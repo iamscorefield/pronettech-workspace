@@ -67,3 +67,5 @@ app.listen(PORT, () => {
     console.log(`🔗 Health Check: http://localhost:${PORT}/api/health`);
     console.log(`===================================================`);
 });
+// Export the app instance for Vercel's serverless runtime
+module.exports = app;
