@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronettech Workspace | Leader Terminal</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="min-h-full bg-slate-950 pb-12 relative overflow-x-hidden">
+
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute -top-[10%] right-[10%] w-[45%] h-[45%] rounded-full bg-brand-900/10 blur-[120px]"></div>
+        <div class="absolute bottom-[10%] left-[10%] w-[45%] h-[45%] rounded-full bg-indigo-900/10 blur-[120px]"></div>
+    </div>
+
+    <nav class="glass-card sticky top-0 z-50 border-b border-slate-800/80 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <!-- Custom Logo Display -->
+                <div class="flex items-center justify-center">
+                    <img src="/assets/images/logo.png" alt="Pronettech Logo" class="h-10 w-auto rounded-lg">
+                </div>
+                <div>
+                    <h2 class="font-bold text-sm tracking-tight flex items-center gap-2">
+                        Pronettech Workspace 
+                        <span id="leader-office-badge" class="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] px-2 py-0.5 rounded-full font-bold">Loading...</span>
+                    </h2>
+                    <p class="text-[10px] text-indigo-400 font-semibold tracking-wider uppercase">Sub-Admin Terminal</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="logout-btn" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-300">
+                    Sign Out
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 mt-8 space-y-8 relative z-10">
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="glass-card p-6 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Regional Staff</p>
+                    <h3 class="text-3xl font-bold mt-1 text-white" id="stat-team-size">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center text-brand-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Present Today</p>
+                    <h3 class="text-3xl font-bold mt-1 text-emerald-400" id="stat-present-count">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-emerald-500/5 border border-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl flex items-center justify-between col-span-1">
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pending Approvals</p>
+                    <h3 class="text-3xl font-bold mt-1 text-amber-400" id="stat-pending-count">0</h3>
+                </div>
+                <div class="w-12 h-12 bg-amber-500/5 border border-amber-500/20 rounded-xl flex items-center justify-center text-amber-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-2 space-y-6">
+
+                <div class="glass-card p-6 rounded-2xl border-brand-500/20 bg-brand-500/[0.01]">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-base font-bold text-white">Pending Staff Registrations</h3>
+                            <p class="text-slate-400 text-xs mt-0.5">Approve or Reject new workspace accounts</p>
+                        </div>
+                        <span class="bg-brand-500/10 text-brand-400 border border-brand-500/20 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">New Signups</span>
+                    </div>
+
+                    <div class="space-y-4" id="pending-registrations-queue">
+                        <p class="text-xs text-slate-500 py-2">Loading pending registration requests...</p>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-6 rounded-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-base font-bold text-white">Pending Attendance Queue</h3>
+                            <p class="text-slate-400 text-xs mt-0.5">Real-time daily incoming logging requests</p>
+                        </div>
+                        <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Live Stream</span>
+                    </div>
+
+                    <div class="space-y-4" id="pending-queue">
+                        <p class="text-xs text-slate-500 py-2">Loading pending check-in requests...</p>
+                    </div>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-base font-bold text-white">Active Task Deployments</h3>
+                            <p class="text-slate-400 text-xs mt-0.5">Real-time status tracking of assigned work</p>
+                        </div>
+                        <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Live Feed</span>
+                    </div>
+
+                    <div id="tasks-monitor-list" class="space-y-4">
+                        <p class="text-xs text-slate-500 py-2">Querying active task databases...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="glass-card p-6 rounded-2xl border-indigo-500/10">
+                    <h3 class="text-sm font-semibold text-indigo-400 uppercase tracking-wider mb-1">Assign Workspace Task</h3>
+                    <p class="text-slate-500 text-xs mb-4">Deploy action items directly to employee terminal dashboards.</p>
+                    
+                    <form id="task-deployer-form" class="space-y-4">
+                        <div>
+                            <label for="task-title" class="block text-xs text-slate-400 mb-1.5">Task Title</label>
+                            <input type="text" id="task-title" required class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs" placeholder="e.g., Run Lagos stock audit">
+                        </div>
+                        <div>
+                            <label for="task-employee-id" class="block text-xs text-slate-400 mb-1.5">Assignee Identifier (Workspace ID)</label>
+                            <input type="text" id="task-employee-id" required class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs" placeholder="e.g., PNT-2026-10001">
+                        </div>
+                        <div>
+                            <label for="task-description" class="block text-xs text-slate-400 mb-1.5">Task Description</label>
+                            <textarea id="task-description" rows="3" required class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs" placeholder="What are the specific guidelines or milestones..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-md">
+                            Deploy Live Task
+                        </button>
+                    </form>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">Escalate Incident</h3>
+                    <p class="text-slate-500 text-xs mb-4">Direct secure communication pipeline straight to Global Owner dashboard.</p>
+                    
+                    <form id="escalation-form" class="space-y-4">
+                        <div>
+                            <label for="report-subject" class="block text-xs text-slate-400 mb-1.5">Subject</label>
+                            <input type="text" id="report-subject" required class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs" placeholder="e.g., Network Outage Lagos HQ">
+                        </div>
+                        <div>
+                            <label for="report-details" class="block text-xs text-slate-400 mb-1.5">Detailed Report</label>
+                            <textarea id="report-details" rows="4" required class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs" placeholder="Describe regional logistics issues, compliance events, or hardware failures..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-md">
+                            Dispatch Incident Log
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        let currentUser = null;
+        let pendingUsers = [];
+        let pendingLogs = [];
+        let activeTasks = [];
+
+        // Restrict view access to authenticated Leaders/Admins and initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Fetch up-to-date user credentials directly from API
+                const authCheck = await fetch('/api/auth/me');
+                const authData = await authCheck.json();
+
+                if (!authData.success) {
+                    window.location.href = '/views/onboarding.html';
+                    return;
+                }
+
+                currentUser = authData.user;
+                if (currentUser.role !== 'leader' && currentUser.role !== 'admin') {
+                    alert('Access Forbidden: Security tier parameter mismatch.');
+                    window.location.href = '/views/dashboard.html';
+                    return;
+                }
+
+                // Make sure we update local storage to match the new profile data
+                localStorage.setItem('pnt_user', JSON.stringify(currentUser));
+
+                // Bind the Leader's regional info dynamically inside the styled brand header
+                document.getElementById('leader-office-badge').textContent = currentUser.office_name || 'No Region';
+
+                // Refresh dashboards
+                refreshLeaderData();
+            } catch (err) {
+                console.error("Session sync crashed, redirecting...", err);
+                window.location.href = '/views/onboarding.html';
+            }
+        });
+
+        // Sign Out execution
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('pnt_user');
+            window.location.href = '/views/onboarding.html';
+        });
+
+        // Unified Master Data Loader
+        async function refreshLeaderData() {
+            if (!currentUser.office_id) return;
+            await fetchRegionalMetrics();
+            await fetchPendingRegistrations();
+            await fetchPendingAttendance();
+            await fetchAllTasks();
+        }
+
+        // ===================================================
+        // 1. REGIONAL METRICS & STATS
+        // ===================================================
+        async function fetchRegionalMetrics() {
+            try {
+                const response = await fetch(`/api/attendance/metrics/office/${currentUser.office_id}`);
+                const resData = await response.json();
+
+                if (resData.success) {
+                    document.getElementById('stat-team-size').textContent = resData.data.totalStaff || 0;
+                    document.getElementById('stat-present-count').textContent = resData.data.presentToday || 0;
+                    document.getElementById('stat-pending-count').textContent = resData.data.pendingCount || 0;
+                    
+                    if (resData.data.pendingCount > 0) {
+                        document.getElementById('stat-pending-count').classList.add('animate-pulse');
+                    } else {
+                        document.getElementById('stat-pending-count').classList.remove('animate-pulse');
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load metrics from server:", err);
+            }
+        }
+
+        // ===================================================
+        // 2. NEW USER REGISTRATIONS APPROVAL & REJECTION
+        // ===================================================
+        async function fetchPendingRegistrations() {
+            try {
+                const response = await fetch(`/api/auth/pending/office/${currentUser.office_id}`);
+                const resData = await response.json();
+
+                if (resData.success) {
+                    pendingUsers = resData.data;
+                    renderPendingRegistrations();
+                }
+            } catch (err) {
+                console.error("Failed to fetch pending user accounts:", err);
+            }
+        }
+
+        function renderPendingRegistrations() {
+            const container = document.getElementById('pending-registrations-queue');
+            container.innerHTML = '';
+
+            if (pendingUsers.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 py-2">All registration requests approved. No pending signups.</p>`;
+                return;
+            }
+
+            pendingUsers.forEach(user => {
+                const initials = `${user.first_name[0] || ''}${user.last_name[0] || ''}`.toUpperCase();
+                const fullName = `${user.first_name} ${user.last_name}`;
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-900/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all duration-300";
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-brand-600/10 border border-brand-500/20 flex items-center justify-center font-bold text-brand-400">
+                            ${initials}
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-200">${fullName}</h4>
+                            <p class="text-xs text-slate-500 font-mono mt-0.5">${user.email} • ${user.phone_number}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2.5 w-full sm:w-auto">
+                        <button onclick="rejectRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300">
+                            Reject
+                        </button>
+                        <button onclick="approveRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-brand-600 hover:bg-brand-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 shadow-md">
+                            Approve Account
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function approveRegistration(profileId, name) {
+            try {
+                const response = await fetch(`/api/auth/approve/${profileId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const resData = await response.json();
+
+                if (resData.success) {
+                    alert(`✅ Successfully activated ${name}'s workspace credentials!`);
+                    refreshLeaderData();
+                } else {
+                    alert(`Activation failed: ${resData.message}`);
+                }
+            } catch (err) {
+                console.error("Error approving registration:", err);
+            }
+        }
+
+        async function rejectRegistration(profileId, name) {
+            if (!confirm(`Are you sure you want to reject registration request from ${name}?`)) return;
+            try {
+                const response = await fetch(`/api/auth/reject/${profileId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const resData = await response.json();
+
+                if (resData.success) {
+                    alert(`❌ Registration request from ${name} has been rejected.`);
+                    refreshLeaderData();
+                } else {
+                    alert(`Rejection task failed: ${resData.message}`);
+                }
+            } catch (err) {
+                console.error("Error rejecting registration:", err);
+            }
+        }
+
+        // ===================================================
+        // 3. REAL-TIME ATTENDANCE VERIFICATION
+        // ===================================================
+        async function fetchPendingAttendance() {
+            try {
+                const response = await fetch(`/api/attendance/pending/office/${currentUser.office_id}`);
+                const resData = await response.json();
+
+                if (resData.success) {
+                    pendingLogs = resData.data;
+                    renderPendingQueue();
+                }
+            } catch (err) {
+                console.error("Failed to fetch pending logs:", err);
+            }
+        }
+
+        function renderPendingQueue() {
+            const container = document.getElementById('pending-queue');
+            container.innerHTML = '';
+
+            if (pendingLogs.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 py-2">No pending verification pings in the queue right now.</p>`;
+                return;
+            }
+
+            pendingLogs.forEach(log => {
+                const initials = `${log.profiles.first_name[0] || ''}${log.profiles.last_name[0] || ''}`.toUpperCase();
+                const fullName = `${log.profiles.first_name} ${log.profiles.last_name}`;
+                const timestamp = new Date(log.marked_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-900/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all duration-300";
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-slate-300">
+                            ${initials}
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-200">${fullName}</h4>
+                            <p class="text-xs text-slate-500 font-mono mt-0.5">${log.profiles.custom_profile_id || 'PNT-MEMBER'} • marked at ${timestamp}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2.5 w-full sm:w-auto">
+                        <button onclick="verifyAttendance('${log.id}', 'rejected')" class="flex-1 sm:flex-none bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300">
+                            Reject
+                        </button>
+                        <button onclick="verifyAttendance('${log.id}', 'confirmed')" class="flex-1 sm:flex-none bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300">
+                            Approve
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function verifyAttendance(logId, status) {
+            try {
+                const response = await fetch(`/api/attendance/verify/${logId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status, notes: `Processed by regional leader: ${currentUser.name}` })
+                });
+
+                const resData = await response.json();
+
+                if (resData.success) {
+                    alert(`Action completed successfully! Status set to ${status}.`);
+                    refreshLeaderData();
+                } else {
+                    alert(`Verification update failed: ${resData.message}`);
+                }
+            } catch (err) {
+                console.error("Error executing attendance verify action:", err);
+            }
+        }
+
+        // ===================================================
+        // 4. TASK MANAGEMENT LOGIC (DEPLOY & TRACK)
+        // ===================================================
+        async function fetchAllTasks() {
+            try {
+                const response = await fetch(`/api/tasks/office/${currentUser.office_id}`);
+                const resData = await response.json();
+
+                if (resData.success) {
+                    activeTasks = resData.data;
+                    renderTasksMonitor();
+                }
+            } catch (err) {
+                console.error("Failed to query task database:", err);
+            }
+        }
+
+        function renderTasksMonitor() {
+            const container = document.getElementById('tasks-monitor-list');
+            container.innerHTML = '';
+
+            if (activeTasks.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 py-2">No tasks deployed yet. Deploy your first task using the sidebar form!</p>`;
+                return;
+            }
+
+            activeTasks.forEach(task => {
+                let badgeClass = "bg-slate-900 border-slate-800 text-slate-400";
+                
+                if (task.status === 'assigned') badgeClass = "bg-blue-500/10 border-blue-500/20 text-blue-400";
+                else if (task.status === 'in_progress') badgeClass = "bg-amber-500/10 border-amber-500/20 text-amber-400";
+                else if (task.status === 'completed') badgeClass = "bg-indigo-500/10 border-indigo-500/20 text-indigo-400 animate-pulse";
+                else if (task.status === 'approved') badgeClass = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+                else if (task.status === 'rejected') badgeClass = "bg-red-500/10 border-red-500/20 text-red-400";
+
+                const element = document.createElement('div');
+                element.className = "bg-slate-900/60 border border-slate-800 p-4 rounded-xl flex items-center justify-between gap-4 transition-all hover:border-slate-700";
+                element.innerHTML = `
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-200">${task.title}</h4>
+                        <p class="text-xs text-slate-500 font-mono mt-1">Assigned to: ${task.profiles?.first_name || ''} ${task.profiles?.last_name || ''} (${task.profiles?.custom_profile_id || 'N/A'})</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-[9px] uppercase font-bold px-2 py-1 border rounded ${badgeClass}">
+                            ${task.status.replace('_', ' ')}
+                        </span>
+                        ${task.status === 'completed' ? `
+                            <button onclick="evaluateTask('${task.id}', 'approved')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded transition-all">Approve</button>
+                            <button onclick="evaluateTask('${task.id}', 'rejected')" class="bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded transition-all">Reject</button>
+                        ` : ''}
+                    </div>
+                `;
+                container.appendChild(element);
+            });
+        }
+
+        // Deploy live task submission handler
+        document.getElementById('task-deployer-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const title = document.getElementById('task-title').value;
+            const assigneeCustomId = document.getElementById('task-employee-id').value;
+            const description = document.getElementById('task-description').value;
+
+            try {
+                const response = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        assigneeCustomId,
+                        description,
+                        assigned_by: currentUser.id,
+                        office_id: currentUser.office_id
+                    })
+                });
+
+                const resData = await response.json();
+
+                if (resData.success) {
+                    alert(`📡 Live Task successfully deployed and assigned to ${assigneeCustomId}!`);
+                    
+                    document.getElementById('task-title').value = '';
+                    document.getElementById('task-employee-id').value = '';
+                    document.getElementById('task-description').value = '';
+
+                    refreshLeaderData();
+                } else {
+                    alert(`Task deployment blocked: ${resData.message}`);
+                }
+            } catch (err) {
+                console.error("Failed to deploy task:", err);
+            }
+        });
+
+        // Evaluate Completed Employee Tasks
+        async function evaluateTask(taskId, decision) {
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: decision })
+                });
+
+                const resData = await response.json();
+
+                if (resData.success) {
+                    alert(`Task marked as ${decision}!`);
+                    refreshLeaderData();
+                } else {
+                    alert(`Failed to evaluate task: ${resData.message}`);
+                }
+            } catch (err) {
+                console.error("Error patching task resolution:", err);
+            }
+        }
+
+        // ===================================================
+        // 5. INCIDENT ESCALATION
+        // ===================================================
+        document.getElementById('escalation-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const subject = document.getElementById('report-subject').value;
+            const details = document.getElementById('report-details').value;
+
+            try {
+                const response = await fetch('/api/community/escalate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        subject,
+                        details,
+                        office_id: currentUser.office_id,
+                        escalated_by: currentUser.id
+                    })
+                });
+
+                const resData = await response.json();
+
+                if (resData.success) {
+                    alert("🔒 Secure report transmitted safely to Owner Admin dashboard.");
+                    document.getElementById('report-subject').value = '';
+                    document.getElementById('report-details').value = '';
+                } else {
+                    alert(`Failed to transmit report: ${resData.message}`);
+                }
+            } catch (err) {
+                console.error("Escalation transmission error:", err);
+            }
+        });
+    </script>
+</body>
+</html>
