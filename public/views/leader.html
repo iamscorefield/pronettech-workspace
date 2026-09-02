@@ -1,20 +1,24 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pronettech Workspace | Leader Terminal</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="stylesheet" href="/css/styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            900: '#1e3a8a',
+                        pnt: {
+                            dark: '#0D122B',
+                            purple: '#6A1BBF',
+                            'purple-light': '#9D4EDD',
+                            orange: '#FF7A00',
+                            gold: '#FFC107',
+                            blue: '#0070c0'
                         }
                     }
                 }
@@ -22,37 +26,44 @@
         }
     </script>
     <style>
-        .glass-card {
-            background: rgba(15, 23, 42, 0.45);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .id-card-container {
+            perspective: 1200px;
+        }
+        .id-card-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .id-card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .id-card-face {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .id-card-back {
+            transform: rotateY(180deg);
         }
     </style>
 </head>
-<body class="min-h-full bg-slate-950 pb-12 relative overflow-x-hidden">
+<body class="min-h-full pb-12 relative overflow-x-hidden bg-white text-pnt-dark">
 
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-[10%] right-[10%] w-[45%] h-[45%] rounded-full bg-brand-900/10 blur-[120px]"></div>
-        <div class="absolute bottom-[10%] left-[10%] w-[45%] h-[45%] rounded-full bg-indigo-900/10 blur-[120px]"></div>
-    </div>
-
-    <nav class="glass-card sticky top-0 z-50 border-b border-slate-800/80 px-6 py-4">
+    <nav class="glass-card sticky top-0 z-50 border-b px-6 py-4">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <!-- Custom Logo Display -->
                 <div class="flex items-center justify-center">
                     <img src="/assets/images/logo.png" alt="Pronettech Logo" class="h-10 w-auto rounded-lg">
                 </div>
                 <div>
-                    <h2 class="font-bold text-sm tracking-tight flex items-center gap-2">
+                    <h2 class="font-bold text-sm tracking-tight text-pnt-dark flex items-center gap-2">
                         Pronettech Workspace 
-                        <span id="leader-office-badge" class="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] px-2 py-0.5 rounded-full font-bold">Loading...</span>
+                        <span id="leader-office-badge" class="bg-purple-50 border border-purple-200 text-pnt-purple text-[10px] px-2 py-0.5 rounded-full font-bold">Loading...</span>
                     </h2>
-                    <p class="text-[10px] text-indigo-400 font-semibold tracking-wider uppercase">Sub-Admin Terminal</p>
+                    <p class="text-[10px] text-pnt-purple font-semibold tracking-wider uppercase">Sub-Admin Terminal</p>
                 </div>
             </div>
             <div class="flex items-center gap-4">
-                <button id="logout-btn" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-300">
+                <span id="user-badge-id" class="hidden sm:inline-block pnt-id-badge text-xs px-3 py-1.5 rounded-full font-mono">PNT-LEADER</span>
+                <button id="logout-btn" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                     Sign Out
                 </button>
             </div>
@@ -61,13 +72,14 @@
 
     <main class="max-w-7xl mx-auto px-6 mt-8 space-y-8 relative z-10">
 
+        <!-- Top Telemetry Row -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div class="glass-card p-6 rounded-2xl flex items-center justify-between">
                 <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Regional Staff</p>
-                    <h3 class="text-3xl font-bold mt-1 text-white" id="stat-team-size">0</h3>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Regional Members</p>
+                    <h3 class="text-3xl font-bold mt-1 text-pnt-dark" id="stat-team-size">0</h3>
                 </div>
-                <div class="w-12 h-12 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center text-brand-500">
+                <div class="w-12 h-12 bg-purple-50 border border-purple-100 rounded-xl flex items-center justify-center text-pnt-purple">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                 </div>
             </div>
@@ -75,9 +87,9 @@
             <div class="glass-card p-6 rounded-2xl flex items-center justify-between">
                 <div>
                     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Present Today</p>
-                    <h3 class="text-3xl font-bold mt-1 text-emerald-400" id="stat-present-count">0</h3>
+                    <h3 class="text-3xl font-bold mt-1 text-emerald-600" id="stat-present-count">0</h3>
                 </div>
-                <div class="w-12 h-12 bg-emerald-500/5 border border-emerald-500/20 rounded-xl flex items-center justify-center text-emerald-400">
+                <div class="w-12 h-12 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-center text-emerald-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
             </div>
@@ -85,9 +97,9 @@
             <div class="glass-card p-6 rounded-2xl flex items-center justify-between col-span-1">
                 <div>
                     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pending Approvals</p>
-                    <h3 class="text-3xl font-bold mt-1 text-amber-400" id="stat-pending-count">0</h3>
+                    <h3 class="text-3xl font-bold mt-1 text-amber-600" id="stat-pending-count">0</h3>
                 </div>
-                <div class="w-12 h-12 bg-amber-500/5 border border-amber-500/20 rounded-xl flex items-center justify-center text-amber-400">
+                <div class="w-12 h-12 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-center text-amber-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
             </div>
@@ -95,89 +107,279 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
+            <!-- Left Side Operations -->
             <div class="lg:col-span-2 space-y-6">
 
-                <div class="glass-card p-6 rounded-2xl border-brand-500/20 bg-brand-500/[0.01]">
+                <div class="glass-card p-6 rounded-2xl border-purple-100">
                     <div class="flex justify-between items-center mb-6">
                         <div>
-                            <h3 class="text-base font-bold text-white">Pending Staff Registrations</h3>
-                            <p class="text-slate-400 text-xs mt-0.5">Approve or Reject new workspace accounts</p>
+                            <h3 class="text-base font-bold text-pnt-dark">Pending Registrations</h3>
+                            <p class="text-slate-500 text-xs mt-0.5">Approve or Reject new workspace member accounts</p>
                         </div>
-                        <span class="bg-brand-500/10 text-brand-400 border border-brand-500/20 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">New Signups</span>
+                        <span class="bg-purple-50 text-pnt-purple border border-purple-200 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">New Signups</span>
                     </div>
 
                     <div class="space-y-4" id="pending-registrations-queue">
-                        <p class="text-xs text-slate-500 py-2">Loading pending registration requests...</p>
+                        <p class="text-xs text-slate-400 py-2">Loading pending registration requests...</p>
                     </div>
                 </div>
                 
                 <div class="glass-card p-6 rounded-2xl">
                     <div class="flex justify-between items-center mb-6">
                         <div>
-                            <h3 class="text-base font-bold text-white">Pending Attendance Queue</h3>
-                            <p class="text-slate-400 text-xs mt-0.5">Real-time daily incoming logging requests</p>
+                            <h3 class="text-base font-bold text-pnt-dark">Pending Attendance Queue</h3>
+                            <p class="text-slate-500 text-xs mt-0.5">Real-time daily incoming logging requests</p>
                         </div>
-                        <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Live Stream</span>
+                        <span class="bg-indigo-50 text-indigo-600 border border-indigo-200 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Live Stream</span>
                     </div>
 
                     <div class="space-y-4" id="pending-queue">
-                        <p class="text-xs text-slate-500 py-2">Loading pending check-in requests...</p>
+                        <p class="text-xs text-slate-400 py-2">Loading pending check-in requests...</p>
                     </div>
                 </div>
 
                 <div class="glass-card p-6 rounded-2xl">
                     <div class="flex justify-between items-center mb-6">
                         <div>
-                            <h3 class="text-base font-bold text-white">Active Task Deployments</h3>
-                            <p class="text-slate-400 text-xs mt-0.5">Real-time status tracking of assigned work</p>
+                            <h3 class="text-base font-bold text-pnt-dark">Active Task Deployments</h3>
+                            <p class="text-slate-500 text-xs mt-0.5">Real-time status tracking of assigned work</p>
                         </div>
-                        <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Live Feed</span>
+                        <span class="bg-indigo-50 text-indigo-600 border border-indigo-200 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Live Feed</span>
                     </div>
 
                     <div id="tasks-monitor-list" class="space-y-4">
-                        <p class="text-xs text-slate-500 py-2">Querying active task databases...</p>
+                        <p class="text-xs text-slate-400 py-2">Querying active task databases...</p>
                     </div>
                 </div>
             </div>
 
+            <!-- Right Side ID Card & Task Forms -->
             <div class="space-y-6">
-                <div class="glass-card p-6 rounded-2xl border-indigo-500/10">
-                    <h3 class="text-sm font-semibold text-indigo-400 uppercase tracking-wider mb-1">Assign Workspace Task</h3>
-                    <p class="text-slate-500 text-xs mb-4">Deploy action items directly to employee terminal dashboards.</p>
+
+                <!-- Official Leader ID Badge with Interactive Flip & Photo Upload -->
+                <div class="glass-card p-6 rounded-2xl relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Leader ID Badge</h3>
+                        <button id="flip-card-btn" class="text-xs font-bold text-pnt-purple bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3 py-1 rounded-full transition-all flex items-center gap-1.5 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            Flip Card
+                        </button>
+                    </div>
+
+                    <div class="id-card-container w-full max-w-[300px] h-[465px] mx-auto">
+                        <div id="id-card-flipper" class="id-card-inner relative w-full h-full shadow-2xl rounded-2xl">
+                            
+                            <!-- FRONT FACE -->
+                            <div class="id-card-face absolute inset-0 w-full h-full bg-white rounded-2xl overflow-hidden border border-slate-200 flex flex-col justify-between">
+                                <div class="w-full h-11 relative">
+                                    <svg class="w-full h-full" viewBox="0 0 300 44" preserveAspectRatio="none">
+                                        <path d="M0,0 L150,0 L140,44 L0,44 Z" fill="#0070c0" />
+                                        <path d="M152,0 L170,0 L155,22 L170,44 L152,44 L137,22 Z" fill="#ff7a00" />
+                                        <path d="M174,0 L300,0 L300,44 L174,44 L159,22 Z" fill="#ff7a00" />
+                                    </svg>
+                                </div>
+
+                                <div class="px-5 text-center -mt-1">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <img src="/assets/images/logo.png" alt="ProNet-Tech" class="h-8 w-auto">
+                                        <div class="text-left">
+                                            <h2 class="text-sm font-black text-[#0070c0] leading-none tracking-tight">ProNet-Tech</h2>
+                                            <p class="text-[8px] font-bold text-[#ff7a00] tracking-wider uppercase">Global Ltd.</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-[9px] font-semibold text-slate-700 tracking-wider mt-1.5">Reg No. 7331721</p>
+                                </div>
+
+                                <!-- Photo Upload Frame -->
+                                <div class="relative mx-auto -mt-1 group cursor-pointer" onclick="document.getElementById('avatar-file-input').click()" title="Click to upload profile photo">
+                                    <div class="w-28 h-32 border-[3px] border-[#1e3a8a] rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center shadow-sm relative">
+                                        <img id="card-avatar-img" src="" alt="Profile Photo" class="w-full h-full object-cover hidden">
+                                        <svg id="card-avatar-placeholder" class="w-16 h-16 text-slate-300" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                        </svg>
+                                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[9px] font-bold">
+                                            <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                            Change Photo
+                                        </div>
+                                    </div>
+                                    <input type="file" id="avatar-file-input" accept="image/*" class="hidden" onchange="uploadAvatar(event)">
+                                </div>
+
+                                <div class="text-center px-4 -mt-1">
+                                    <h3 id="card-fullname" class="font-black text-base text-[#0070c0] uppercase tracking-tight">LEADER NAME</h3>
+                                    <p id="card-role" class="text-xs font-serif italic text-slate-600 font-medium">Team Leader</p>
+                                </div>
+
+                                <div class="relative px-6 flex items-center justify-center">
+                                    <div class="absolute right-0 bottom-0 w-28 h-28 opacity-15 pointer-events-none">
+                                        <svg viewBox="0 0 200 200" fill="none" stroke="#0070c0" stroke-width="3">
+                                            <circle cx="100" cy="100" r="90" fill="#e0f2fe"/>
+                                            <ellipse cx="100" cy="100" rx="90" ry="35"/>
+                                            <ellipse cx="100" cy="100" rx="35" ry="90"/>
+                                            <path d="M10 100h180M100 10v180"/>
+                                        </svg>
+                                    </div>
+
+                                    <div class="w-16 h-16 bg-white p-1 rounded border border-slate-200 shadow-sm z-10 flex items-center justify-center">
+                                        <img id="card-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PNT-LEADER&color=0D122B&bgcolor=FFFFFF" alt="QR Code" class="w-full h-full object-contain">
+                                    </div>
+                                </div>
+
+                                <div class="w-full h-9 relative">
+                                    <svg class="w-full h-full" viewBox="0 0 300 36" preserveAspectRatio="none">
+                                        <path d="M0,0 L120,0 L135,18 L120,36 L0,36 Z" fill="#ff7a00" />
+                                        <path d="M125,0 L140,0 L155,18 L140,36 L125,36 L140,18 Z" fill="#ffffff" />
+                                        <path d="M144,0 L300,0 L300,36 L144,36 L159,18 Z" fill="#0070c0" />
+                                        <text x="215" y="22" font-size="10" font-weight="bold" fill="#ffffff" text-anchor="middle" font-family="sans-serif">TEAM IDENTITY CARD</text>
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <!-- BACK FACE -->
+                            <div class="id-card-face id-card-back absolute inset-0 w-full h-full bg-white rounded-2xl overflow-hidden border border-slate-200 flex flex-col justify-between p-4 text-center">
+                                <div class="absolute inset-2 border border-cyan-400 pointer-events-none rounded-xl"></div>
+
+                                <div class="space-y-0.5 mt-1 relative z-10">
+                                    <p class="text-[9px] text-slate-700 font-medium leading-tight">The bearer of this card is the</p>
+                                    <p id="card-back-role" class="text-xs font-black text-slate-900 tracking-wider uppercase">TEAM LEADER</p>
+                                    <p class="text-[9px] text-slate-700 font-medium">of</p>
+                                </div>
+
+                                <div class="flex items-center justify-center gap-1.5 relative z-10">
+                                    <img src="/assets/images/logo.png" alt="ProNet-Tech" class="h-6 w-auto">
+                                    <div class="text-left">
+                                        <h4 class="text-xs font-black text-[#0070c0] leading-none">ProNet-Tech</h4>
+                                        <p class="text-[7px] font-bold text-[#ff7a00] uppercase">Global Ltd.</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-0.5 relative z-10 text-[9px] text-slate-800 leading-tight px-2">
+                                    <p class="font-bold">This card is authorised for use only by ProNet-Tech Global Limited.</p>
+                                    <p class="text-slate-600 font-medium">If found please return to</p>
+                                </div>
+
+                                <div class="space-y-1.5 text-left text-[8px] text-slate-700 px-3 relative z-10">
+                                    <div class="flex items-start gap-1.5">
+                                        <span class="text-[#0070c0] text-[9px] flex-shrink-0">📍</span>
+                                        <p class="leading-tight font-medium">Feyintola Complex, Hope Hospital junction opp. carwash beside Dr. water, Adigbe, Abeokuta, Ogun State, Nigeria.</p>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-[#0070c0] text-[9px] flex-shrink-0">📞</span>
+                                        <p class="font-bold text-slate-900">07062727081</p>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-[#0070c0] text-[9px] flex-shrink-0">✉️</span>
+                                        <p class="font-medium text-slate-800">pmvteamafrican@gmail.com</p>
+                                    </div>
+                                </div>
+
+                                <div class="relative z-10 flex flex-col items-center">
+                                    <div class="h-9 flex items-center justify-center">
+                                        <img src="/assets/images/signature.png" alt="Signature" class="h-8 w-auto object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                        <svg class="h-8 w-24 text-slate-900 hidden" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M10,30 C20,10 25,35 35,15 C45,-5 40,35 55,25 C65,15 75,20 85,25 C75,35 60,30 65,20 C70,10 85,15 90,25" />
+                                        </svg>
+                                    </div>
+                                    <div class="text-[8px] uppercase tracking-wider font-bold text-slate-900 border-t border-slate-300 pt-0.5 w-32 text-center">
+                                        Authorised Signature
+                                    </div>
+                                </div>
+
+                                <div class="relative z-10 mb-1 px-4">
+                                    <svg class="w-full h-7" viewBox="0 0 200 30" preserveAspectRatio="none">
+                                        <rect x="0" y="0" width="3" height="30" fill="#0D122B"/>
+                                        <rect x="5" y="0" width="1.5" height="30" fill="#0D122B"/>
+                                        <rect x="9" y="0" width="4" height="30" fill="#0D122B"/>
+                                        <rect x="15" y="0" width="2" height="30" fill="#0D122B"/>
+                                        <rect x="20" y="0" width="1" height="30" fill="#0D122B"/>
+                                        <rect x="23" y="0" width="3" height="30" fill="#0D122B"/>
+                                        <rect x="28" y="0" width="5" height="30" fill="#0D122B"/>
+                                        <rect x="35" y="0" width="2" height="30" fill="#0D122B"/>
+                                        <rect x="39" y="0" width="1" height="30" fill="#0D122B"/>
+                                        <rect x="42" y="0" width="4" height="30" fill="#0D122B"/>
+                                        <rect x="48" y="0" width="2.5" height="30" fill="#0D122B"/>
+                                        <rect x="53" y="0" width="1" height="30" fill="#0D122B"/>
+                                        <rect x="56" y="0" width="3.5" height="30" fill="#0D122B"/>
+                                        <rect x="62" y="0" width="2" height="30" fill="#0D122B"/>
+                                        <rect x="66" y="0" width="4" height="30" fill="#0D122B"/>
+                                        <rect x="72" y="0" width="1.5" height="30" fill="#0D122B"/>
+                                        <rect x="76" y="0" width="3" height="30" fill="#0D122B"/>
+                                        <rect x="81" y="0" width="1" height="30" fill="#0D122B"/>
+                                        <rect x="84" y="0" width="4.5" height="30" fill="#0D122B"/>
+                                        <rect x="91" y="0" width="2" height="30" fill="#0D122B"/>
+                                        <rect x="95" y="0" width="1" height="30" fill="#0D122B"/>
+                                        <rect x="98" y="0" width="3" height="30" fill="#0D122B"/>
+                                        <rect x="103" y="0" width="4" height="30" fill="#0D122B"/>
+                                        <rect x="109" y="0" width="1.5" height="30" fill="#0D122B"/>
+                                        <rect x="113" y="0" width="2.5" height="30" fill="#0D122B"/>
+                                        <rect x="118" y="0" width="4" height="30" fill="#0D122B"/>
+                                        <rect x="124" y="0" width="1" height="30" fill="#0D122B"/>
+                                        <rect x="127" y="0" width="3" height="30" fill="#0D122B"/>
+                                        <rect x="132" y="0" width="2" height="30" fill="#0D122B"/>
+                                        <rect x="136" y="0" width="4" height="30" fill="#0D122B"/>
+                                        <rect x="142" y="0" width="1.5" height="30" fill="#0D122B"/>
+                                        <rect x="146" y="0" width="3" height="30" fill="#0D122B"/>
+                                        <rect x="151" y="0" width="1" height="30" fill="#0D122B"/>
+                                        <rect x="154" y="0" width="4" height="30" fill="#0D122B"/>
+                                        <rect x="160" y="0" width="2" height="30" fill="#0D122B"/>
+                                        <rect x="164" y="0" width="3.5" height="30" fill="#0D122B"/>
+                                        <rect x="170" y="0" width="1.5" height="30" fill="#0D122B"/>
+                                        <rect x="174" y="0" width="3" height="30" fill="#0D122B"/>
+                                        <rect x="179" y="0" width="1" height="30" fill="#0D122B"/>
+                                        <rect x="182" y="0" width="4" height="30" fill="#0D122B"/>
+                                        <rect x="188" y="0" width="2" height="30" fill="#0D122B"/>
+                                        <rect x="192" y="0" width="3" height="30" fill="#0D122B"/>
+                                        <rect x="197" y="0" width="3" height="30" fill="#0D122B"/>
+                                    </svg>
+                                </div>
+
+                                <div class="absolute left-0 top-1/3 bottom-0 w-2 bg-[#ff7a00]"></div>
+                                <div class="absolute right-0 top-1/3 bottom-0 w-2 bg-[#ff7a00]"></div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deploy Task Form -->
+                <div class="glass-card p-6 rounded-2xl border-purple-100">
+                    <h3 class="text-sm font-semibold text-pnt-purple uppercase tracking-wider mb-1">Assign Workspace Task</h3>
+                    <p class="text-slate-500 text-xs mb-4">Deploy action items directly to member terminal dashboards.</p>
                     
                     <form id="task-deployer-form" class="space-y-4">
                         <div>
-                            <label for="task-title" class="block text-xs text-slate-400 mb-1.5">Task Title</label>
-                            <input type="text" id="task-title" required class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs" placeholder="e.g., Run Lagos stock audit">
+                            <label for="task-title" class="block text-xs text-slate-600 font-medium mb-1.5">Task Title</label>
+                            <input type="text" id="task-title" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple text-xs" placeholder="e.g., Run Lagos stock audit">
                         </div>
                         <div>
-                            <label for="task-employee-id" class="block text-xs text-slate-400 mb-1.5">Assignee Identifier (Workspace ID)</label>
-                            <input type="text" id="task-employee-id" required class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs" placeholder="e.g., PNT-2026-10001">
+                            <label for="task-member-id" class="block text-xs text-slate-600 font-medium mb-1.5">Assignee Identifier (Workspace ID)</label>
+                            <input type="text" id="task-member-id" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple text-xs" placeholder="e.g., PNT-2026-10001">
                         </div>
                         <div>
-                            <label for="task-description" class="block text-xs text-slate-400 mb-1.5">Task Description</label>
-                            <textarea id="task-description" rows="3" required class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs" placeholder="What are the specific guidelines or milestones..."></textarea>
+                            <label for="task-description" class="block text-xs text-slate-600 font-medium mb-1.5">Task Description</label>
+                            <textarea id="task-description" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple text-xs" placeholder="What are the specific guidelines or milestones..."></textarea>
                         </div>
-                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-md">
+                        <button type="submit" class="w-full btn-brand-gradient font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-md">
                             Deploy Live Task
                         </button>
                     </form>
                 </div>
 
+                <!-- Escalate Incident Form -->
                 <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">Escalate Incident</h3>
+                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Escalate Incident</h3>
                     <p class="text-slate-500 text-xs mb-4">Direct secure communication pipeline straight to Global Owner dashboard.</p>
                     
                     <form id="escalation-form" class="space-y-4">
                         <div>
-                            <label for="report-subject" class="block text-xs text-slate-400 mb-1.5">Subject</label>
-                            <input type="text" id="report-subject" required class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs" placeholder="e.g., Network Outage Lagos HQ">
+                            <label for="report-subject" class="block text-xs text-slate-600 font-medium mb-1.5">Subject</label>
+                            <input type="text" id="report-subject" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple text-xs" placeholder="e.g., Network Outage Lagos HQ">
                         </div>
                         <div>
-                            <label for="report-details" class="block text-xs text-slate-400 mb-1.5">Detailed Report</label>
-                            <textarea id="report-details" rows="4" required class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs" placeholder="Describe regional logistics issues, compliance events, or hardware failures..."></textarea>
+                            <label for="report-details" class="block text-xs text-slate-600 font-medium mb-1.5">Detailed Report</label>
+                            <textarea id="report-details" rows="4" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple text-xs" placeholder="Describe regional logistics issues, compliance events, or hardware failures..."></textarea>
                         </div>
-                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-md">
+                        <button type="submit" class="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-pnt-dark font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-sm">
                             Dispatch Incident Log
                         </button>
                     </form>
@@ -194,11 +396,17 @@
         let pendingLogs = [];
         let activeTasks = [];
 
-        // Restrict view access to authenticated Leaders/Admins and initialize dashboard
+        // 3D Card Flipper
+        const flipBtn = document.getElementById('flip-card-btn');
+        const cardFlipper = document.getElementById('id-card-flipper');
+        
+        flipBtn.addEventListener('click', () => {
+            cardFlipper.classList.toggle('is-flipped');
+        });
+
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Fetch up-to-date user credentials directly from API
-                const authCheck = await fetch('/api/auth/me');
+                const authCheck = await fetch('/api/auth/me', { credentials: 'include' });
                 const authData = await authCheck.json();
 
                 if (!authData.success) {
@@ -213,13 +421,28 @@
                     return;
                 }
 
-                // Make sure we update local storage to match the new profile data
                 localStorage.setItem('pnt_user', JSON.stringify(currentUser));
-
-                // Bind the Leader's regional info dynamically inside the styled brand header
                 document.getElementById('leader-office-badge').textContent = currentUser.office_name || 'No Region';
+                document.getElementById('user-badge-id').textContent = currentUser.customId || 'PNT-LEADER';
 
-                // Refresh dashboards
+                // Populate ID Badge Information
+                document.getElementById('card-fullname').textContent = (currentUser.name || 'Team Leader').toUpperCase();
+                const userRole = currentUser.role ? currentUser.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Team Leader';
+                document.getElementById('card-role').textContent = userRole;
+                document.getElementById('card-back-role').textContent = userRole.toUpperCase();
+
+                // Load Leader avatar if available
+                if (currentUser.avatar_url) {
+                    const avatarImg = document.getElementById('card-avatar-img');
+                    const placeholder = document.getElementById('card-avatar-placeholder');
+                    avatarImg.src = currentUser.avatar_url;
+                    avatarImg.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                }
+
+                const userCode = currentUser.customId || 'PNT-LEADER-01';
+                document.getElementById('card-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(userCode)}&color=0D122B&bgcolor=FFFFFF`;
+
                 refreshLeaderData();
             } catch (err) {
                 console.error("Session sync crashed, redirecting...", err);
@@ -227,13 +450,45 @@
             }
         });
 
-        // Sign Out execution
+        async function uploadAvatar(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            try {
+                const res = await fetch('/api/auth/profile/avatar', {
+                    method: 'PUT',
+                    credentials: 'include',
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    const avatarImg = document.getElementById('card-avatar-img');
+                    const placeholder = document.getElementById('card-avatar-placeholder');
+                    avatarImg.src = data.avatar_url;
+                    avatarImg.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+
+                    currentUser.avatar_url = data.avatar_url;
+                    localStorage.setItem('pnt_user', JSON.stringify(currentUser));
+                    alert('ID Photo updated successfully!');
+                } else {
+                    alert(`Upload failed: ${data.message}`);
+                }
+            } catch (err) {
+                console.error('Error uploading photo:', err);
+                alert('Server communication failed.');
+            }
+        }
+
         document.getElementById('logout-btn').addEventListener('click', () => {
             localStorage.removeItem('pnt_user');
             window.location.href = '/views/onboarding.html';
         });
 
-        // Unified Master Data Loader
         async function refreshLeaderData() {
             if (!currentUser.office_id) return;
             await fetchRegionalMetrics();
@@ -247,7 +502,7 @@
         // ===================================================
         async function fetchRegionalMetrics() {
             try {
-                const response = await fetch(`/api/attendance/metrics/office/${currentUser.office_id}`);
+                const response = await fetch(`/api/attendance/metrics/office/${currentUser.office_id}`, { credentials: 'include' });
                 const resData = await response.json();
 
                 if (resData.success) {
@@ -271,7 +526,7 @@
         // ===================================================
         async function fetchPendingRegistrations() {
             try {
-                const response = await fetch(`/api/auth/pending/office/${currentUser.office_id}`);
+                const response = await fetch(`/api/auth/pending/office/${currentUser.office_id}`, { credentials: 'include' });
                 const resData = await response.json();
 
                 if (resData.success) {
@@ -288,7 +543,7 @@
             container.innerHTML = '';
 
             if (pendingUsers.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-500 py-2">All registration requests approved. No pending signups.</p>`;
+                container.innerHTML = `<p class="text-xs text-slate-400 py-2">All registration requests approved. No pending signups.</p>`;
                 return;
             }
 
@@ -297,22 +552,22 @@
                 const fullName = `${user.first_name} ${user.last_name}`;
 
                 const card = document.createElement('div');
-                card.className = "bg-slate-900/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all duration-300";
+                card.className = "bg-slate-50/70 border border-slate-200 hover:border-slate-300 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all duration-300";
                 card.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-brand-600/10 border border-brand-500/20 flex items-center justify-center font-bold text-brand-400">
-                            ${initials}
+                        <div class="w-10 h-10 rounded-full bg-purple-50 border border-purple-200 flex items-center justify-center font-bold text-pnt-purple overflow-hidden">
+                            ${user.avatar_url ? `<img src="${user.avatar_url}" class="w-full h-full object-cover">` : initials}
                         </div>
                         <div>
-                            <h4 class="font-bold text-sm text-slate-200">${fullName}</h4>
+                            <h4 class="font-bold text-sm text-pnt-dark">${fullName}</h4>
                             <p class="text-xs text-slate-500 font-mono mt-0.5">${user.email} • ${user.phone_number}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2.5 w-full sm:w-auto">
-                        <button onclick="rejectRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300">
+                        <button onclick="rejectRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300">
                             Reject
                         </button>
-                        <button onclick="approveRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-brand-600 hover:bg-brand-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 shadow-md">
+                        <button onclick="approveRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-pnt-purple hover:opacity-90 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 shadow-sm">
                             Approve Account
                         </button>
                     </div>
@@ -325,7 +580,8 @@
             try {
                 const response = await fetch(`/api/auth/approve/${profileId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
                 });
 
                 const resData = await response.json();
@@ -346,7 +602,8 @@
             try {
                 const response = await fetch(`/api/auth/reject/${profileId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
                 });
 
                 const resData = await response.json();
@@ -367,7 +624,7 @@
         // ===================================================
         async function fetchPendingAttendance() {
             try {
-                const response = await fetch(`/api/attendance/pending/office/${currentUser.office_id}`);
+                const response = await fetch(`/api/attendance/pending/office/${currentUser.office_id}`, { credentials: 'include' });
                 const resData = await response.json();
 
                 if (resData.success) {
@@ -384,7 +641,7 @@
             container.innerHTML = '';
 
             if (pendingLogs.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-500 py-2">No pending verification pings in the queue right now.</p>`;
+                container.innerHTML = `<p class="text-xs text-slate-400 py-2">No pending verification pings in the queue right now.</p>`;
                 return;
             }
 
@@ -394,22 +651,22 @@
                 const timestamp = new Date(log.marked_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
                 const card = document.createElement('div');
-                card.className = "bg-slate-900/60 border border-slate-800 hover:border-slate-700 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all duration-300";
+                card.className = "bg-slate-50/70 border border-slate-200 hover:border-slate-300 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all duration-300";
                 card.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-slate-300">
+                        <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-pnt-dark">
                             ${initials}
                         </div>
                         <div>
-                            <h4 class="font-bold text-sm text-slate-200">${fullName}</h4>
+                            <h4 class="font-bold text-sm text-pnt-dark">${fullName}</h4>
                             <p class="text-xs text-slate-500 font-mono mt-0.5">${log.profiles.custom_profile_id || 'PNT-MEMBER'} • marked at ${timestamp}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2.5 w-full sm:w-auto">
-                        <button onclick="verifyAttendance('${log.id}', 'rejected')" class="flex-1 sm:flex-none bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300">
+                        <button onclick="verifyAttendance('${log.id}', 'rejected')" class="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300">
                             Reject
                         </button>
-                        <button onclick="verifyAttendance('${log.id}', 'confirmed')" class="flex-1 sm:flex-none bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300">
+                        <button onclick="verifyAttendance('${log.id}', 'confirmed')" class="flex-1 sm:flex-none bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300">
                             Approve
                         </button>
                     </div>
@@ -423,6 +680,7 @@
                 const response = await fetch(`/api/attendance/verify/${logId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ status, notes: `Processed by regional leader: ${currentUser.name}` })
                 });
 
@@ -440,11 +698,11 @@
         }
 
         // ===================================================
-        // 4. TASK MANAGEMENT LOGIC (DEPLOY & TRACK)
+        // 4. TASK MANAGEMENT LOGIC
         // ===================================================
         async function fetchAllTasks() {
             try {
-                const response = await fetch(`/api/tasks/office/${currentUser.office_id}`);
+                const response = await fetch(`/api/tasks/office/${currentUser.office_id}`, { credentials: 'include' });
                 const resData = await response.json();
 
                 if (resData.success) {
@@ -461,24 +719,24 @@
             container.innerHTML = '';
 
             if (activeTasks.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-500 py-2">No tasks deployed yet. Deploy your first task using the sidebar form!</p>`;
+                container.innerHTML = `<p class="text-xs text-slate-400 py-2">No tasks deployed yet. Deploy your first task using the sidebar form!</p>`;
                 return;
             }
 
             activeTasks.forEach(task => {
-                let badgeClass = "bg-slate-900 border-slate-800 text-slate-400";
+                let badgeClass = "bg-slate-100 border-slate-200 text-slate-600";
                 
-                if (task.status === 'assigned') badgeClass = "bg-blue-500/10 border-blue-500/20 text-blue-400";
-                else if (task.status === 'in_progress') badgeClass = "bg-amber-500/10 border-amber-500/20 text-amber-400";
-                else if (task.status === 'completed') badgeClass = "bg-indigo-500/10 border-indigo-500/20 text-indigo-400 animate-pulse";
-                else if (task.status === 'approved') badgeClass = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
-                else if (task.status === 'rejected') badgeClass = "bg-red-500/10 border-red-500/20 text-red-400";
+                if (task.status === 'assigned') badgeClass = "bg-blue-50 border-blue-200 text-blue-700";
+                else if (task.status === 'in_progress') badgeClass = "bg-amber-50 border-amber-200 text-amber-700";
+                else if (task.status === 'completed') badgeClass = "bg-purple-50 border-purple-200 text-pnt-purple animate-pulse";
+                else if (task.status === 'approved') badgeClass = "bg-emerald-50 border-emerald-200 text-emerald-700";
+                else if (task.status === 'rejected') badgeClass = "bg-red-50 border-red-200 text-red-700";
 
                 const element = document.createElement('div');
-                element.className = "bg-slate-900/60 border border-slate-800 p-4 rounded-xl flex items-center justify-between gap-4 transition-all hover:border-slate-700";
+                element.className = "bg-slate-50/70 border border-slate-200 p-4 rounded-xl flex items-center justify-between gap-4 transition-all hover:border-slate-300";
                 element.innerHTML = `
                     <div>
-                        <h4 class="font-bold text-sm text-slate-200">${task.title}</h4>
+                        <h4 class="font-bold text-sm text-pnt-dark">${task.title}</h4>
                         <p class="text-xs text-slate-500 font-mono mt-1">Assigned to: ${task.profiles?.first_name || ''} ${task.profiles?.last_name || ''} (${task.profiles?.custom_profile_id || 'N/A'})</p>
                     </div>
                     <div class="flex items-center gap-3">
@@ -495,18 +753,18 @@
             });
         }
 
-        // Deploy live task submission handler
         document.getElementById('task-deployer-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const title = document.getElementById('task-title').value;
-            const assigneeCustomId = document.getElementById('task-employee-id').value;
+            const assigneeCustomId = document.getElementById('task-member-id').value;
             const description = document.getElementById('task-description').value;
 
             try {
                 const response = await fetch('/api/tasks', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({
                         title,
                         assigneeCustomId,
@@ -522,7 +780,7 @@
                     alert(`📡 Live Task successfully deployed and assigned to ${assigneeCustomId}!`);
                     
                     document.getElementById('task-title').value = '';
-                    document.getElementById('task-employee-id').value = '';
+                    document.getElementById('task-member-id').value = '';
                     document.getElementById('task-description').value = '';
 
                     refreshLeaderData();
@@ -534,12 +792,12 @@
             }
         });
 
-        // Evaluate Completed Employee Tasks
         async function evaluateTask(taskId, decision) {
             try {
                 const response = await fetch(`/api/tasks/${taskId}/status`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ status: decision })
                 });
 
@@ -569,6 +827,7 @@
                 const response = await fetch('/api/community/escalate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({
                         subject,
                         details,

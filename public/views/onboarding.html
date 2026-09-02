@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pronettech Workspace | Join the Network</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="stylesheet" href="/css/styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#f0f7ff',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            900: '#1e3a8a',
+                        pnt: {
+                            dark: '#0D122B',
+                            purple: '#6A1BBF',
+                            'purple-light': '#9D4EDD',
+                            orange: '#FF7A00',
+                            gold: '#FFC107'
                         }
                     }
                 }
@@ -23,90 +25,80 @@
         }
     </script>
     <style>
-        .glass-card {
-            background: rgba(15, 23, 42, 0.45);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
         .step-transition {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
     </style>
 </head>
-<body class="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative selection:bg-brand-500 selection:text-white overflow-x-hidden">
-
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-[10%] left-[5%] w-[50%] h-[50%] rounded-full bg-brand-900/10 blur-[150px]"></div>
-        <div class="absolute bottom-[10%] right-[5%] w-[50%] h-[50%] rounded-full bg-indigo-900/10 blur-[150px]"></div>
-    </div>
+<body class="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative selection:bg-pnt-purple selection:text-white overflow-x-hidden">
 
     <div class="sm:mx-auto sm:w-full sm:max-w-xl relative z-10">
         <div class="flex justify-center mb-4">
             <div class="flex items-center justify-center">
-                <img src="/assets/images/logo.png" alt="Pronettech Logo" class="h-12 w-auto rounded-xl shadow-lg shadow-brand-500/10">
+                <img src="/assets/images/logo.png" alt="Pronettech Logo" class="h-12 w-auto rounded-xl shadow-md">
             </div>
         </div>
-        <h2 id="page-title" class="text-center text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+        <h2 id="page-title" class="text-center text-3xl font-extrabold tracking-tight text-pnt-dark">
             Welcome to Pronettech Workspace
         </h2>
-        <p id="page-subtitle" class="mt-2 text-center text-sm text-slate-400">
+        <p id="page-subtitle" class="mt-2 text-center text-sm text-slate-500">
             Let's get your corporate profile configured.
         </p>
     </div>
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-xl relative z-10 px-4 sm:px-0">
-        <div class="glass-card py-8 px-6 sm:px-10 rounded-2xl shadow-2xl relative overflow-hidden">
-            
+        <div class="glass-card py-8 px-6 sm:px-10 rounded-2xl shadow-xl relative overflow-hidden">
+
             <div id="progress-container" class="mb-8">
-                <div class="flex items-center justify-between text-xs text-slate-400 uppercase tracking-widest font-semibold mb-2">
+                <div class="flex items-center justify-between text-xs text-slate-500 uppercase tracking-widest font-semibold mb-2">
                     <span id="step-label">Step 1: Account Info</span>
                     <span id="step-count">1 of 2</span>
                 </div>
-                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                    <div id="progress-bar" class="bg-gradient-to-r from-brand-500 to-indigo-500 h-full w-1/2 transition-all duration-500"></div>
+                <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-gradient-to-r from-pnt-purple to-pnt-orange h-full w-1/2 transition-all duration-500"></div>
                 </div>
             </div>
 
             <form id="onboarding-form" class="space-y-6">
-                
+
                 <div id="step-1-container" class="step-transition space-y-5">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label for="first_name" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">First Name</label>
-                            <input type="text" id="first_name" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all text-sm" placeholder="John">
+                            <label for="first_name" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">First Name</label>
+                            <input type="text" id="first_name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnt-purple/30 focus:border-pnt-purple transition-all text-sm" placeholder="John">
                         </div>
                         <div>
-                            <label for="last_name" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Last Name</label>
-                            <input type="text" id="last_name" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all text-sm" placeholder="Doe">
+                            <label for="last_name" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Last Name</label>
+                            <input type="text" id="last_name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnt-purple/30 focus:border-pnt-purple transition-all text-sm" placeholder="Doe">
                         </div>
                     </div>
 
                     <div>
-                        <label for="email" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Corporate Email Address</label>
-                        <input type="email" id="email" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all text-sm" placeholder="johndoe@pronettech.com">
+                        <label for="email" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Corporate Email Address</label>
+                        <input type="email" id="email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnt-purple/30 focus:border-pnt-purple transition-all text-sm" placeholder="johndoe@pronettech.com">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label for="password" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Password</label>
-                            <input type="password" id="password" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all text-sm" placeholder="••••••••">
+                            <label for="password" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Password</label>
+                            <input type="password" id="password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnt-purple/30 focus:border-pnt-purple transition-all text-sm" placeholder="••••••••">
                         </div>
                         <div>
-                            <label for="phone_number" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Phone Number</label>
-                            <input type="tel" id="phone_number" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all text-sm" placeholder="+234...">
+                            <label for="phone_number" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Phone Number</label>
+                            <input type="tel" id="phone_number" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnt-purple/30 focus:border-pnt-purple transition-all text-sm" placeholder="+234...">
                         </div>
                     </div>
 
                     <div class="relative py-2">
                         <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                            <div class="w-full border-t border-slate-800"></div>
+                            <div class="w-full border-t border-slate-200"></div>
                         </div>
                         <div class="relative flex justify-center text-xs uppercase">
-                            <span class="bg-slate-950 px-2 text-slate-500 tracking-wider">Or Register with SSO</span>
+                            <span class="bg-white px-2 text-slate-400 tracking-wider">Or Register with SSO</span>
                         </div>
                     </div>
 
-                    <button type="button" class="google-auth-btn w-full flex items-center justify-center gap-3 bg-slate-900/40 hover:bg-slate-900/80 border border-slate-800 hover:border-slate-700 text-slate-300 font-medium py-3 px-4 rounded-xl transition-all duration-300 text-sm">
+                    <button type="button" class="google-auth-btn w-full flex items-center justify-center gap-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-pnt-dark font-medium py-3 px-4 rounded-xl transition-all duration-300 text-sm">
                         <svg class="h-5 w-5" viewBox="0 0 24 24">
                             <path fill="#EA4335" d="M12 5.04c1.62 0 3.08.56 4.22 1.65l3.15-3.15C17.45 1.74 14.96 1 12 1 7.35 1 3.39 3.65 1.5 7.5l3.6 2.8C6.01 7.04 8.78 5.04 12 5.04z"/>
                             <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.47h6.44c-.28 1.48-1.12 2.73-2.38 3.58v2.98h3.84c2.24-2.06 3.59-5.1 3.59-8.67z"/>
@@ -117,7 +109,7 @@
                     </button>
 
                     <div class="pt-2">
-                        <button type="button" id="next-btn" class="w-full bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all duration-300 text-sm flex items-center justify-center gap-2">
+                        <button type="button" id="next-btn" class="w-full btn-brand-gradient font-semibold py-3 px-4 rounded-xl shadow-lg shadow-pnt-purple/20 transition-all duration-300 text-sm flex items-center justify-center gap-2">
                             Proceed to Office Selection
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         </button>
@@ -125,37 +117,37 @@
 
                     <p class="text-center text-xs text-slate-500">
                         Already registered? 
-                        <button type="button" id="toggle-to-login" class="text-brand-500 hover:underline font-semibold focus:outline-none ml-1">Sign In Here</button>
+                        <button type="button" id="toggle-to-login" class="text-pnt-purple hover:underline font-semibold focus:outline-none ml-1">Sign In Here</button>
                     </p>
                 </div>
 
                 <div id="step-2-container" class="step-transition hidden space-y-6">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Select Assigned Branch Office</label>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-3">Select Assigned Branch Office</label>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="office-grid">
-                            <div class="text-center text-xs py-4 text-slate-500 col-span-2">Loading active network nodes...</div>
+                            <div class="text-center text-xs py-4 text-slate-400 col-span-2">Loading active network nodes...</div>
                         </div>
                     </div>
 
-                    <div class="border-t border-slate-800/80 pt-5 space-y-4">
-                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Compliance Authorization</h3>
+                    <div class="border-t border-slate-200 pt-5 space-y-4">
+                        <h3 class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Compliance Authorization</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label for="sponsor_name" class="block text-xs text-slate-500 mb-1">Sponsor Full Name</label>
-                                <input type="text" id="sponsor_name" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all text-sm" placeholder="Verifier name">
+                                <input type="text" id="sponsor_name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnt-purple/30 focus:border-pnt-purple transition-all text-sm" placeholder="Verifier name">
                             </div>
                             <div>
                                 <label for="sponsor_number" class="block text-xs text-slate-500 mb-1">Sponsor ID Number</label>
-                                <input type="text" id="sponsor_number" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all text-sm" placeholder="e.g. PNT-SP-992">
+                                <input type="text" id="sponsor_number" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnt-purple/30 focus:border-pnt-purple transition-all text-sm" placeholder="e.g. PNT-SP-992">
                             </div>
                         </div>
                     </div>
 
                     <div class="flex gap-4 pt-2">
-                        <button type="button" id="back-btn" class="w-1/3 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-300 font-semibold py-3 px-4 rounded-xl transition-all duration-300 text-sm">
+                        <button type="button" id="back-btn" class="w-1/3 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-pnt-dark font-semibold py-3 px-4 rounded-xl transition-all duration-300 text-sm">
                             Back
                         </button>
-                        <button type="submit" id="submit-btn" class="w-2/3 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all duration-300 text-sm flex items-center justify-center gap-2">
+                        <button type="submit" id="submit-btn" class="w-2/3 btn-brand-gradient font-semibold py-3 px-4 rounded-xl shadow-lg shadow-pnt-purple/20 transition-all duration-300 text-sm flex items-center justify-center gap-2">
                             Finalize Profile Registration
                         </button>
                     </div>
@@ -165,25 +157,25 @@
             <form id="login-form" class="step-transition hidden space-y-6">
                 <div class="space-y-5">
                     <div>
-                        <label for="login_email" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Corporate Email Address</label>
-                        <input type="email" id="login_email" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all text-sm" placeholder="johndoe@pronettech.com">
+                        <label for="login_email" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Corporate Email Address</label>
+                        <input type="email" id="login_email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnt-purple/30 focus:border-pnt-purple transition-all text-sm" placeholder="johndoe@pronettech.com">
                     </div>
 
                     <div>
-                        <label for="login_password" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Password</label>
-                        <input type="password" id="login_password" class="w-full bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all text-sm" placeholder="••••••••">
+                        <label for="login_password" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Password</label>
+                        <input type="password" id="login_password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnt-purple/30 focus:border-pnt-purple transition-all text-sm" placeholder="••••••••">
                     </div>
 
                     <div class="relative py-2">
                         <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                            <div class="w-full border-t border-slate-800"></div>
+                            <div class="w-full border-t border-slate-200"></div>
                         </div>
                         <div class="relative flex justify-center text-xs uppercase">
-                            <span class="bg-slate-950 px-2 text-slate-500 tracking-wider">Or Sign in with SSO</span>
+                            <span class="bg-white px-2 text-slate-400 tracking-wider">Or Sign in with SSO</span>
                         </div>
                     </div>
 
-                    <button type="button" class="google-auth-btn w-full flex items-center justify-center gap-3 bg-slate-900/40 hover:bg-slate-900/80 border border-slate-800 hover:border-slate-700 text-slate-300 font-medium py-3 px-4 rounded-xl transition-all duration-300 text-sm">
+                    <button type="button" class="google-auth-btn w-full flex items-center justify-center gap-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-pnt-dark font-medium py-3 px-4 rounded-xl transition-all duration-300 text-sm">
                         <svg class="h-5 w-5" viewBox="0 0 24 24">
                             <path fill="#EA4335" d="M12 5.04c1.62 0 3.08.56 4.22 1.65l3.15-3.15C17.45 1.74 14.96 1 12 1 7.35 1 3.39 3.65 1.5 7.5l3.6 2.8C6.01 7.04 8.78 5.04 12 5.04z"/>
                             <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.47h6.44c-.28 1.48-1.12 2.73-2.38 3.58v2.98h3.84c2.24-2.06 3.59-5.1 3.59-8.67z"/>
@@ -194,7 +186,7 @@
                     </button>
 
                     <div class="pt-2">
-                        <button type="submit" class="w-full bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-brand-500/20 transition-all duration-300 text-sm flex items-center justify-center gap-2">
+                        <button type="submit" class="w-full btn-brand-gradient font-semibold py-3 px-4 rounded-xl shadow-lg shadow-pnt-purple/20 transition-all duration-300 text-sm flex items-center justify-center gap-2">
                             Authenticate Account
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                         </button>
@@ -202,7 +194,7 @@
 
                     <p class="text-center text-xs text-slate-500">
                         New to the Workspace? 
-                        <button type="button" id="toggle-to-register" class="text-brand-500 hover:underline font-semibold focus:outline-none ml-1">Create an Account</button>
+                        <button type="button" id="toggle-to-register" class="text-pnt-purple hover:underline font-semibold focus:outline-none ml-1">Create an Account</button>
                     </p>
                 </div>
             </form>
@@ -216,7 +208,7 @@
         const progressContainer = document.getElementById('progress-container');
         const pageTitle = document.getElementById('page-title');
         const pageSubtitle = document.getElementById('page-subtitle');
-        
+
         const nextBtn = document.getElementById('next-btn');
         const backBtn = document.getElementById('back-btn');
         const step1 = document.getElementById('step-1-container');
@@ -240,7 +232,7 @@
             onboardingForm.classList.add('hidden');
             loginForm.classList.remove('hidden');
             progressContainer.classList.add('hidden');
-            
+
             pageTitle.textContent = "Sign In to Workspace";
             pageSubtitle.textContent = "Enter your credentials to access your terminal.";
         });
@@ -249,10 +241,10 @@
             loginForm.classList.add('hidden');
             onboardingForm.classList.remove('hidden');
             progressContainer.classList.remove('hidden');
-            
+
             pageTitle.textContent = "Welcome to Pronettech Workspace";
             pageSubtitle.textContent = "Let's get your corporate profile configured.";
-            
+
             step2.classList.add('hidden');
             step1.classList.remove('hidden');
             stepLabel.textContent = "Step 1: Account Info";
@@ -275,7 +267,7 @@
         function renderOfficeGrid(offices) {
             officeGrid.innerHTML = '';
             if (offices.length === 0) {
-                officeGrid.innerHTML = `<div class="text-center text-xs py-4 text-slate-500 col-span-2">No branch offices active.</div>`;
+                officeGrid.innerHTML = `<div class="text-center text-xs py-4 text-slate-400 col-span-2">No branch offices active.</div>`;
                 return;
             }
 
@@ -286,13 +278,12 @@
                 const card = document.createElement('div');
                 card.setAttribute('data-office-id', office.id);
                 card.className = isSelected 
-                    ? "border-2 border-brand-500 bg-brand-500/10 p-4 rounded-xl cursor-pointer transition-all duration-300 office-card"
-                    : "border border-slate-800 hover:border-slate-700 bg-slate-900/30 hover:bg-slate-900/60 p-4 rounded-xl cursor-pointer transition-all duration-300 office-card";
+                    ? "border-2 border-pnt-purple bg-purple-50/60 p-4 rounded-xl cursor-pointer transition-all duration-300 office-card"
+                    : "border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 p-4 rounded-xl cursor-pointer transition-all duration-300 office-card";
 
-                // Refactored to fetch office.branch_name dynamically based on schema
                 card.innerHTML = `
-                    <h4 class="font-bold text-sm text-slate-100">${office.branch_name || 'Physical Branch'}</h4>
-                    <span class="${isSelected ? 'bg-brand-500/20 text-brand-400' : 'bg-slate-800 text-slate-400'} inline-block text-[10px] px-2 py-0.5 rounded-full mt-2 font-semibold">
+                    <h4 class="font-bold text-sm text-pnt-dark">${office.branch_name || 'Physical Branch'}</h4>
+                    <span class="${isSelected ? 'bg-purple-100 text-pnt-purple' : 'bg-slate-200 text-slate-600'} inline-block text-[10px] px-2 py-0.5 rounded-full mt-2 font-semibold">
                         Active Node
                     </span>
                 `;
@@ -300,13 +291,13 @@
                 card.addEventListener('click', () => {
                     selectedOfficeId = office.id;
                     document.querySelectorAll('.office-card').forEach(sibling => {
-                        sibling.className = "border border-slate-800 hover:border-slate-700 bg-slate-900/30 hover:bg-slate-900/60 p-4 rounded-xl cursor-pointer transition-all duration-300 office-card";
+                        sibling.className = "border border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100 p-4 rounded-xl cursor-pointer transition-all duration-300 office-card";
                         const b = sibling.querySelector('span');
-                        if(b) b.className = "bg-slate-800 text-slate-400 inline-block text-[10px] px-2 py-0.5 rounded-full mt-2";
+                        if(b) b.className = "bg-slate-200 text-slate-600 inline-block text-[10px] px-2 py-0.5 rounded-full mt-2 font-semibold";
                     });
-                    card.className = "border-2 border-brand-500 bg-brand-500/10 p-4 rounded-xl cursor-pointer transition-all duration-300 office-card";
+                    card.className = "border-2 border-pnt-purple bg-purple-50/60 p-4 rounded-xl cursor-pointer transition-all duration-300 office-card";
                     const ab = card.querySelector('span');
-                    if(ab) ab.className = "bg-brand-500/20 text-brand-400 inline-block text-[10px] px-2 py-0.5 rounded-full mt-2 font-semibold";
+                    if(ab) ab.className = "bg-purple-100 text-pnt-purple inline-block text-[10px] px-2 py-0.5 rounded-full mt-2 font-semibold";
                 });
 
                 officeGrid.appendChild(card);
@@ -402,8 +393,7 @@
                     }));
 
                     alert('🔒 Session authenticated successfully!');
-                    
-                    // Standardized view path routing destinations
+
                     if (data.user.role === 'admin' || data.user.role === 'global_admin') {
                         window.location.href = './admin.html';
                     } else if (data.user.role === 'leader' || data.user.role === 'team_leader') {

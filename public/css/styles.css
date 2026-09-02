@@ -1,0 +1,61 @@
+/* ==========================================================================
+   ProNet-Tech Workspace Global Stylesheet
+   ========================================================================== */
+
+:root {
+  /* Brand Palette Variables */
+  --pnt-bg: #ffffff;
+  --pnt-surface: #f8fafc;
+  --pnt-dark: #0D122B;
+  --pnt-purple-deep: #6A1BBF;
+  --pnt-purple-light: #9D4EDD;
+  --pnt-orange: #FF7A00;
+  --pnt-gold: #FFC107;
+
+  /* Text & Border Palette */
+  --text-main: #0D122B;
+  --text-muted: #64748b;
+  --border-subtle: rgba(13, 18, 43, 0.08);
+}
+
+/* Global Reset & Base Canvas */
+html, body {
+  background-color: var(--pnt-bg) !important;
+  color: var(--text-main) !important;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Clean Card Utility */
+.glass-card,
+.pnt-card {
+  background: #ffffff !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: 0 4px 20px -2px rgba(13, 18, 43, 0.05);
+  border-radius: 1rem;
+}
+
+/* Primary Brand Button (Purple to Orange Gradient) */
+.btn-brand-gradient {
+  background: linear-gradient(135deg, var(--pnt-purple-deep) 0%, var(--pnt-orange) 100%) !important;
+  color: #ffffff !important;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.btn-brand-gradient:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+/* Brand Accent Text */
+.text-pnt-dark { color: var(--pnt-dark) !important; }
+.text-pnt-purple { color: var(--pnt-purple-deep) !important; }
+.text-pnt-orange { color: var(--pnt-orange) !important; }
+
+/* Custom ID Badge */
+.pnt-id-badge {
+  background: rgba(106, 27, 191, 0.08);
+  border: 1px solid rgba(106, 27, 191, 0.2);
+  color: var(--pnt-purple-deep);
+}

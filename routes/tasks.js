@@ -3,7 +3,7 @@ const router = express.Router();
 const supabase = require('../config/supabase');
 const { protect, authorize } = require('../middleware/auth');
 
-// 1. GET: Fetch tasks assigned to a specific user ID (Employee View)
+// 1. GET: Fetch tasks assigned to a specific user ID (Member View)
 router.get('/user/:userId', protect, async (req, res) => {
     const { userId } = req.params;
     try {
@@ -70,7 +70,7 @@ router.post('/', protect, authorize('leader', 'admin'), async (req, res) => {
             .single();
 
         if (profileError || !userProfile) {
-            return res.status(404).json({ success: false, message: `Employee with ID ${assigneeCustomId} does not exist.` });
+            return res.status(404).json({ success: false, message: `Member with ID ${assigneeCustomId} does not exist.` });
         }
 
         // Insert task directly linked to their profile

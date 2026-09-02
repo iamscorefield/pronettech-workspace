@@ -4,9 +4,9 @@ const supabase = require('../config/supabase');
 const { protect, authorize } = require('../middleware/auth');
 
 // ===================================================
-// 1. EMPLOYEE ENDPOINT: MARK DAILY ATTENDANCE
+// 1. MEMBER ENDPOINT: MARK DAILY ATTENDANCE
 // ===================================================
-router.post('/checkin', protect, authorize('employee'), async (req, res) => {
+router.post('/checkin', protect, authorize('member'), async (req, res) => {
     try {
         const userId = req.user.id;
         const officeId = req.user.office_id;
@@ -88,9 +88,9 @@ router.put('/verify/:logId', protect, authorize('leader', 'admin'), async (req, 
 });
 
 // ===================================================
-// 3. EMPLOYEE ENDPOINT: GET CURRENT WEEK'S LOGS
+// 3. MEMBER ENDPOINT: GET CURRENT WEEK'S LOGS
 // ===================================================
-router.get('/weekly', protect, authorize('employee'), async (req, res) => {
+router.get('/weekly', protect, authorize('member'), async (req, res) => {
     try {
         const userId = req.user.id;
 
@@ -131,11 +131,11 @@ router.get('/metrics/office/:officeId', protect, authorize('leader', 'admin'), a
             .from('profiles')
             .select('*', { count: 'exact', head: true })
             .eq('office_id', officeId)
-            .eq('role', 'employee');
+            .eq('role', 'member');
 
         if (staffError) throw staffError;
 
-        // Query 2: Total employees present/confirmed today
+        // Query 2: Total members present/confirmed today
         const today = new Date().toISOString().split('T')[0];
         const { count: presentToday, error: presentError } = await supabase
             .from('attendance_logs')
