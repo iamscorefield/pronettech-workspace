@@ -19,13 +19,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Fail-Safe Favicon Interceptor Endpoint
-app.get('/favicon.ico', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'favicon.ico'));
-});
+// Static File Directory Mounts
+const publicPath = path.join(__dirname, 'public');
+app.use(express.static(publicPath));
+app.use('/views', express.static(path.join(publicPath, 'views')));
+app.use('/css', express.static(path.join(publicPath, 'css')));
+app.use('/assets', express.static(path.join(publicPath, 'assets')));
 
-// Serve Static Assets from Public Directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Favicon Route
+app.get('/favicon.ico', (req, res) => {
+    res.sendFile(path.join(publicPath, 'favicon.ico'));
+});
 
 // Architectural Baseline Health Route
 app.get('/api/health', (req, res) => {
@@ -52,14 +56,32 @@ app.get('/api/offices', async (req, res) => {
     }
 });
 
-// Mount Routing Modules
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/tasks', taskRoutes);
 
-// Run Application Server (Only in local development)
+// Frontend Page Routing
+app.get('/', (req, res) => {
+    res.sendFile(path.join(publicPath, 'index.html'));
+});
+
+app.get('/verify', (req, res) => {
+    res.sendFile(path.join(publicPath, 'verify.html'));
+});
+
+app.get('/views/:page', (req, res) => {
+    res.sendFile(path.join(publicPath, 'views', req.params.page));
+});
+
+// Fallback: send index.html for unmatched browser requests
+app.get('*', (req, res) => {
+    res.sendFile(path.join(publicPath, 'index.html'));
+});
+
+// Local Development Server
 if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => {
         console.log(`===================================================`);
