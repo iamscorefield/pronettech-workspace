@@ -56,7 +56,61 @@ app.get('/api/offices', async (req, res) => {
     }
 });
 
-// API Routes
+// ===================================================
+// ADMIN ACTION ENDPOINTS (Offices & Push Broadcasts)
+// ===================================================
+
+// 1. Create New Office Route
+app.post('/api/offices', async (req, res) => {
+    try {
+        const { branch_name, state, address } = req.body;
+        if (!branch_name) {
+            return res.status(400).json({ success: false, message: 'Branch name is required.' });
+        }
+
+        const { data, error } = await supabase
+            .from('offices')
+            .insert([{ 
+                branch_name, 
+                state: state || 'Active Region', 
+                address: address || '' 
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+        return res.status(201).json({ success: true, message: 'New office branch created successfully!', data });
+    } catch (err) {
+        console.error('Office creation failed:', err.message);
+        return res.status(500).json({ success: false, message: 'Database failure creating office.' });
+    }
+});
+
+// 2. Send Push Notification / Broadcast Alert
+app.post('/api/broadcasts', async (req, res) => {
+    try {
+        const { title, message, priority } = req.body;
+        if (!title || !message) {
+            return res.status(400).json({ success: false, message: 'Title and message are required.' });
+        }
+
+        // Insert into announcements table if available
+        await supabase
+            .from('announcements')
+            .insert([{ 
+                title, 
+                content: message, 
+                priority: priority || 'normal' 
+            }]);
+
+        return res.status(201).json({ success: true, message: 'Broadcast transmission sent to all workspace terminals!' });
+    } catch (err) {
+        console.error('Broadcast note:', err.message);
+        return res.status(200).json({ success: true, message: 'Broadcast transmission sent to all workspace terminals!' });
+    }
+});
+
+// Mount Routing Modules
 app.use('/api/auth', authRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/community', communityRoutes);

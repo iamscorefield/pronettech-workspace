@@ -27,6 +27,7 @@
 </head>
 <body class="min-h-full pb-12 relative overflow-x-hidden bg-white text-pnt-dark">
 
+    <!-- Top Navigation -->
     <nav class="glass-card sticky top-0 z-50 border-b px-6 py-4">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -46,6 +47,7 @@
 
     <main class="max-w-7xl mx-auto px-6 mt-8 space-y-8 relative z-10">
 
+        <!-- Top Telemetry Metrics -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div class="glass-card p-6 rounded-2xl">
                 <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Members</p>
@@ -73,6 +75,7 @@
             </div>
         </div>
 
+        <!-- User Directory & Role Switcher -->
         <div class="glass-card p-6 rounded-2xl space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -108,26 +111,30 @@
             </div>
         </div>
 
+        <!-- Operations Hub & Sidebars -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <div class="lg:col-span-2 space-y-8">
                 
+                <!-- Administrative Control Panel Cards -->
                 <div class="glass-card p-6 rounded-2xl">
                     <h3 class="text-base font-bold text-pnt-dark mb-6">Administrative Control Panel</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         
+                        <!-- Action 1: Regional Setup -->
                         <div class="bg-purple-50/40 border border-purple-100 p-4 rounded-xl space-y-3">
                             <h4 class="text-xs font-bold uppercase tracking-wider text-pnt-purple">Regional Setup</h4>
                             <p class="text-xs text-slate-500 leading-relaxed">Add corporate office branches and dynamically assign Team Leaders to fill local registries.</p>
-                            <button onclick="adminAction('Add Office')" class="w-full bg-pnt-purple hover:opacity-90 text-white font-semibold py-2 rounded-lg text-xs transition-all duration-300">
+                            <button onclick="openModal('office-modal')" class="w-full bg-pnt-purple hover:opacity-90 text-white font-semibold py-2 rounded-lg text-xs transition-all duration-300">
                                 Create New Office Route
                             </button>
                         </div>
 
+                        <!-- Action 2: Broadcast Alerts -->
                         <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
                             <h4 class="text-xs font-bold uppercase tracking-wider text-[#9D4EDD]">Broadcast Alerts</h4>
                             <p class="text-xs text-slate-500 leading-relaxed">Send custom, company-wide instant push notifications to all users across every department.</p>
-                            <button onclick="adminAction('Send Broadcast')" class="w-full bg-[#9D4EDD] hover:opacity-90 text-white font-semibold py-2 rounded-lg text-xs transition-all duration-300">
+                            <button onclick="openModal('broadcast-modal')" class="w-full bg-[#9D4EDD] hover:opacity-90 text-white font-semibold py-2 rounded-lg text-xs transition-all duration-300">
                                 Send Push Notification
                             </button>
                         </div>
@@ -135,7 +142,7 @@
                         <div class="bg-amber-50/40 border border-amber-100 p-4 rounded-xl space-y-3">
                             <h4 class="text-xs font-bold uppercase tracking-wider text-amber-600">Global Settings</h4>
                             <p class="text-xs text-slate-500 leading-relaxed">Configure default metadata styling criteria and pricing tiers for Softcopy / Hardcopy ID cards.</p>
-                            <button onclick="adminAction('Edit Settings')" class="w-full bg-slate-100 hover:bg-slate-200 text-pnt-dark font-semibold py-2 rounded-lg text-xs border border-slate-200 transition-all duration-300">
+                            <button onclick="alert('Pricing scales configuration console locked for active quarter.')" class="w-full bg-slate-100 hover:bg-slate-200 text-pnt-dark font-semibold py-2 rounded-lg text-xs border border-slate-200 transition-all duration-300">
                                 Modify Price Scales
                             </button>
                         </div>
@@ -143,7 +150,7 @@
                         <div class="bg-red-50/40 border border-red-100 p-4 rounded-xl space-y-3">
                             <h4 class="text-xs font-bold uppercase tracking-wider text-red-600">Security Sector</h4>
                             <p class="text-xs text-slate-500 leading-relaxed">Audit all member listings to suspend access, delete users, or ban fraudulent profiles.</p>
-                            <button onclick="adminAction('Audit Roster')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-semibold py-2 rounded-lg text-xs transition-all duration-300">
+                            <button onclick="document.getElementById('user-search-input').focus()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-semibold py-2 rounded-lg text-xs transition-all duration-300">
                                 Launch Auditing Console
                             </button>
                         </div>
@@ -151,6 +158,7 @@
                     </div>
                 </div>
 
+                <!-- Global Task Approval Desk -->
                 <div class="glass-card p-6 rounded-2xl">
                     <div class="flex justify-between items-center mb-6">
                         <div>
@@ -167,7 +175,42 @@
 
             </div>
 
+            <!-- Right Column: Assign Leader Task & Incident Logs -->
             <div class="space-y-6">
+
+                <!-- Deploy Directive to Team Leader Form -->
+                <div class="glass-card p-6 rounded-2xl border-purple-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-bold text-pnt-purple uppercase tracking-wider">Assign Task to Leader</h3>
+                        <span class="bg-purple-100 text-pnt-purple text-[9px] font-bold px-2 py-0.5 rounded-full">Executive Command</span>
+                    </div>
+                    <p class="text-slate-500 text-xs mb-4">Deploy direct management directives to branch Team Leaders.</p>
+                    
+                    <form id="leader-task-form" class="space-y-4">
+                        <div>
+                            <label for="leader-select" class="block text-xs text-slate-600 font-medium mb-1.5">Select Team Leader</label>
+                            <select id="leader-select" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-pnt-dark text-xs focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+                                <option value="" disabled selected>Loading active leaders...</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="leader-task-title" class="block text-xs text-slate-600 font-medium mb-1.5">Directive Title</label>
+                            <input type="text" id="leader-task-title" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple text-xs" placeholder="e.g., Conduct Regional Monthly Audit">
+                        </div>
+
+                        <div>
+                            <label for="leader-task-desc" class="block text-xs text-slate-600 font-medium mb-1.5">Detailed Instructions</label>
+                            <textarea id="leader-task-desc" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple text-xs" placeholder="Milestones, attendance audit criteria, or branch compliance targets..."></textarea>
+                        </div>
+
+                        <button type="submit" id="deploy-leader-task-btn" class="w-full btn-brand-gradient font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-md">
+                            Dispatch Task to Leader
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Leader Incident Logs -->
                 <div class="glass-card p-6 rounded-2xl border-red-200">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Leader Incident Logs</h3>
@@ -178,11 +221,78 @@
                         <p class="text-xs text-slate-400 py-2">Querying incident databases...</p>
                     </div>
                 </div>
+
             </div>
 
         </div>
 
     </main>
+
+    <!-- ================= MODAL 1: CREATE NEW OFFICE ROUTE ================= -->
+    <div id="office-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-base font-bold text-pnt-dark">Initialize Regional Branch</h3>
+                <button onclick="closeModal('office-modal')" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+            </div>
+            <p class="text-xs text-slate-500">Configure a physical or regional workspace node to expand operations.</p>
+            
+            <form id="create-office-form" class="space-y-3.5">
+                <div>
+                    <label for="modal-branch-name" class="block text-xs font-semibold text-slate-600 mb-1">Branch Name</label>
+                    <input type="text" id="modal-branch-name" required placeholder="e.g., Ibadan Central Hub" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
+                </div>
+                <div>
+                    <label for="modal-branch-state" class="block text-xs font-semibold text-slate-600 mb-1">State / Region</label>
+                    <input type="text" id="modal-branch-state" required placeholder="e.g., Oyo State" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
+                </div>
+                <div>
+                    <label for="modal-branch-address" class="block text-xs font-semibold text-slate-600 mb-1">Physical Location Address</label>
+                    <input type="text" id="modal-branch-address" placeholder="Suite or street location..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeModal('office-modal')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl transition-all">Cancel</button>
+                    <button type="submit" id="save-office-btn" class="w-1/2 py-2.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-md transition-all">Create Branch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL 2: SEND BROADCAST NOTIFICATION ================= -->
+    <div id="broadcast-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-base font-bold text-pnt-dark">Deploy Broadcast Signal</h3>
+                <button onclick="closeModal('broadcast-modal')" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+            </div>
+            <p class="text-xs text-slate-500">Transmit real-time alerts to all logged-in members and team leaders.</p>
+            
+            <form id="send-broadcast-form" class="space-y-3.5">
+                <div>
+                    <label for="modal-broadcast-title" class="block text-xs font-semibold text-slate-600 mb-1">Broadcast Title</label>
+                    <input type="text" id="modal-broadcast-title" required placeholder="e.g., Mandatory System Audit" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
+                </div>
+                <div>
+                    <label for="modal-broadcast-priority" class="block text-xs font-semibold text-slate-600 mb-1">Urgency Priority</label>
+                    <select id="modal-broadcast-priority" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
+                        <option value="normal">Standard Notice</option>
+                        <option value="high">High Priority</option>
+                        <option value="urgent">Red Alert Emergency</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="modal-broadcast-message" class="block text-xs font-semibold text-slate-600 mb-1">Notification Message</label>
+                    <textarea id="modal-broadcast-message" rows="3" required placeholder="Type the announcement announcement text here..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeModal('broadcast-modal')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl transition-all">Cancel</button>
+                    <button type="submit" id="send-broadcast-btn" class="w-1/2 py-2.5 bg-[#9D4EDD] hover:opacity-90 text-xs font-bold text-white rounded-xl shadow-md transition-all">Send Transmission</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         let currentUser = null;
@@ -224,7 +334,8 @@
                 fetchGlobalMetrics(),
                 fetchUserDirectory(),
                 fetchAdminTasksQueue(),
-                fetchIncidentReports()
+                fetchIncidentReports(),
+                fetchLeadersForTaskAssignment()
             ]);
         }
 
@@ -346,6 +457,7 @@
                     alert(resData.message);
                     fetchUserDirectory();
                     fetchGlobalMetrics();
+                    fetchLeadersForTaskAssignment();
                 } else {
                     alert(`Failed to update role: ${resData.message}`);
                 }
@@ -377,7 +489,161 @@
         }
 
         // ==========================================
-        // 3. GLOBAL TASK QUEUE AUDITING
+        // 3. ADMIN ASSIGN TASK TO LEADER
+        // ==========================================
+        async function fetchLeadersForTaskAssignment() {
+            const select = document.getElementById('leader-select');
+            try {
+                const response = await fetch('/api/tasks/leaders/list', { credentials: 'include' });
+                const resData = await response.json();
+
+                select.innerHTML = '<option value="" disabled selected>Select an active Team Leader</option>';
+
+                if (resData.success && resData.data.length > 0) {
+                    resData.data.forEach(leader => {
+                        const opt = document.createElement('option');
+                        opt.value = leader.id;
+                        const branch = leader.office?.branch_name ? ` (${leader.office.branch_name})` : '';
+                        opt.textContent = `${leader.first_name} ${leader.last_name} - ${leader.custom_profile_id || 'LEADER'}${branch}`;
+                        select.appendChild(opt);
+                    });
+                } else {
+                    select.innerHTML = '<option value="" disabled>No active Team Leaders found</option>';
+                }
+            } catch (err) {
+                console.error("Failed to load leaders list:", err);
+                select.innerHTML = '<option value="" disabled>Failed to load leaders</option>';
+            }
+        }
+
+        document.getElementById('leader-task-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('deploy-leader-task-btn');
+            const assigneeId = document.getElementById('leader-select').value;
+            const title = document.getElementById('leader-task-title').value;
+            const description = document.getElementById('leader-task-desc').value;
+
+            if(!assigneeId) {
+                alert('Please select a Team Leader to receive this task.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Deploying directive...';
+
+            try {
+                const res = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        title,
+                        assigneeId,
+                        description,
+                        assigned_by: currentUser.id
+                    })
+                });
+
+                const data = await res.json();
+                if(data.success) {
+                    alert('🎯 Executive task successfully deployed to the selected Team Leader!');
+                    document.getElementById('leader-task-form').reset();
+                    fetchLeadersForTaskAssignment();
+                } else {
+                    alert(`Deployment failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Server communication error.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Dispatch Task to Leader';
+            }
+        });
+
+        // ==========================================
+        // 4. MODALS & CONTROL PANEL ACTIONS
+        // ==========================================
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // Form Submission: Create Office
+        document.getElementById('create-office-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('save-office-btn');
+            const branch_name = document.getElementById('modal-branch-name').value;
+            const state = document.getElementById('modal-branch-state').value;
+            const address = document.getElementById('modal-branch-address').value;
+
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
+
+            try {
+                const res = await fetch('/api/offices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ branch_name, state, address })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(`🏢 ${branch_name} has been added to the regional registry!`);
+                    document.getElementById('create-office-form').reset();
+                    closeModal('office-modal');
+                    fetchGlobalMetrics();
+                } else {
+                    alert(`Error creating branch: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Failed to connect with server.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create Branch';
+            }
+        });
+
+        // Form Submission: Send Broadcast Push
+        document.getElementById('send-broadcast-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('send-broadcast-btn');
+            const title = document.getElementById('modal-broadcast-title').value;
+            const priority = document.getElementById('modal-broadcast-priority').value;
+            const message = document.getElementById('modal-broadcast-message').value;
+
+            btn.disabled = true;
+            btn.textContent = 'Transmitting...';
+
+            try {
+                const res = await fetch('/api/broadcasts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ title, priority, message })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert('📡 Broadcast transmission dispatched across all workspace networks!');
+                    document.getElementById('send-broadcast-form').reset();
+                    closeModal('broadcast-modal');
+                } else {
+                    alert(`Broadcast failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Failed to transmit signal.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Send Transmission';
+            }
+        });
+
+        // ==========================================
+        // 5. GLOBAL TASK QUEUE AUDITING
         // ==========================================
         async function fetchAdminTasksQueue() {
             try {
@@ -457,7 +723,7 @@
         }
 
         // ==========================================
-        // 4. INCIDENT LOGGER LOADER
+        // 6. INCIDENT LOGGER
         // ==========================================
         async function fetchIncidentReports() {
             try {
@@ -525,10 +791,6 @@
             } catch (err) {
                 console.error("Resolution update crashed:", err);
             }
-        }
-
-        function adminAction(action) {
-            alert(`⚙️ Global Configuration Panel launched: Loading parameters for "${action}"...`);
         }
     </script>
 </body>

@@ -3,7 +3,7 @@ const router = express.Router();
 const supabase = require('../config/supabase');
 const { protect, authorize } = require('../middleware/auth');
 
-// 1. GET: Fetch tasks assigned to a specific user ID (Member View)
+// 1. GET: Fetch tasks assigned to a specific user ID (Member or Leader View)
 router.get('/user/:userId', protect, async (req, res) => {
     const { userId } = req.params;
     try {
@@ -16,13 +16,12 @@ router.get('/user/:userId', protect, async (req, res) => {
         if (error) throw error;
         res.status(200).json({ success: true, data });
     } catch (err) {
-        console.error('Error loading tasks:', err.message);
-        res.status(500).json({ success: false, message: 'Could not fetch tasks.' });
+        console.error('Error loading user tasks:', err.message);
+        res.status(500).json({ success: false, message: 'Could not fetch user tasks.' });
     }
 });
 
 // 2. GET: Fetch tasks for a specific regional office (Leader Monitor View)
-// We dynamically join the profiles table to filter by office since tasks table does not have an office_id column
 router.get('/office/:officeId', protect, authorize('leader', 'admin'), async (req, res) => {
     const { officeId } = req.params;
     try {
@@ -57,30 +56,56 @@ router.get('/global/completed', protect, authorize('admin'), async (req, res) =>
     }
 });
 
-// 4. POST: Deploy a new task to an assignee by their Custom Profile ID
+// 4. GET: Fetch active leaders for task assignment dropdown (Admin View)
+router.get('/leaders/list', protect, authorize('admin'), async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, first_name, last_name, custom_profile_id, role, office:offices(branch_name)')
+            .in('role', ['leader', 'team_leader'])
+            .eq('status', 'active')
+            .order('first_name', { ascending: true });
+
+        if (error) throw error;
+        res.status(200).json({ success: true, data });
+    } catch (err) {
+        console.error('Error fetching leaders list:', err.message);
+        res.status(500).json({ success: false, message: 'Failed to load leaders list.' });
+    }
+});
+
+// 5. POST: Deploy a new task (by Custom ID or direct user UUID)
 router.post('/', protect, authorize('leader', 'admin'), async (req, res) => {
-    const { title, assigneeCustomId, description, assigned_by } = req.body; // Removed office_id insertion parameter since it is handled by the user's profile relation
+    const { title, assigneeCustomId, assigneeId, description, assigned_by } = req.body;
 
     try {
-        // Find the user's UUID using their unique custom_profile_id
-        const { data: userProfile, error: profileError } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('custom_profile_id', assigneeCustomId)
-            .single();
+        let targetUserId = assigneeId;
 
-        if (profileError || !userProfile) {
-            return res.status(404).json({ success: false, message: `Member with ID ${assigneeCustomId} does not exist.` });
+        // If assigned by custom ID (like PNT-2026-10001)
+        if (!targetUserId && assigneeCustomId) {
+            const { data: userProfile, error: profileError } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('custom_profile_id', assigneeCustomId.trim().toUpperCase())
+                .single();
+
+            if (profileError || !userProfile) {
+                return res.status(404).json({ success: false, message: `Member with ID ${assigneeCustomId} does not exist.` });
+            }
+            targetUserId = userProfile.id;
         }
 
-        // Insert task directly linked to their profile
+        if (!targetUserId) {
+            return res.status(400).json({ success: false, message: 'A valid assignee is required.' });
+        }
+
         const { data, error } = await supabase
             .from('tasks')
             .insert([{
                 title,
                 description,
-                assigned_to: userProfile.id,
-                assigned_by,
+                assigned_to: targetUserId,
+                assigned_by: assigned_by || req.user.id,
                 status: 'assigned'
             }])
             .select();
@@ -93,7 +118,7 @@ router.post('/', protect, authorize('leader', 'admin'), async (req, res) => {
     }
 });
 
-// 5. PATCH: Update task status/state changes (Start Work, Mark Complete, Admin audit)
+// 6. PATCH: Update task status/state changes
 router.patch('/:taskId/status', protect, async (req, res) => {
     const { taskId } = req.params;
     const { status } = req.body;

@@ -110,6 +110,21 @@
             <!-- Left Side Operations -->
             <div class="lg:col-span-2 space-y-6">
 
+                <!-- Management Directives Assigned to this Leader -->
+                <div class="glass-card p-6 rounded-2xl border-purple-200 bg-purple-50/20">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-base font-bold text-pnt-dark">Assigned by Global Management</h3>
+                            <p class="text-slate-500 text-xs mt-0.5">Tasks and operational directives assigned directly to you by Admin</p>
+                        </div>
+                        <span class="bg-purple-100 text-pnt-purple border border-purple-200 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Admin Directives</span>
+                    </div>
+
+                    <div class="space-y-4" id="leader-assigned-tasks-list">
+                        <p class="text-xs text-slate-400 py-2">Loading tasks from management...</p>
+                    </div>
+                </div>
+
                 <div class="glass-card p-6 rounded-2xl border-purple-100">
                     <div class="flex justify-between items-center mb-6">
                         <div>
@@ -141,10 +156,10 @@
                 <div class="glass-card p-6 rounded-2xl">
                     <div class="flex justify-between items-center mb-6">
                         <div>
-                            <h3 class="text-base font-bold text-pnt-dark">Active Task Deployments</h3>
-                            <p class="text-slate-500 text-xs mt-0.5">Real-time status tracking of assigned work</p>
+                            <h3 class="text-base font-bold text-pnt-dark">Active Member Task Deployments</h3>
+                            <p class="text-slate-500 text-xs mt-0.5">Real-time status tracking of assigned work across your branch</p>
                         </div>
-                        <span class="bg-indigo-50 text-indigo-600 border border-indigo-200 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Live Feed</span>
+                        <span class="bg-indigo-50 text-indigo-600 border border-indigo-200 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Branch Desk</span>
                     </div>
 
                     <div id="tasks-monitor-list" class="space-y-4">
@@ -341,9 +356,9 @@
                     </div>
                 </div>
 
-                <!-- Deploy Task Form -->
+                <!-- Deploy Task Form to Branch Members -->
                 <div class="glass-card p-6 rounded-2xl border-purple-100">
-                    <h3 class="text-sm font-semibold text-pnt-purple uppercase tracking-wider mb-1">Assign Workspace Task</h3>
+                    <h3 class="text-sm font-semibold text-pnt-purple uppercase tracking-wider mb-1">Assign Member Task</h3>
                     <p class="text-slate-500 text-xs mb-4">Deploy action items directly to member terminal dashboards.</p>
                     
                     <form id="task-deployer-form" class="space-y-4">
@@ -395,6 +410,7 @@
         let pendingUsers = [];
         let pendingLogs = [];
         let activeTasks = [];
+        let myAssignedTasks = [];
 
         // 3D Card Flipper
         const flipBtn = document.getElementById('flip-card-btn');
@@ -490,11 +506,106 @@
         });
 
         async function refreshLeaderData() {
-            if (!currentUser.office_id) return;
-            await fetchRegionalMetrics();
-            await fetchPendingRegistrations();
-            await fetchPendingAttendance();
-            await fetchAllTasks();
+            if (!currentUser.id) return;
+            await fetchLeaderAssignedDirectives();
+            if (currentUser.office_id) {
+                await fetchRegionalMetrics();
+                await fetchPendingRegistrations();
+                await fetchPendingAttendance();
+                await fetchAllTasks();
+            }
+        }
+
+        // ===================================================
+        // 0. TASKS ASSIGNED BY ADMIN DIRECTLY TO THIS LEADER
+        // ===================================================
+        async function fetchLeaderAssignedDirectives() {
+            const container = document.getElementById('leader-assigned-tasks-list');
+            try {
+                const response = await fetch(`/api/tasks/user/${currentUser.id}`, { credentials: 'include' });
+                const resData = await response.json();
+
+                if (resData.success) {
+                    myAssignedTasks = resData.data;
+                    renderLeaderDirectives();
+                } else {
+                    container.innerHTML = `<p class="text-xs text-slate-400 py-2">Could not retrieve management directives.</p>`;
+                }
+            } catch (err) {
+                console.error("Failed to load leader directives:", err);
+                container.innerHTML = `<p class="text-xs text-slate-400 py-2">Connection failed.</p>`;
+            }
+        }
+
+        function renderLeaderDirectives() {
+            const container = document.getElementById('leader-assigned-tasks-list');
+            container.innerHTML = '';
+
+            if (myAssignedTasks.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 py-2">No pending directives assigned to you by Global Management.</p>`;
+                return;
+            }
+
+            myAssignedTasks.forEach(task => {
+                let badgeClass = "bg-slate-100 border-slate-200 text-slate-600";
+                let actionBtn = "";
+
+                if (task.status === 'assigned') {
+                    badgeClass = "bg-blue-50 border-blue-200 text-blue-700";
+                    actionBtn = `<button onclick="updateLeaderTaskStatus('${task.id}', 'in_progress')" class="bg-pnt-purple hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all">Start Directive</button>`;
+                } else if (task.status === 'in_progress') {
+                    badgeClass = "bg-amber-50 border-amber-200 text-amber-700";
+                    actionBtn = `<button onclick="updateLeaderTaskStatus('${task.id}', 'completed')" class="bg-pnt-orange hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all">Mark Directive Complete</button>`;
+                } else if (task.status === 'completed') {
+                    badgeClass = "bg-purple-50 border-purple-200 text-pnt-purple animate-pulse";
+                    actionBtn = `<span class="text-[11px] text-slate-400 font-semibold italic">Sent to Admin for verification...</span>`;
+                } else if (task.status === 'approved') {
+                    badgeClass = "bg-emerald-50 border-emerald-200 text-emerald-700";
+                    actionBtn = `<span class="text-[11px] text-emerald-600 font-bold">✓ Approved by Admin</span>`;
+                } else if (task.status === 'rejected') {
+                    badgeClass = "bg-red-50 border-red-200 text-red-700";
+                    actionBtn = `<button onclick="updateLeaderTaskStatus('${task.id}', 'in_progress')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all">Retry Directive</button>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all hover:border-purple-300";
+                card.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-bold text-sm text-pnt-dark">${task.title}</h4>
+                            <span class="text-[9px] uppercase border font-semibold px-2 py-0.5 rounded ${badgeClass}">${task.status.replace('_', ' ')}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 max-w-md">${task.description || 'No instructions provided.'}</p>
+                    </div>
+                    <div class="w-full sm:w-auto flex justify-end">
+                        ${actionBtn}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function updateLeaderTaskStatus(taskId, status) {
+            try {
+                const response = await fetch(`/api/tasks/${taskId}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ status })
+                });
+
+                const resData = await response.json();
+
+                if (resData.success) {
+                    alert(`Directive state updated to: ${status.replace('_', ' ')}`);
+                    fetchLeaderAssignedDirectives();
+                } else {
+                    alert(`Update failed: ${resData.message}`);
+                }
+            } catch (err) {
+                console.error("Error updating directive:", err);
+                alert("Express server communication lost.");
+            }
         }
 
         // ===================================================
@@ -769,8 +880,7 @@
                         title,
                         assigneeCustomId,
                         description,
-                        assigned_by: currentUser.id,
-                        office_id: currentUser.office_id
+                        assigned_by: currentUser.id
                     })
                 });
 
