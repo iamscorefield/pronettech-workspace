@@ -10,7 +10,7 @@ router.get('/announcements', protect, async (req, res) => {
     try {
         const officeId = req.user.office_id;
 
-        // Pull notifications that are either global or specifically target the employee's local branch
+        // Pull notifications that are either global or specifically target the member's local branch
         const { data, error } = await supabase
             .from('announcements')
             .select('*, profiles(first_name, last_name, role)')

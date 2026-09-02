@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronettech | Official Credential Verification</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pnt: {
+                            dark: '#0D122B',
+                            purple: '#6A1BBF',
+                            'purple-light': '#9D4EDD',
+                            orange: '#FF7A00',
+                            gold: '#FFC107',
+                            blue: '#0070c0'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-full bg-slate-50 flex flex-col justify-center items-center py-10 px-4 sm:px-6 relative overflow-x-hidden text-pnt-dark">
+
+    <div class="max-w-md w-full relative z-10">
+        <div class="bg-white border border-slate-200 shadow-2xl rounded-3xl p-6 sm:p-8 text-center relative overflow-hidden">
+            
+            <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#0070c0] via-[#6A1BBF] to-[#FF7A00]"></div>
+
+            <div class="flex items-center justify-center gap-2.5 my-4">
+                <img src="/assets/images/logo.png" alt="ProNet-Tech" class="h-10 w-auto">
+                <div class="text-left">
+                    <h1 class="text-base font-black text-[#0070c0] leading-none tracking-tight">ProNet-Tech</h1>
+                    <p class="text-[9px] font-bold text-[#FF7A00] uppercase tracking-wider">Global Ltd.</p>
+                </div>
+            </div>
+
+            <div id="loading-state" class="py-12 space-y-4">
+                <div class="w-12 h-12 border-4 border-slate-100 border-t-pnt-purple rounded-full animate-spin mx-auto"></div>
+                <p class="text-xs text-slate-500 font-semibold tracking-wider uppercase">Querying Central Verification Database...</p>
+            </div>
+
+            <div id="error-state" class="hidden py-8 space-y-4">
+                <div class="w-14 h-14 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto border border-red-200">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900">Credential Not Verified</h3>
+                <p id="error-message" class="text-xs text-slate-500 max-w-xs mx-auto">This ID card is not registered or may have been suspended from the network.</p>
+            </div>
+
+            <div id="verified-state" class="hidden space-y-6 pt-2">
+                
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold tracking-wide">
+                    <svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                    AUTHENTIC & ACTIVE
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-3.5 text-left text-xs">
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                        <span class="text-slate-500 font-medium">NAME:</span>
+                        <span id="v-name" class="font-extrabold text-slate-900 uppercase">---</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                        <span class="text-slate-500 font-medium">Rank:</span>
+                        <span id="v-rank" class="font-bold text-pnt-purple">---</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                        <span class="text-slate-500 font-medium">Workspace ID:</span>
+                        <span id="v-id" class="font-mono font-bold text-slate-900">---</span>
+                    </div>
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                        <span class="text-slate-500 font-medium">Branch Office:</span>
+                        <span id="v-office" class="font-semibold text-slate-800">---</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500 font-medium">Status:</span>
+                        <span class="font-bold text-emerald-600 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block"></span>
+                            Active
+                        </span>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <a href="https://dglobalgrowthfield.com" target="_blank" rel="noopener noreferrer" class="w-full btn-brand-gradient flex items-center justify-center gap-2 font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-pnt-purple/20 text-xs tracking-wider uppercase transition-all duration-300 transform hover:-translate-y-0.5 text-white">
+                        Know more about ProNet-Tech
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+        <p class="text-center text-[10px] text-slate-400 font-medium mt-6">
+            Official Security & Identity Verification Protocol • ProNet-Tech Global Ltd.
+        </p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const customId = urlParams.get('id');
+
+            const loadingState = document.getElementById('loading-state');
+            const errorState = document.getElementById('error-state');
+            const verifiedState = document.getElementById('verified-state');
+
+            if (!customId) {
+                loadingState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+                document.getElementById('error-message').textContent = 'No identification token supplied in scan.';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/auth/verify-public/${encodeURIComponent(customId)}`);
+                const resData = await response.json();
+
+                loadingState.classList.add('hidden');
+
+                if (resData.success && resData.data) {
+                    document.getElementById('v-name').textContent = resData.data.name;
+                    document.getElementById('v-rank').textContent = resData.data.rank;
+                    document.getElementById('v-id').textContent = resData.data.customId;
+                    document.getElementById('v-office').textContent = resData.data.office;
+                    verifiedState.classList.remove('hidden');
+                } else {
+                    errorState.classList.remove('hidden');
+                    document.getElementById('error-message').textContent = resData.message || 'Credential failed verification.';
+                }
+            } catch (err) {
+                console.error('Verification error:', err);
+                loadingState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+                document.getElementById('error-message').textContent = 'Could not establish secure connection to verification gateway.';
+            }
+        });
+    </script>
+</body>
+</html>

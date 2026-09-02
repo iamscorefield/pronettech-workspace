@@ -1,53 +1,44 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pronettech Workspace | Global Admin Command</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="stylesheet" href="/css/styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            900: '#1e3a8a',
+                        pnt: {
+                            dark: '#0D122B',
+                            purple: '#6A1BBF',
+                            'purple-light': '#9D4EDD',
+                            orange: '#FF7A00',
+                            gold: '#FFC107'
                         }
                     }
                 }
             }
         }
     </script>
-    <style>
-        .glass-card {
-            background: rgba(15, 23, 42, 0.45);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-    </style>
 </head>
-<body class="min-h-full bg-slate-950 pb-12 relative overflow-x-hidden">
+<body class="min-h-full pb-12 relative overflow-x-hidden bg-white text-pnt-dark">
 
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-[10%] left-[20%] w-[50%] h-[50%] rounded-full bg-brand-900/10 blur-[150px]"></div>
-        <div class="absolute bottom-[10%] right-[20%] w-[50%] h-[50%] rounded-full bg-indigo-900/10 blur-[150px]"></div>
-    </div>
-
-    <nav class="glass-card sticky top-0 z-50 border-b border-slate-800/80 px-6 py-4">
+    <nav class="glass-card sticky top-0 z-50 border-b px-6 py-4">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="flex items-center justify-center">
                     <img src="/assets/images/logo.png" alt="Pronettech Logo" class="h-10 w-auto rounded-lg">
                 </div>
                 <div>
-                    <h2 class="font-bold text-sm tracking-tight">Pronettech Workspace</h2>
-                    <p class="text-[10px] text-red-400 font-semibold tracking-wider uppercase">Global Security Command</p>
+                    <h2 class="font-bold text-sm tracking-tight text-pnt-dark">Pronettech Workspace</h2>
+                    <p class="text-[10px] text-red-600 font-semibold tracking-wider uppercase">Global Security Command</p>
                 </div>
             </div>
-            <button id="logout-btn" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-300">
+            <button id="logout-btn" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-300">
                 Sign Out
             </button>
         </div>
@@ -57,28 +48,63 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div class="glass-card p-6 rounded-2xl">
-                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Staff Base</p>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Members</p>
                 <div class="flex items-baseline gap-2 mt-1">
-                    <h3 class="text-3xl font-bold text-white" id="metric-total-staff">0</h3>
+                    <h3 class="text-3xl font-bold text-pnt-dark" id="metric-total-staff">0</h3>
                 </div>
             </div>
             <div class="glass-card p-6 rounded-2xl">
                 <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Regional Branches</p>
                 <div class="flex items-baseline gap-2 mt-1">
-                    <h3 class="text-3xl font-bold text-white" id="metric-total-branches">0</h3>
+                    <h3 class="text-3xl font-bold text-pnt-dark" id="metric-total-branches">0</h3>
                 </div>
             </div>
             <div class="glass-card p-6 rounded-2xl">
                 <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Assigned Sub-Admins</p>
                 <div class="flex items-baseline gap-2 mt-1">
-                    <h3 class="text-3xl font-bold text-white" id="metric-total-leaders">0</h3>
+                    <h3 class="text-3xl font-bold text-pnt-dark" id="metric-total-leaders">0</h3>
                 </div>
             </div>
-            <div class="glass-card p-6 rounded-2xl border-red-500/10 bg-red-500/[0.02]">
-                <p class="text-xs font-semibold text-red-400 uppercase tracking-wider">Red-Alert Escalations</p>
+            <div class="glass-card p-6 rounded-2xl border-red-200 bg-red-50/40">
+                <p class="text-xs font-semibold text-red-600 uppercase tracking-wider">Red-Alert Escalations</p>
                 <div class="flex items-baseline gap-2 mt-1">
-                    <h3 class="text-3xl font-bold text-red-500" id="metric-active-escalations">0</h3>
+                    <h3 class="text-3xl font-bold text-red-600" id="metric-active-escalations">0</h3>
                 </div>
+            </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-2xl space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-base font-bold text-pnt-dark">Workspace User Directory & Role Management</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Audit personnel records, verify ID badges, and toggle roles between Members and Team Leaders</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="user-search-input" placeholder="Search by name, ID or branch..." class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple w-full sm:w-64">
+                    <button onclick="fetchUserDirectory()" title="Refresh Directory" class="p-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-slate-600 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-slate-400 uppercase font-semibold text-[10px] tracking-wider">
+                            <th class="py-3 px-4">Member Name</th>
+                            <th class="py-3 px-4">Workspace ID</th>
+                            <th class="py-3 px-4">Branch Office</th>
+                            <th class="py-3 px-4">Contact</th>
+                            <th class="py-3 px-4">Current Role</th>
+                            <th class="py-3 px-4 text-right">Role Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-directory-tbody" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="6" class="text-center py-8 text-xs text-slate-400">Loading personnel records...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -87,37 +113,37 @@
             <div class="lg:col-span-2 space-y-8">
                 
                 <div class="glass-card p-6 rounded-2xl">
-                    <h3 class="text-base font-bold text-white mb-6">Administrative Control Panel</h3>
+                    <h3 class="text-base font-bold text-pnt-dark mb-6">Administrative Control Panel</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         
-                        <div class="bg-slate-900/40 border border-slate-800 p-4 rounded-xl space-y-3">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-brand-400">Regional Setup</h4>
-                            <p class="text-xs text-slate-400">Add corporate office branches and dynamically assign Team Leaders to fill local registries.</p>
-                            <button onclick="adminAction('Add Office')" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2 rounded-lg text-xs transition-all duration-300">
+                        <div class="bg-purple-50/40 border border-purple-100 p-4 rounded-xl space-y-3">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-pnt-purple">Regional Setup</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">Add corporate office branches and dynamically assign Team Leaders to fill local registries.</p>
+                            <button onclick="adminAction('Add Office')" class="w-full bg-pnt-purple hover:opacity-90 text-white font-semibold py-2 rounded-lg text-xs transition-all duration-300">
                                 Create New Office Route
                             </button>
                         </div>
 
-                        <div class="bg-slate-900/40 border border-slate-800 p-4 rounded-xl space-y-3">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-400">Broadcast Alerts</h4>
-                            <p class="text-xs text-slate-400">Send custom, company-wide instant push notifications to all users across every department.</p>
-                            <button onclick="adminAction('Send Broadcast')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 rounded-lg text-xs transition-all duration-300">
+                        <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-[#9D4EDD]">Broadcast Alerts</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">Send custom, company-wide instant push notifications to all users across every department.</p>
+                            <button onclick="adminAction('Send Broadcast')" class="w-full bg-[#9D4EDD] hover:opacity-90 text-white font-semibold py-2 rounded-lg text-xs transition-all duration-300">
                                 Send Push Notification
                             </button>
                         </div>
 
-                        <div class="bg-slate-900/40 border border-slate-800 p-4 rounded-xl space-y-3">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-amber-500">Global Settings</h4>
-                            <p class="text-xs text-slate-400">Configure default metadata styling criteria and pricing tiers for Softcopy / Hardcopy ID cards.</p>
-                            <button onclick="adminAction('Edit Settings')" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 rounded-lg text-xs transition-all duration-300">
+                        <div class="bg-amber-50/40 border border-amber-100 p-4 rounded-xl space-y-3">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-amber-600">Global Settings</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">Configure default metadata styling criteria and pricing tiers for Softcopy / Hardcopy ID cards.</p>
+                            <button onclick="adminAction('Edit Settings')" class="w-full bg-slate-100 hover:bg-slate-200 text-pnt-dark font-semibold py-2 rounded-lg text-xs border border-slate-200 transition-all duration-300">
                                 Modify Price Scales
                             </button>
                         </div>
 
-                        <div class="bg-slate-900/40 border border-slate-800 p-4 rounded-xl space-y-3">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-red-500">Security Sector</h4>
-                            <p class="text-xs text-slate-400">Audit all 142+ employee listings to suspend access, delete users, or ban fraudulent profiles.</p>
-                            <button onclick="adminAction('Audit Roster')" class="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-semibold py-2 rounded-lg text-xs transition-all duration-300">
+                        <div class="bg-red-50/40 border border-red-100 p-4 rounded-xl space-y-3">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-red-600">Security Sector</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">Audit all member listings to suspend access, delete users, or ban fraudulent profiles.</p>
+                            <button onclick="adminAction('Audit Roster')" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-semibold py-2 rounded-lg text-xs transition-all duration-300">
                                 Launch Auditing Console
                             </button>
                         </div>
@@ -128,28 +154,28 @@
                 <div class="glass-card p-6 rounded-2xl">
                     <div class="flex justify-between items-center mb-6">
                         <div>
-                            <h3 class="text-base font-bold text-white">Global Task Approval Desk</h3>
-                            <p class="text-slate-400 text-xs mt-0.5">Audit tasks marked complete by regional workers</p>
+                            <h3 class="text-base font-bold text-pnt-dark">Global Task Approval Desk</h3>
+                            <p class="text-slate-500 text-xs mt-0.5">Audit tasks marked complete by regional workers</p>
                         </div>
-                        <span class="bg-brand-500/10 text-brand-400 border border-brand-500/20 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Queue Monitor</span>
+                        <span class="bg-purple-50 text-pnt-purple border border-purple-200 text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Queue Monitor</span>
                     </div>
 
                     <div id="admin-tasks-queue" class="space-y-4">
-                        <p class="text-xs text-slate-500 py-2">Loading active workplace tasks stream...</p>
+                        <p class="text-xs text-slate-400 py-2">Loading active workplace tasks stream...</p>
                     </div>
                 </div>
 
             </div>
 
             <div class="space-y-6">
-                <div class="glass-card p-6 rounded-2xl border-red-500/10">
+                <div class="glass-card p-6 rounded-2xl border-red-200">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Leader Incident Logs</h3>
-                        <span class="bg-red-500/10 text-red-400 text-[10px] px-2 py-0.5 rounded font-bold animate-pulse" id="escalation-alert">Live</span>
+                        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Leader Incident Logs</h3>
+                        <span class="bg-red-50 text-red-600 border border-red-200 text-[10px] px-2 py-0.5 rounded font-bold animate-pulse" id="escalation-alert">Live</span>
                     </div>
 
                     <div class="space-y-4" id="incident-logs-container">
-                        <p class="text-xs text-slate-500 py-2">Querying incident databases...</p>
+                        <p class="text-xs text-slate-400 py-2">Querying incident databases...</p>
                     </div>
                 </div>
             </div>
@@ -162,9 +188,9 @@
         let currentUser = null;
         let adminTaskQueue = [];
         let incidentReports = [];
+        let allUsersDirectory = [];
 
-        // Restrict view access to authenticated Admins only
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const userSession = localStorage.getItem('pnt_user');
             if(!userSession) {
                 window.location.href = '/views/onboarding.html';
@@ -172,35 +198,171 @@
             }
 
             currentUser = JSON.parse(userSession);
-            if(currentUser.role !== 'admin') {
+            if(currentUser.role !== 'admin' && currentUser.role !== 'global_admin') {
                 alert('Access Forbidden: Admin security tier validation required.');
                 window.location.href = '/views/dashboard.html';
                 return;
             }
 
-            // Fire global loaders
-            refreshAdminConsole();
+            await refreshAdminConsole();
+
+            // Hook instant search filtering
+            document.getElementById('user-search-input').addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                const filtered = allUsersDirectory.filter(u => 
+                    `${u.first_name} ${u.last_name}`.toLowerCase().includes(query) ||
+                    (u.custom_profile_id && u.custom_profile_id.toLowerCase().includes(query)) ||
+                    (u.office?.branch_name && u.office.branch_name.toLowerCase().includes(query)) ||
+                    u.email.toLowerCase().includes(query)
+                );
+                renderUserDirectory(filtered);
+            });
         });
 
-        // Dynamic refresh
         async function refreshAdminConsole() {
-            await fetchGlobalMetrics();
-            await fetchAdminTasksQueue();
-            await fetchIncidentReports();
+            await Promise.all([
+                fetchGlobalMetrics(),
+                fetchUserDirectory(),
+                fetchAdminTasksQueue(),
+                fetchIncidentReports()
+            ]);
         }
 
-        // Sign Out execution
         document.getElementById('logout-btn').addEventListener('click', () => {
             localStorage.removeItem('pnt_user');
             window.location.href = '/views/onboarding.html';
         });
 
         // ==========================================
-        // 1. FETCH GLOBAL COMMAND SYSTEM METRICS
+        // 1. FETCH GLOBAL USER DIRECTORY TABLE
+        // ==========================================
+        async function fetchUserDirectory() {
+            try {
+                const response = await fetch('/api/auth/users/all', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    document.getElementById('user-directory-tbody').innerHTML = `
+                        <tr><td colspan="6" class="text-center py-6 text-xs text-red-500 font-semibold">Session expired or unauthorized. Please re-login.</td></tr>
+                    `;
+                    return;
+                }
+
+                const resData = await response.json();
+
+                if (resData.success) {
+                    allUsersDirectory = resData.data;
+                    renderUserDirectory(allUsersDirectory);
+                } else {
+                    document.getElementById('user-directory-tbody').innerHTML = `
+                        <tr><td colspan="6" class="text-center py-6 text-xs text-red-500">${resData.message || 'Could not retrieve user records.'}</td></tr>
+                    `;
+                }
+            } catch (err) {
+                console.error("Directory fetch error:", err);
+                document.getElementById('user-directory-tbody').innerHTML = `
+                    <tr><td colspan="6" class="text-center py-6 text-xs text-red-500">Express server connection failed.</td></tr>
+                `;
+            }
+        }
+
+        function renderUserDirectory(users) {
+            const tbody = document.getElementById('user-directory-tbody');
+            tbody.innerHTML = '';
+
+            if (!users || users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-xs text-slate-400">No matching user records found in workspace directory.</td></tr>`;
+                return;
+            }
+
+            users.forEach(user => {
+                const isLeader = user.role === 'leader' || user.role === 'team_leader';
+                const isAdmin = user.role === 'admin' || user.role === 'global_admin';
+                
+                let badgeClass = "bg-purple-50 text-pnt-purple border border-purple-200";
+                let roleLabel = "Member";
+
+                if (isAdmin) {
+                    badgeClass = "bg-red-50 text-red-600 border border-red-200";
+                    roleLabel = "Admin";
+                } else if (isLeader) {
+                    badgeClass = "bg-blue-50 text-[#0070c0] border border-blue-200";
+                    roleLabel = "Team Leader";
+                }
+
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50/80 transition-colors";
+                row.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-pnt-dark">
+                        ${user.first_name} ${user.last_name}
+                    </td>
+                    <td class="py-3 px-4 font-mono text-xs text-pnt-purple font-bold tracking-wider">
+                        ${user.custom_profile_id || 'PNT-PENDING'}
+                    </td>
+                    <td class="py-3 px-4 text-xs text-slate-600">
+                        ${user.office?.branch_name || 'Physical Branch'}
+                    </td>
+                    <td class="py-3 px-4 text-xs text-slate-500">
+                        <div>${user.email}</div>
+                        <div class="text-[10px] text-slate-400">${user.phone_number || ''}</div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${badgeClass}">
+                            ${roleLabel}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        ${isAdmin ? `
+                            <span class="text-[10px] font-mono text-slate-400 uppercase font-semibold">Protected</span>
+                        ` : `
+                            <button onclick="toggleUserRole('${user.id}', '${user.role}')" class="text-[11px] font-bold text-pnt-purple hover:underline bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2.5 py-1 rounded-lg transition-all">
+                                Switch to ${isLeader ? 'Member' : 'Leader'}
+                            </button>
+                        `}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function toggleUserRole(userId, currentRole) {
+            const nextRole = (currentRole === 'leader' || currentRole === 'team_leader') ? 'member' : 'leader';
+            if(!confirm(`Are you sure you want to change this user's role to ${nextRole === 'leader' ? 'Team Leader' : 'Member'}?`)) return;
+
+            try {
+                const response = await fetch(`/api/auth/users/${userId}/role`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ role: nextRole })
+                });
+
+                const resData = await response.json();
+
+                if(resData.success) {
+                    alert(resData.message);
+                    fetchUserDirectory();
+                    fetchGlobalMetrics();
+                } else {
+                    alert(`Failed to update role: ${resData.message}`);
+                }
+            } catch (err) {
+                console.error("Role update failed:", err);
+                alert("Express backend server communication failed.");
+            }
+        }
+
+        // ==========================================
+        // 2. FETCH GLOBAL METRICS
         // ==========================================
         async function fetchGlobalMetrics() {
             try {
-                const response = await fetch('/api/auth/metrics/global');
+                const response = await fetch('/api/auth/metrics/global', {
+                    credentials: 'include'
+                });
                 const resData = await response.json();
 
                 if (resData.success) {
@@ -215,11 +377,13 @@
         }
 
         // ==========================================
-        // 2. GLOBAL TASK AUDITING SYSTEM
+        // 3. GLOBAL TASK QUEUE AUDITING
         // ==========================================
         async function fetchAdminTasksQueue() {
             try {
-                const response = await fetch('/api/tasks/global/completed');
+                const response = await fetch('/api/tasks/global/completed', {
+                    credentials: 'include'
+                });
                 const resData = await response.json();
 
                 if (resData.success) {
@@ -235,33 +399,33 @@
             const queueContainer = document.getElementById('admin-tasks-queue');
             queueContainer.innerHTML = '';
 
-            if (adminTaskQueue.length === 0) {
+            if (!adminTaskQueue || adminTaskQueue.length === 0) {
                 queueContainer.innerHTML = `
                     <div class="text-center py-6">
-                        <p class="text-xs text-slate-500">All task submissions cleared. There are no completed tasks pending review.</p>
+                        <p class="text-xs text-slate-400">All task submissions cleared. There are no completed tasks pending review.</p>
                     </div>`;
                 return;
             }
 
             adminTaskQueue.forEach(task => {
                 const card = document.createElement('div');
-                card.className = "bg-slate-900/60 border border-slate-800 p-4 rounded-xl space-y-3 transition-all hover:border-slate-700";
+                card.className = "bg-slate-50/70 border border-slate-200 p-4 rounded-xl space-y-3 transition-all hover:border-slate-300";
                 card.innerHTML = `
                     <div class="flex items-center justify-between">
                         <span class="text-[10px] font-bold text-slate-500 font-mono">
                             Assigned To: ${task.profiles?.first_name || ''} ${task.profiles?.last_name || ''} (${task.profiles?.custom_profile_id || 'N/A'})
                         </span>
-                        <span class="bg-indigo-500/10 text-indigo-400 text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded animate-pulse">Awaiting Approval</span>
+                        <span class="bg-purple-50 text-pnt-purple border border-purple-200 text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded animate-pulse">Awaiting Approval</span>
                     </div>
                     <div>
-                        <h4 class="text-sm font-bold text-slate-200">${task.title}</h4>
-                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">${task.description || 'No description provided.'}</p>
+                        <h4 class="text-sm font-bold text-pnt-dark">${task.title}</h4>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">${task.description || 'No description provided.'}</p>
                     </div>
-                    <div class="pt-2 border-t border-slate-800/80 flex gap-2">
-                        <button onclick="auditTask('${task.id}', 'rejected')" class="flex-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-semibold py-1.5 rounded-lg transition-all">
+                    <div class="pt-2 border-t border-slate-200 flex gap-2">
+                        <button onclick="auditTask('${task.id}', 'rejected')" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-semibold py-1.5 rounded-lg transition-all">
                             Reject & Redo
                         </button>
-                        <button onclick="auditTask('${task.id}', 'approved')" class="flex-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-xs font-semibold py-1.5 rounded-lg transition-all">
+                        <button onclick="auditTask('${task.id}', 'approved')" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 text-xs font-semibold py-1.5 rounded-lg transition-all">
                             Approve Task
                         </button>
                     </div>
@@ -275,13 +439,14 @@
                 const response = await fetch(`/api/tasks/${taskId}/status`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ status: targetStatus })
                 });
 
                 const resData = await response.json();
 
                 if (resData.success) {
-                    alert(`✅ Task successfully ${targetStatus === 'approved' ? 'Approved' : 'Rejected'}! Status update sent directly to the worker.`);
+                    alert(`✅ Task successfully ${targetStatus === 'approved' ? 'Approved' : 'Rejected'}! Status update sent directly to the member.`);
                     fetchAdminTasksQueue();
                 } else {
                     alert(`Audit registration failed: ${resData.message}`);
@@ -292,11 +457,13 @@
         }
 
         // ==========================================
-        // 3. INCIDENT LOGGER LOADER
+        // 4. INCIDENT LOGGER LOADER
         // ==========================================
         async function fetchIncidentReports() {
             try {
-                const response = await fetch('/api/community/incidents');
+                const response = await fetch('/api/community/incidents', {
+                    credentials: 'include'
+                });
                 const resData = await response.json();
 
                 if (resData.success) {
@@ -312,26 +479,26 @@
             const container = document.getElementById('incident-logs-container');
             container.innerHTML = '';
 
-            if (incidentReports.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-500 py-2">No active incident escalations reported from branches.</p>`;
+            if (!incidentReports || incidentReports.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 py-2">No active incident escalations reported from branches.</p>`;
                 document.getElementById('escalation-alert').classList.remove('animate-pulse');
                 return;
             }
 
             incidentReports.forEach(report => {
                 const card = document.createElement('div');
-                card.className = "bg-slate-900/60 border border-slate-800 p-4 rounded-xl space-y-3";
+                card.className = "bg-slate-50/70 border border-slate-200 p-4 rounded-xl space-y-3";
                 card.innerHTML = `
                     <div class="flex items-center justify-between">
                         <span class="text-[10px] font-bold text-slate-500 font-mono">ESC-${report.id.substring(0,6).toUpperCase()}</span>
-                        <span class="bg-amber-500/10 text-amber-400 text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded">Unresolved</span>
+                        <span class="bg-amber-50 text-amber-700 border border-amber-200 text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded">Unresolved</span>
                     </div>
                     <div>
-                        <h4 class="text-sm font-bold text-slate-200">${report.subject}</h4>
-                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">${report.details}</p>
+                        <h4 class="text-sm font-bold text-pnt-dark">${report.subject}</h4>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">${report.details}</p>
                     </div>
-                    <div class="pt-2 border-t border-slate-800/80 flex gap-2">
-                        <button onclick="resolveReport('${report.id}')" class="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-bold py-1.5 rounded transition-all">
+                    <div class="pt-2 border-t border-slate-200 flex gap-2">
+                        <button onclick="resolveReport('${report.id}')" class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 text-[10px] font-bold py-1.5 rounded transition-all">
                             Mark Resolved
                         </button>
                     </div>
@@ -343,7 +510,8 @@
         async function resolveReport(reportId) {
             try {
                 const response = await fetch(`/api/community/incidents/${reportId}/resolve`, {
-                    method: 'PATCH'
+                    method: 'PATCH',
+                    credentials: 'include'
                 });
 
                 const resData = await response.json();

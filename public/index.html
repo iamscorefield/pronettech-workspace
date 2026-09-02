@@ -1,76 +1,66 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pronettech Workspace | Gateway</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="stylesheet" href="/css/styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#f0f7ff',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            900: '#1e3a8a',
+                        pnt: {
+                            dark: '#0D122B',
+                            purple: '#6A1BBF',
+                            'purple-light': '#9D4EDD',
+                            orange: '#FF7A00',
+                            gold: '#FFC107'
                         }
                     }
                 }
             }
         }
     </script>
-    <style>
-        .glass-card {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-    </style>
 </head>
-<body class="h-full flex flex-col items-center justify-center p-6 selection:bg-brand-500 selection:text-white relative">
+<body class="h-full flex flex-col items-center justify-center p-6 selection:bg-pnt-purple selection:text-white relative">
 
-    <div class="absolute top-6 z-50 glass-card rounded-full px-5 py-2.5 flex items-center gap-3 text-[11px] shadow-xl border border-brand-500/20 max-w-sm sm:max-w-none flex-wrap justify-center">
-        <span class="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Architect Demo:</span>
-        <button onclick="injectDemo('employee', 'Deen Developer', 'PNT-2026-10001')" class="bg-brand-500/20 hover:bg-brand-500/40 text-brand-400 font-bold px-3 py-1 rounded-full transition-all">Employee Hub</button>
-        <button onclick="injectDemo('leader', 'Sub-Admin Michael', 'PNT-2026-LEADER')" class="bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-400 font-bold px-3 py-1 rounded-full transition-all">Leader Board</button>
-        <button onclick="injectDemo('admin', 'Global Owner', 'PNT-2026-ADMIN')" class="bg-red-500/20 hover:bg-red-500/40 text-red-400 font-bold px-3 py-1 rounded-full transition-all">Owner Command</button>
+    <div class="absolute top-6 z-50 glass-card rounded-full px-5 py-2.5 flex items-center gap-3 text-[11px] shadow-sm border border-slate-200 max-w-sm sm:max-w-none flex-wrap justify-center">
+        <span class="text-slate-500 font-bold uppercase tracking-wider text-[10px]">Architect Demo:</span>
+        <button onclick="injectDemo('member', 'Deen Developer', 'PNT-2026-10001')" class="bg-purple-50 hover:bg-purple-100 text-pnt-purple font-bold px-3 py-1 rounded-full border border-purple-200 transition-all">Member Hub</button>
+        <button onclick="injectDemo('leader', 'Sub-Admin Michael', 'PNT-2026-LEADER')" class="bg-orange-50 hover:bg-orange-100 text-pnt-orange font-bold px-3 py-1 rounded-full border border-orange-200 transition-all">Leader Board</button>
+        <button onclick="injectDemo('admin', 'Global Owner', 'PNT-2026-ADMIN')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold px-3 py-1 rounded-full border border-red-200 transition-all">Owner Command</button>
     </div>
 
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-[40%] -left-[20%] w-[80%] h-[80%] rounded-full bg-brand-900/20 blur-[120px]"></div>
-        <div class="absolute -bottom-[40%] -right-[20%] w-[80%] h-[80%] rounded-full bg-indigo-900/20 blur-[120px]"></div>
-    </div>
-
-    <div class="glass-card max-w-md w-full rounded-2xl p-8 text-center shadow-2xl relative z-10 transition-all duration-500 hover:border-brand-500/30">
-        <div class="mx-auto w-16 h-16 bg-gradient-to-tr from-brand-600 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/20 mb-6">
+    <div class="glass-card max-w-md w-full rounded-2xl p-8 text-center shadow-xl relative z-10 transition-all duration-500">
+        <div class="mx-auto w-16 h-16 btn-brand-gradient rounded-2xl flex items-center justify-center shadow-lg shadow-pnt-purple/20 mb-6">
             <svg class="w-8 h-8 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
             </svg>
         </div>
 
-        <h1 class="text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+        <h1 class="text-2xl font-bold tracking-tight text-pnt-dark">
             Pronettech Workspace
         </h1>
-        <p class="text-slate-400 mt-2 text-sm">Synchronizing your secure session...</p>
+        <p class="text-slate-500 mt-2 text-sm">Synchronizing your secure session...</p>
 
         <div class="mt-8 flex justify-center">
             <div class="relative w-12 h-12">
-                <div class="absolute inset-0 rounded-full border-4 border-slate-800"></div>
-                <div class="absolute inset-0 rounded-full border-4 border-t-brand-500 animate-spin"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-t-pnt-purple animate-spin"></div>
             </div>
         </div>
 
-        <p id="status-message" class="text-xs text-slate-500 mt-6 tracking-wide uppercase">Verifying Authorization</p>
+        <p id="status-message" class="text-xs text-slate-400 mt-6 tracking-wide uppercase font-semibold">Verifying Authorization</p>
     </div>
 
     <script>
-        // Demo Injection helper function
         function injectDemo(role, name, customId) {
             localStorage.setItem('pnt_user', JSON.stringify({ role, name, customId }));
             const destinations = { 
-                employee: '/views/dashboard.html', 
+                member: '/views/dashboard.html', 
                 leader: '/views/leader.html', 
                 admin: '/views/admin.html' 
             };
@@ -80,7 +70,6 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const statusMsg = document.getElementById('status-message');
             
-            // Premium-feeling micro-delay
             await new Promise(resolve => setTimeout(resolve, 800));
 
             try {

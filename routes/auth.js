@@ -1,20 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
 const supabase = require('../config/supabase');
 const { protect, authorize } = require('../middleware/auth');
 
+// Multer in-memory storage for avatar uploads
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
 // ===================================================
-// 1. GET CURRENT USER PROFILE (DIAGNOSTIC & FAIL-SAFE)
+// 1. GET CURRENT USER PROFILE
 // ===================================================
 router.get('/me', protect, async (req, res) => {
     try {
         const userId = req.user.id;
 
-        // Fetch up-to-date profile details
         const { data: profile, error: profErr } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, role, status, custom_profile_id, office_id')
+            .select('id, first_name, last_name, role, status, custom_profile_id, office_id, avatar_url')
             .eq('id', userId)
             .single();
 
@@ -22,7 +28,6 @@ router.get('/me', protect, async (req, res) => {
             return res.status(404).json({ success: false, message: 'User profile not found.' });
         }
 
-        // Fetch office name optionally using 'branch_name' instead of 'name'
         let officeName = null;
         if (profile.office_id) {
             const { data: officeData } = await supabase
@@ -45,7 +50,8 @@ router.get('/me', protect, async (req, res) => {
                 name: `${profile.first_name} ${profile.last_name}`,
                 customId: profile.custom_profile_id || 'PNT-2026-PENDING',
                 office_id: profile.office_id || null,
-                office_name: officeName
+                office_name: officeName,
+                avatar_url: profile.avatar_url || null
             }
         });
     } catch (err) {
@@ -54,7 +60,56 @@ router.get('/me', protect, async (req, res) => {
 });
 
 // ===================================================
-// 2. STANDARD REGISTRATION / SIGNUP ROUTE
+// 2. AVATAR / PROFILE PHOTO UPLOAD
+// ===================================================
+router.put('/profile/avatar', protect, upload.single('avatar'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No image file uploaded.' });
+        }
+
+        const userId = req.user.id;
+        const fileExt = req.file.originalname.split('.').pop();
+        const filePath = `${userId}-${Date.now()}.${fileExt}`;
+
+        // Upload buffer directly to Supabase storage bucket named "avatars"
+        const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(filePath, req.file.buffer, {
+                contentType: req.file.mimetype,
+                upsert: true
+            });
+
+        if (uploadError) throw uploadError;
+
+        // Retrieve public URL
+        const { data: publicUrlData } = supabase.storage
+            .from('avatars')
+            .getPublicUrl(filePath);
+
+        const avatarUrl = publicUrlData.publicUrl;
+
+        // Update avatar_url in the user's profile table
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ avatar_url: avatarUrl })
+            .eq('id', userId);
+
+        if (profileError) throw profileError;
+
+        return res.status(200).json({
+            success: true,
+            message: 'Profile photo updated successfully!',
+            avatar_url: avatarUrl
+        });
+    } catch (err) {
+        console.error('Avatar upload failed:', err.message);
+        return res.status(500).json({ success: false, message: 'Failed to upload profile picture.' });
+    }
+});
+
+// ===================================================
+// 3. STANDARD REGISTRATION / SIGNUP ROUTE
 // ===================================================
 router.post('/signup', async (req, res) => {
     const { email, password, first_name, last_name, phone_number, office_id, sponsor_name, sponsor_number } = req.body;
@@ -84,7 +139,7 @@ router.post('/signup', async (req, res) => {
                 email,
                 phone_number,
                 office_id,
-                role: 'employee',
+                role: 'member',
                 status: 'pending'
             }])
             .select();
@@ -121,7 +176,7 @@ router.post('/signup', async (req, res) => {
 });
 
 // ===================================================
-// 3. GOOGLE OAUTH AUTHENTICATION REDIRECT
+// 4. GOOGLE OAUTH AUTHENTICATION REDIRECT
 // ===================================================
 router.get('/google', async (req, res) => {
     try {
@@ -143,7 +198,7 @@ router.get('/google', async (req, res) => {
 });
 
 // ===================================================
-// 4. TRADITIONAL LOGIN VIA EMAIL/PASSWORD
+// 5. TRADITIONAL LOGIN VIA EMAIL/PASSWORD
 // ===================================================
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -161,7 +216,7 @@ router.post('/login', async (req, res) => {
 
         const { data: profile, error: profErr } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, role, status, custom_profile_id, office_id')
+            .select('id, first_name, last_name, role, status, custom_profile_id, office_id, avatar_url')
             .eq('id', data.user.id)
             .single();
 
@@ -195,6 +250,7 @@ router.post('/login', async (req, res) => {
         res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
             maxAge: 24 * 60 * 60 * 1000
         });
 
@@ -208,7 +264,8 @@ router.post('/login', async (req, res) => {
                 name: `${profile.first_name} ${profile.last_name}`,
                 customId: profile.custom_profile_id || 'PNT-2026-PENDING',
                 office_id: profile.office_id || null,
-                office_name: officeName
+                office_name: officeName,
+                avatar_url: profile.avatar_url || null
             }
         });
 
@@ -218,17 +275,17 @@ router.post('/login', async (req, res) => {
 });
 
 // ===================================================
-// 5. LEADER ENDPOINT: FETCH PENDING ACCOUNT REGISTRATIONS
+// 6. LEADER ENDPOINT: FETCH PENDING ACCOUNT REGISTRATIONS
 // ===================================================
 router.get('/pending/office/:officeId', protect, authorize('leader', 'admin'), async (req, res) => {
     const { officeId } = req.params;
     try {
         const { data, error } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, email, phone_number, custom_profile_id, created_at')
+            .select('id, first_name, last_name, email, phone_number, custom_profile_id, created_at, avatar_url')
             .eq('office_id', officeId)
             .eq('status', 'pending')
-            .eq('role', 'employee')
+            .eq('role', 'member')
             .order('created_at', { ascending: true });
 
         if (error) throw error;
@@ -240,7 +297,7 @@ router.get('/pending/office/:officeId', protect, authorize('leader', 'admin'), a
 });
 
 // ===================================================
-// 6. LEADER/ADMIN ENDPOINT: APPROVE PENDING ACCOUNT
+// 7. LEADER/ADMIN ENDPOINT: APPROVE PENDING ACCOUNT
 // ===================================================
 router.put('/approve/:profileId', protect, authorize('leader', 'admin'), async (req, res) => {
     const { profileId } = req.params;
@@ -252,7 +309,7 @@ router.put('/approve/:profileId', protect, authorize('leader', 'admin'), async (
             .select();
 
         if (error) throw error;
-        res.status(200).json({ success: true, message: 'Employee registration approved successfully!', data: data[0] });
+        res.status(200).json({ success: true, message: 'Member registration approved successfully!', data: data[0] });
     } catch (err) {
         console.error('Account approval database error:', err.message);
         res.status(500).json({ success: false, message: 'Failed to approve registration.' });
@@ -260,7 +317,7 @@ router.put('/approve/:profileId', protect, authorize('leader', 'admin'), async (
 });
 
 // ===================================================
-// 7. LEADER/ADMIN ENDPOINT: REJECT PENDING ACCOUNT
+// 8. LEADER/ADMIN ENDPOINT: REJECT PENDING ACCOUNT
 // ===================================================
 router.put('/reject/:profileId', protect, authorize('leader', 'admin'), async (req, res) => {
     const { profileId } = req.params;
@@ -272,7 +329,7 @@ router.put('/reject/:profileId', protect, authorize('leader', 'admin'), async (r
             .select();
 
         if (error) throw error;
-        res.status(200).json({ success: true, message: 'Employee registration rejected.', data: data[0] });
+        res.status(200).json({ success: true, message: 'Member registration rejected.', data: data[0] });
     } catch (err) {
         console.error('Account rejection database error:', err.message);
         res.status(500).json({ success: false, message: 'Failed to reject registration.' });
@@ -280,14 +337,14 @@ router.put('/reject/:profileId', protect, authorize('leader', 'admin'), async (r
 });
 
 // ===================================================
-// 8. GLOBAL METRICS FOR ADMIN COMMAND CENTER
+// 9. GLOBAL METRICS FOR ADMIN COMMAND CENTER
 // ===================================================
 router.get('/metrics/global', protect, authorize('admin'), async (req, res) => {
     try {
         const { count: totalStaff, error: staffError } = await supabase
             .from('profiles')
             .select('*', { count: 'exact', head: true })
-            .eq('role', 'employee');
+            .eq('role', 'member');
 
         if (staffError) throw staffError;
 
@@ -323,6 +380,93 @@ router.get('/metrics/global', protect, authorize('admin'), async (req, res) => {
     } catch (err) {
         console.error('Error fetching global admin metrics:', err.message);
         res.status(500).json({ success: false, message: 'Could not load global telemetry.' });
+    }
+});
+
+// ===================================================
+// 10. PUBLIC BADGE VERIFICATION ENDPOINT
+// ===================================================
+router.get('/verify-public/:customId', async (req, res) => {
+    try {
+        const { customId } = req.params;
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('id, first_name, last_name, custom_profile_id, role, status, created_at, avatar_url, office:offices(branch_name)')
+            .eq('custom_profile_id', customId.trim().toUpperCase())
+            .single();
+
+        if (error || !profile) {
+            return res.status(404).json({ success: false, message: 'Member credential not found in workspace database.' });
+        }
+
+        const roleFormatted = (profile.role === 'leader' || profile.role === 'team_leader') 
+            ? 'Team Leader' 
+            : (profile.role === 'admin' ? 'Global Admin' : 'Member');
+
+        return res.json({
+            success: true,
+            data: {
+                name: `${profile.first_name} ${profile.last_name}`,
+                customId: profile.custom_profile_id,
+                rank: roleFormatted,
+                status: profile.status || 'Active',
+                office: profile.office?.branch_name || 'Physical Branch',
+                avatar_url: profile.avatar_url || null
+            }
+        });
+    } catch (err) {
+        console.error('Public verification error:', err);
+        return res.status(500).json({ success: false, message: 'Server database verification error.' });
+    }
+});
+
+// ===================================================
+// 11. ADMIN ENDPOINT: FETCH ALL USERS DIRECTORY TABLE
+// ===================================================
+router.get('/users/all', protect, authorize('admin'), async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, first_name, last_name, email, phone_number, custom_profile_id, role, status, created_at, avatar_url, office:offices(branch_name)')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return res.status(200).json({ success: true, data });
+    } catch (err) {
+        console.error('Error fetching global users directory:', err.message);
+        return res.status(500).json({ success: false, message: 'Could not fetch workspace user directory.' });
+    }
+});
+
+// ===================================================
+// 12. ADMIN ENDPOINT: TOGGLE USER ROLE
+// ===================================================
+router.patch('/users/:id/role', protect, authorize('admin'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { role } = req.body;
+
+        if (!['member', 'leader'].includes(role)) {
+            return res.status(400).json({ success: false, message: 'Invalid target role specification.' });
+        }
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .update({ role })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        return res.json({ 
+            success: true, 
+            message: `User role successfully updated to ${role === 'leader' ? 'Team Leader' : 'Member'}.`,
+            data 
+        });
+    } catch (err) {
+        console.error('Admin role update failed:', err);
+        return res.status(500).json({ success: false, message: 'Failed to update user security role.' });
     }
 });
 
