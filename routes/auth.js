@@ -60,7 +60,7 @@ router.get('/me', protect, async (req, res) => {
 });
 
 // ===================================================
-// 2. AVATAR / PROFILE PHOTO UPLOAD
+// 2. AVATAR UPLOAD (WITH AUTOMATIC OLD FILE CLEANUP)
 // ===================================================
 router.put('/profile/avatar', protect, upload.single('avatar'), async (req, res) => {
     try {
@@ -69,12 +69,34 @@ router.put('/profile/avatar', protect, upload.single('avatar'), async (req, res)
         }
 
         const userId = req.user.id;
+
+        // Step A: Check if the user already has an existing avatar
+        const { data: currentProfile } = await supabase
+            .from('profiles')
+            .select('avatar_url')
+            .eq('id', userId)
+            .single();
+
+        // Step B: If an old avatar exists, parse the file path and remove it from storage
+        if (currentProfile && currentProfile.avatar_url) {
+            try {
+                const oldUrl = currentProfile.avatar_url;
+                const oldFilePath = oldUrl.substring(oldUrl.lastIndexOf('/') + 1);
+                if (oldFilePath) {
+                    await supabase.storage.from('avatars').remove([oldFilePath]);
+                }
+            } catch (cleanupErr) {
+                console.warn('Non-blocking: Failed to remove old avatar file:', cleanupErr.message);
+            }
+        }
+
+        // Step C: Upload the new avatar
         const fileExt = req.file.originalname.split('.').pop();
-        const filePath = `${userId}-${Date.now()}.${fileExt}`;
+        const newFilePath = `${userId}-${Date.now()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
             .from('avatars')
-            .upload(filePath, req.file.buffer, {
+            .upload(newFilePath, req.file.buffer, {
                 contentType: req.file.mimetype,
                 upsert: true
             });
@@ -83,21 +105,22 @@ router.put('/profile/avatar', protect, upload.single('avatar'), async (req, res)
 
         const { data: publicUrlData } = supabase.storage
             .from('avatars')
-            .getPublicUrl(filePath);
+            .getPublicUrl(newFilePath);
 
-        const avatarUrl = publicUrlData.publicUrl;
+        const newAvatarUrl = publicUrlData.publicUrl;
 
+        // Step D: Update the user's profile with the new URL
         const { error: profileError } = await supabase
             .from('profiles')
-            .update({ avatar_url: avatarUrl })
+            .update({ avatar_url: newAvatarUrl })
             .eq('id', userId);
 
         if (profileError) throw profileError;
 
         return res.status(200).json({
             success: true,
-            message: 'Profile photo updated successfully!',
-            avatar_url: avatarUrl
+            message: 'Profile photo updated successfully and previous image purged!',
+            avatar_url: newAvatarUrl
         });
     } catch (err) {
         console.error('Avatar upload failed:', err.message);
@@ -173,116 +196,7 @@ router.post('/signup', async (req, res) => {
 });
 
 // ===================================================
-// 4. GOOGLE OAUTH INITIATION
-// ===================================================
-router.get('/google', async (req, res) => {
-    try {
-        const host = req.get('host');
-        const protocol = req.protocol === 'https' || host.includes('vercel.app') || !host.includes('localhost') ? 'https' : 'http';
-        const redirectUrl = `${protocol}://${host}/api/auth/google/callback`;
-
-        const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: redirectUrl,
-                skipBrowserRedirect: true
-            }
-        });
-
-        if (error || !data?.url) {
-            return res.status(400).json({ 
-                success: false, 
-                message: `Google OAuth initialization failed: ${error?.message || 'No redirect URL returned'}` 
-            });
-        }
-
-        return res.redirect(data.url);
-    } catch (err) {
-        console.error('OAuth redirect error:', err.message);
-        return res.status(500).json({ success: false, message: `OAuth initialization error: ${err.message}` });
-    }
-});
-
-// ===================================================
-// 5. GOOGLE OAUTH CALLBACK HANDLER
-// ===================================================
-router.get('/google/callback', async (req, res) => {
-    try {
-        const { code } = req.query;
-
-        if (!code) {
-            return res.redirect('/views/onboarding.html?error=no_auth_code');
-        }
-
-        const { data: sessionData, error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
-
-        if (sessionError || !sessionData?.user) {
-            console.error('Session exchange failed:', sessionError?.message);
-            return res.redirect('/views/onboarding.html?error=auth_failed');
-        }
-
-        const user = sessionData.user;
-
-        let { data: profile } = await supabase
-            .from('profiles')
-            .select('id, first_name, last_name, role, status, custom_profile_id, office_id')
-            .eq('id', user.id)
-            .single();
-
-        if (!profile) {
-            const fullName = user.user_metadata?.full_name || user.user_metadata?.name || '';
-            const nameParts = fullName.split(' ');
-            const firstName = nameParts[0] || 'Member';
-            const lastName = nameParts.slice(1).join(' ') || '';
-
-            const { data: newProfile, error: profileErr } = await supabase
-                .from('profiles')
-                .insert([{
-                    id: user.id,
-                    email: user.email,
-                    first_name: firstName,
-                    last_name: lastName,
-                    role: 'member',
-                    status: 'active'
-                }])
-                .select()
-                .single();
-
-            if (profileErr) {
-                console.error('Google profile creation error:', profileErr.message);
-            }
-            profile = newProfile;
-        }
-
-        const token = jwt.sign(
-            { id: profile?.id || user.id, role: profile?.role || 'member', customId: profile?.custom_profile_id },
-            process.env.JWT_SECRET,
-            { expiresIn: '24h' }
-        );
-
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 24 * 60 * 60 * 1000
-        });
-
-        if (profile?.role === 'admin' || profile?.role === 'global_admin') {
-            return res.redirect('/views/admin.html');
-        } else if (profile?.role === 'leader' || profile?.role === 'team_leader') {
-            return res.redirect('/views/leader.html');
-        } else {
-            return res.redirect('/views/dashboard.html');
-        }
-
-    } catch (err) {
-        console.error('OAuth Callback crash:', err.message);
-        return res.redirect('/views/onboarding.html?error=server_error');
-    }
-});
-
-// ===================================================
-// 6. TRADITIONAL LOGIN VIA EMAIL/PASSWORD
+// 4. TRADITIONAL LOGIN VIA EMAIL/PASSWORD
 // ===================================================
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -359,7 +273,7 @@ router.post('/login', async (req, res) => {
 });
 
 // ===================================================
-// 7. LEADER ENDPOINT: FETCH PENDING ACCOUNT REGISTRATIONS
+// 5. LEADER ENDPOINT: FETCH PENDING ACCOUNT REGISTRATIONS
 // ===================================================
 router.get('/pending/office/:officeId', protect, authorize('leader', 'admin'), async (req, res) => {
     const { officeId } = req.params;
@@ -381,7 +295,7 @@ router.get('/pending/office/:officeId', protect, authorize('leader', 'admin'), a
 });
 
 // ===================================================
-// 8. LEADER/ADMIN ENDPOINT: APPROVE PENDING ACCOUNT
+// 6. LEADER/ADMIN ENDPOINT: APPROVE PENDING ACCOUNT
 // ===================================================
 router.put('/approve/:profileId', protect, authorize('leader', 'admin'), async (req, res) => {
     const { profileId } = req.params;
@@ -401,7 +315,7 @@ router.put('/approve/:profileId', protect, authorize('leader', 'admin'), async (
 });
 
 // ===================================================
-// 9. LEADER/ADMIN ENDPOINT: REJECT PENDING ACCOUNT
+// 7. LEADER/ADMIN ENDPOINT: REJECT PENDING ACCOUNT
 // ===================================================
 router.put('/reject/:profileId', protect, authorize('leader', 'admin'), async (req, res) => {
     const { profileId } = req.params;
@@ -421,7 +335,7 @@ router.put('/reject/:profileId', protect, authorize('leader', 'admin'), async (r
 });
 
 // ===================================================
-// 10. GLOBAL METRICS FOR ADMIN COMMAND CENTER
+// 8. GLOBAL METRICS FOR ADMIN COMMAND CENTER
 // ===================================================
 router.get('/metrics/global', protect, authorize('admin'), async (req, res) => {
     try {
@@ -468,7 +382,7 @@ router.get('/metrics/global', protect, authorize('admin'), async (req, res) => {
 });
 
 // ===================================================
-// 11. PUBLIC BADGE VERIFICATION ENDPOINT
+// 9. PUBLIC BADGE VERIFICATION ENDPOINT
 // ===================================================
 router.get('/verify-public/:customId', async (req, res) => {
     try {
@@ -505,7 +419,7 @@ router.get('/verify-public/:customId', async (req, res) => {
 });
 
 // ===================================================
-// 12. ADMIN ENDPOINT: FETCH ALL USERS DIRECTORY TABLE
+// 10. ADMIN ENDPOINT: FETCH ALL USERS DIRECTORY TABLE
 // ===================================================
 router.get('/users/all', protect, authorize('admin'), async (req, res) => {
     try {
@@ -523,7 +437,7 @@ router.get('/users/all', protect, authorize('admin'), async (req, res) => {
 });
 
 // ===================================================
-// 13. ADMIN ENDPOINT: TOGGLE USER ROLE
+// 11. ADMIN ENDPOINT: TOGGLE USER ROLE
 // ===================================================
 router.patch('/users/:id/role', protect, authorize('admin'), async (req, res) => {
     try {
