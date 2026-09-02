@@ -59,13 +59,16 @@ app.use('/api/community', communityRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/tasks', taskRoutes);
 
-// Run Application Server
-app.listen(PORT, () => {
-    console.log(`===================================================`);
-    console.log(`🚀 SENIOR ARCHITECT SYSTEM LOG`);
-    console.log(`🛰️  Server initialized cleanly on port: ${PORT}`);
-    console.log(`🔗 Health Check: http://localhost:${PORT}/api/health`);
-    console.log(`===================================================`);
-});
+// Run Application Server (Only in local development)
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`===================================================`);
+        console.log(`🚀 SENIOR ARCHITECT SYSTEM LOG`);
+        console.log(`🛰️  Server initialized cleanly on port: ${PORT}`);
+        console.log(`🔗 Health Check: http://localhost:${PORT}/api/health`);
+        console.log(`===================================================`);
+    });
+}
+
 // Export the app instance for Vercel's serverless runtime
 module.exports = app;
