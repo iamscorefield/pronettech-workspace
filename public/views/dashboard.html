@@ -385,7 +385,8 @@
 
                 // Vector QR Code with actual User Identifier
                 const userCode = currentUser.customId || 'PNT-2026-10001';
-                document.getElementById('card-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(userCode)}&color=0D122B&bgcolor=FFFFFF`;
+                const verificationUrl = `${window.location.origin}/verify.html?id=${encodeURIComponent(userCode)}`;
+                document.getElementById('card-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}&color=0D122B&bgcolor=FFFFFF`;
 
                 fetchTasks();
                 fetchWeeklyAttendance();
