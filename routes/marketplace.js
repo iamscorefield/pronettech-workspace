@@ -81,15 +81,20 @@ router.post('/order/certificate', protect, async (req, res) => {
 router.post('/verify-payment', protect, async (req, res) => {
     const { reference, purpose } = req.body;
 
+    console.log('[DEBUG] Incoming verify payload:', { reference, purpose, userId: req.user?.id });
+
     if (!reference) {
         return res.status(400).json({ success: false, message: 'Transaction reference is missing.' });
     }
 
     try {
-        const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
-        if (!paystackSecret) {
+        const rawSecret = process.env.PAYSTACK_SECRET_KEY;
+        if (!rawSecret) {
+            console.error('[DEBUG ERROR] PAYSTACK_SECRET_KEY environment variable is not defined in process.env!');
             return res.status(500).json({ success: false, message: 'Server configuration error: missing Secret Key.' });
         }
+
+        const paystackSecret = rawSecret.trim();
 
         const paystackRes = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
             method: 'GET',
@@ -100,13 +105,16 @@ router.post('/verify-payment', protect, async (req, res) => {
         });
 
         const result = await paystackRes.json();
+        console.log('[DEBUG] Paystack API HTTP Status:', paystackRes.status);
+        console.log('[DEBUG] Paystack API Response Body:', JSON.stringify(result));
 
-        if (result.status && result.data.status === 'success') {
+        if (result.status && result.data && result.data.status === 'success') {
             const amountPaidInNaira = result.data.amount / 100; // Paystack sends amounts in kobo
 
             // A. Digital Softcopy Verification (₦2,000)
             if (purpose === 'softcopy') {
                 if (amountPaidInNaira < 2000) {
+                    console.warn(`[DEBUG WARNING] Softcopy payment amount insufficient: ₦${amountPaidInNaira}`);
                     return res.status(400).json({ success: false, message: 'Paid amount is below ₦2,000 threshold.' });
                 }
 
@@ -130,12 +138,20 @@ router.post('/verify-payment', protect, async (req, res) => {
             // B. Annual Membership Renewal Verification (₦3,000)
             if (purpose === 'renewal') {
                 if (amountPaidInNaira < 3000) {
+                    console.warn(`[DEBUG WARNING] Renewal payment amount insufficient: ₦${amountPaidInNaira}`);
                     return res.status(400).json({ success: false, message: 'Paid amount is below ₦3,000 threshold.' });
                 }
 
+                // Add 1 year to current expiration
+                const oneYearFromNow = new Date();
+                oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+
                 await supabase
                     .from('profiles')
-                    .update({ status: 'active' })
+                    .update({ 
+                        status: 'active',
+                        membership_expires_at: oneYearFromNow.toISOString()
+                    })
                     .eq('id', req.user.id);
 
                 return res.status(200).json({ 
@@ -148,9 +164,13 @@ router.post('/verify-payment', protect, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid payment purpose specified.' });
         }
 
-        return res.status(400).json({ success: false, message: 'Paystack could not confirm this transaction.' });
+        console.error('[DEBUG REJECTION] Paystack transaction verify failed:', result.message || result);
+        return res.status(400).json({ 
+            success: false, 
+            message: result.message || 'Paystack could not confirm this transaction.' 
+        });
     } catch (err) {
-        console.error('Payment verification failed:', err);
+        console.error('[DEBUG FATAL] Payment verification server error:', err);
         return res.status(500).json({ success: false, message: `Server transaction error: ${err.message}` });
     }
 });
