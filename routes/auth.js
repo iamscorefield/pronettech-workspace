@@ -12,7 +12,7 @@ const upload = multer({
 });
 
 // ===================================================
-// 1. GET CURRENT USER PROFILE
+// 1. GET CURRENT USER PROFILE & TELEMETRY
 // ===================================================
 router.get('/me', protect, async (req, res) => {
     try {
@@ -20,7 +20,7 @@ router.get('/me', protect, async (req, res) => {
 
         const { data: profile, error: profErr } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, role, status, custom_profile_id, office_id, avatar_url')
+            .select('id, first_name, last_name, role, status, status_reason, membership_expires_at, custom_profile_id, office_id, avatar_url')
             .eq('id', userId)
             .single();
 
@@ -41,12 +41,31 @@ router.get('/me', protect, async (req, res) => {
             }
         }
 
+        // Expiration & Remaining Days Calculation
+        const now = new Date();
+        const expiresAt = profile.membership_expires_at ? new Date(profile.membership_expires_at) : null;
+        let daysRemaining = null;
+        let isExpired = false;
+
+        if (expiresAt) {
+            const diffTime = expiresAt - now;
+            daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (daysRemaining <= 0) {
+                daysRemaining = 0;
+                isExpired = true;
+            }
+        }
+
         return res.status(200).json({
             success: true,
             user: {
                 id: profile.id,
                 role: profile.role,
                 status: profile.status,
+                status_reason: profile.status_reason || null,
+                membership_expires_at: profile.membership_expires_at,
+                days_remaining: daysRemaining,
+                is_expired: isExpired,
                 name: `${profile.first_name} ${profile.last_name}`,
                 customId: profile.custom_profile_id || 'PNT-2026-PENDING',
                 office_id: profile.office_id || null,
@@ -70,14 +89,12 @@ router.put('/profile/avatar', protect, upload.single('avatar'), async (req, res)
 
         const userId = req.user.id;
 
-        // Step A: Check if the user already has an existing avatar
         const { data: currentProfile } = await supabase
             .from('profiles')
             .select('avatar_url')
             .eq('id', userId)
             .single();
 
-        // Step B: If an old avatar exists, parse the file path and remove it from storage
         if (currentProfile && currentProfile.avatar_url) {
             try {
                 const oldUrl = currentProfile.avatar_url;
@@ -90,7 +107,6 @@ router.put('/profile/avatar', protect, upload.single('avatar'), async (req, res)
             }
         }
 
-        // Step C: Upload the new avatar
         const fileExt = req.file.originalname.split('.').pop();
         const newFilePath = `${userId}-${Date.now()}.${fileExt}`;
 
@@ -109,7 +125,6 @@ router.put('/profile/avatar', protect, upload.single('avatar'), async (req, res)
 
         const newAvatarUrl = publicUrlData.publicUrl;
 
-        // Step D: Update the user's profile with the new URL
         const { error: profileError } = await supabase
             .from('profiles')
             .update({ avatar_url: newAvatarUrl })
@@ -129,7 +144,72 @@ router.put('/profile/avatar', protect, upload.single('avatar'), async (req, res)
 });
 
 // ===================================================
-// 3. STANDARD REGISTRATION / SIGNUP ROUTE
+// 3. PASSWORD RESET PIPELINE
+// ===================================================
+router.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ success: false, message: 'Account email address is required.' });
+    }
+
+    try {
+        const redirectUrl = `${req.protocol}://${req.get('host')}/views/reset-password.html`;
+
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: redirectUrl
+        });
+
+        if (error) throw error;
+
+        return res.status(200).json({
+            success: true,
+            message: 'Password reset link has been dispatched to your email address.'
+        });
+    } catch (err) {
+        console.error('Forgot password error:', err.message);
+        return res.status(500).json({ 
+            success: false, 
+            message: err.message || 'Unable to process password reset request.' 
+        });
+    }
+});
+
+router.post('/reset-password', async (req, res) => {
+    const { password, accessToken } = req.body;
+
+    if (!password || password.length < 6) {
+        return res.status(400).json({ success: false, message: 'New password must be at least 6 characters.' });
+    }
+
+    try {
+        if (accessToken) {
+            const { error: sessionError } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: accessToken
+            });
+            if (sessionError) console.warn('Token handoff note:', sessionError.message);
+        }
+
+        const { error } = await supabase.auth.updateUser({ password });
+
+        if (error) throw error;
+
+        return res.status(200).json({
+            success: true,
+            message: 'Account password has been successfully reset.'
+        });
+    } catch (err) {
+        console.error('Reset password application error:', err.message);
+        return res.status(500).json({ 
+            success: false, 
+            message: err.message || 'Failed to update user password.' 
+        });
+    }
+});
+
+// ===================================================
+// 4. SIGNUP ROUTE
 // ===================================================
 router.post('/signup', async (req, res) => {
     const { email, password, first_name, last_name, phone_number, office_id, sponsor_name, sponsor_number } = req.body;
@@ -196,7 +276,7 @@ router.post('/signup', async (req, res) => {
 });
 
 // ===================================================
-// 4. TRADITIONAL LOGIN VIA EMAIL/PASSWORD
+// 5. LOGIN ROUTE
 // ===================================================
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -214,7 +294,7 @@ router.post('/login', async (req, res) => {
 
         const { data: profile, error: profErr } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, role, status, custom_profile_id, office_id, avatar_url')
+            .select('id, first_name, last_name, role, status, status_reason, membership_expires_at, custom_profile_id, office_id, avatar_url')
             .eq('id', data.user.id)
             .single();
 
@@ -222,8 +302,11 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ success: false, message: 'System account profile mismatch.' });
         }
 
-        if (profile.status === 'banned') {
-            return res.status(403).json({ success: false, message: 'This account has been permanently suspended.' });
+        if (profile.status === 'banned' || profile.status === 'ban') {
+            return res.status(403).json({ 
+                success: false, 
+                message: `Account Banned: ${profile.status_reason || 'Suspended for administrative compliance violations.'}` 
+            });
         }
 
         let officeName = null;
@@ -258,7 +341,9 @@ router.post('/login', async (req, res) => {
             user: { 
                 id: profile.id, 
                 role: profile.role, 
-                status: profile.status, 
+                status: profile.status,
+                status_reason: profile.status_reason || null,
+                membership_expires_at: profile.membership_expires_at,
                 name: `${profile.first_name} ${profile.last_name}`,
                 customId: profile.custom_profile_id || 'PNT-2026-PENDING',
                 office_id: profile.office_id || null,
@@ -273,7 +358,7 @@ router.post('/login', async (req, res) => {
 });
 
 // ===================================================
-// 5. LEADER ENDPOINT: FETCH PENDING ACCOUNT REGISTRATIONS
+// 6. LEADER ENDPOINTS (REGISTRATIONS)
 // ===================================================
 router.get('/pending/office/:officeId', protect, authorize('leader', 'admin'), async (req, res) => {
     const { officeId } = req.params;
@@ -294,9 +379,6 @@ router.get('/pending/office/:officeId', protect, authorize('leader', 'admin'), a
     }
 });
 
-// ===================================================
-// 6. LEADER/ADMIN ENDPOINT: APPROVE PENDING ACCOUNT
-// ===================================================
 router.put('/approve/:profileId', protect, authorize('leader', 'admin'), async (req, res) => {
     const { profileId } = req.params;
     try {
@@ -314,9 +396,6 @@ router.put('/approve/:profileId', protect, authorize('leader', 'admin'), async (
     }
 });
 
-// ===================================================
-// 7. LEADER/ADMIN ENDPOINT: REJECT PENDING ACCOUNT
-// ===================================================
 router.put('/reject/:profileId', protect, authorize('leader', 'admin'), async (req, res) => {
     const { profileId } = req.params;
     try {
@@ -335,7 +414,7 @@ router.put('/reject/:profileId', protect, authorize('leader', 'admin'), async (r
 });
 
 // ===================================================
-// 8. GLOBAL METRICS FOR ADMIN COMMAND CENTER
+// 7. GLOBAL METRICS FOR ADMIN COMMAND CENTER
 // ===================================================
 router.get('/metrics/global', protect, authorize('admin'), async (req, res) => {
     try {
@@ -382,7 +461,7 @@ router.get('/metrics/global', protect, authorize('admin'), async (req, res) => {
 });
 
 // ===================================================
-// 9. PUBLIC BADGE VERIFICATION ENDPOINT
+// 8. PUBLIC BADGE VERIFICATION ENDPOINT
 // ===================================================
 router.get('/verify-public/:customId', async (req, res) => {
     try {
@@ -419,13 +498,15 @@ router.get('/verify-public/:customId', async (req, res) => {
 });
 
 // ===================================================
-// 10. ADMIN ENDPOINT: FETCH ALL USERS DIRECTORY TABLE
+// 9. ADMIN ENDPOINTS (DIRECTORY, ROLES & DISCIPLINARY ACTIONS)
 // ===================================================
+
+// A. Fetch All Users Directory Table (with Avatar, Role, Status & Reason)
 router.get('/users/all', protect, authorize('admin'), async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, email, phone_number, custom_profile_id, role, status, created_at, avatar_url, office:offices(branch_name)')
+            .select('id, first_name, last_name, email, phone_number, custom_profile_id, role, status, status_reason, membership_expires_at, created_at, avatar_url, office:offices(branch_name)')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -436,9 +517,7 @@ router.get('/users/all', protect, authorize('admin'), async (req, res) => {
     }
 });
 
-// ===================================================
-// 11. ADMIN ENDPOINT: TOGGLE USER ROLE
-// ===================================================
+// B. Toggle Role (Member / Leader)
 router.patch('/users/:id/role', protect, authorize('admin'), async (req, res) => {
     try {
         const { id } = req.params;
@@ -465,6 +544,46 @@ router.patch('/users/:id/role', protect, authorize('admin'), async (req, res) =>
     } catch (err) {
         console.error('Admin role update failed:', err);
         return res.status(500).json({ success: false, message: 'Failed to update user security role.' });
+    }
+});
+
+// C. Apply Disciplinary Action (Warning, Inactive, Suspended, Ban, Active) with Stored Reason
+router.patch('/users/:id/status', protect, authorize('admin'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status, reason } = req.body;
+
+        const validStatuses = ['active', 'warning', 'inactive', 'suspended', 'ban', 'banned'];
+        if (!validStatuses.includes(status?.toLowerCase())) {
+            return res.status(400).json({ success: false, message: 'Invalid status provided.' });
+        }
+
+        if (status !== 'active' && (!reason || reason.trim() === '')) {
+            return res.status(400).json({ success: false, message: 'A written justification or reason is required for disciplinary actions.' });
+        }
+
+        const normalizedStatus = status === 'ban' ? 'banned' : status.toLowerCase();
+
+        const { data, error } = await supabase
+            .from('profiles')
+            .update({ 
+                status: normalizedStatus,
+                status_reason: status === 'active' ? null : reason.trim()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        return res.json({
+            success: true,
+            message: `User status set to ${normalizedStatus.toUpperCase()} successfully.`,
+            data
+        });
+    } catch (err) {
+        console.error('Admin status update failed:', err);
+        return res.status(500).json({ success: false, message: 'Failed to apply disciplinary action.' });
     }
 });
 
