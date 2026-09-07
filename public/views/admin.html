@@ -75,12 +75,12 @@
             </div>
         </div>
 
-        <!-- User Directory & Role Switcher -->
+        <!-- User Directory & Disciplinary Actions -->
         <div class="glass-card p-6 rounded-2xl space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h3 class="text-base font-bold text-pnt-dark">Workspace User Directory & Role Management</h3>
-                    <p class="text-slate-500 text-xs mt-0.5">Audit personnel records, verify ID badges, and toggle roles between Members and Team Leaders</p>
+                    <h3 class="text-base font-bold text-pnt-dark">Workspace User Directory & Access Control</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Audit personnel records, verify ID badges, assign roles, and apply disciplinary status actions</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <input type="text" id="user-search-input" placeholder="Search by name, ID or branch..." class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple w-full sm:w-64">
@@ -94,17 +94,18 @@
                 <table class="w-full text-left text-xs">
                     <thead>
                         <tr class="border-b border-slate-200 text-slate-400 uppercase font-semibold text-[10px] tracking-wider">
-                            <th class="py-3 px-4">Member Name</th>
+                            <th class="py-3 px-4">Member Profile</th>
                             <th class="py-3 px-4">Workspace ID</th>
                             <th class="py-3 px-4">Branch Office</th>
-                            <th class="py-3 px-4">Contact</th>
                             <th class="py-3 px-4">Current Role</th>
-                            <th class="py-3 px-4 text-right">Role Actions</th>
+                            <th class="py-3 px-4">Account Status</th>
+                            <th class="py-3 px-4 text-center">Role Switch</th>
+                            <th class="py-3 px-4 text-right">Disciplinary Action</th>
                         </tr>
                     </thead>
                     <tbody id="user-directory-tbody" class="divide-y divide-slate-100">
                         <tr>
-                            <td colspan="6" class="text-center py-8 text-xs text-slate-400">Loading personnel records...</td>
+                            <td colspan="7" class="text-center py-8 text-xs text-slate-400">Loading personnel records...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -116,12 +117,10 @@
             
             <div class="lg:col-span-2 space-y-8">
                 
-                <!-- Administrative Control Panel Cards -->
                 <div class="glass-card p-6 rounded-2xl">
                     <h3 class="text-base font-bold text-pnt-dark mb-6">Administrative Control Panel</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         
-                        <!-- Action 1: Regional Setup -->
                         <div class="bg-purple-50/40 border border-purple-100 p-4 rounded-xl space-y-3">
                             <h4 class="text-xs font-bold uppercase tracking-wider text-pnt-purple">Regional Setup</h4>
                             <p class="text-xs text-slate-500 leading-relaxed">Add corporate office branches and dynamically assign Team Leaders to fill local registries.</p>
@@ -130,7 +129,6 @@
                             </button>
                         </div>
 
-                        <!-- Action 2: Broadcast Alerts -->
                         <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3">
                             <h4 class="text-xs font-bold uppercase tracking-wider text-[#9D4EDD]">Broadcast Alerts</h4>
                             <p class="text-xs text-slate-500 leading-relaxed">Send custom, company-wide instant push notifications to all users across every department.</p>
@@ -175,10 +173,8 @@
 
             </div>
 
-            <!-- Right Column: Assign Leader Task & Incident Logs -->
             <div class="space-y-6">
 
-                <!-- Deploy Directive to Team Leader Form -->
                 <div class="glass-card p-6 rounded-2xl border-purple-100">
                     <div class="flex items-center justify-between mb-2">
                         <h3 class="text-sm font-bold text-pnt-purple uppercase tracking-wider">Assign Task to Leader</h3>
@@ -204,13 +200,12 @@
                             <textarea id="leader-task-desc" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple text-xs" placeholder="Milestones, attendance audit criteria, or branch compliance targets..."></textarea>
                         </div>
 
-                        <button type="submit" id="deploy-leader-task-btn" class="w-full btn-brand-gradient font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-md">
+                        <button type="submit" id="deploy-leader-task-btn" class="w-full btn-brand-gradient font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-md text-white">
                             Dispatch Task to Leader
                         </button>
                     </form>
                 </div>
 
-                <!-- Leader Incident Logs -->
                 <div class="glass-card p-6 rounded-2xl border-red-200">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Leader Incident Logs</h3>
@@ -228,7 +223,36 @@
 
     </main>
 
-    <!-- ================= MODAL 1: CREATE NEW OFFICE ROUTE ================= -->
+    <!-- ================= MODAL: DISCIPLINARY ACTION & REASON ================= -->
+    <div id="disciplinary-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-base font-bold text-pnt-dark" id="modal-action-title">Confirm Disciplinary Action</h3>
+                <button onclick="closeModal('disciplinary-modal')" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+            </div>
+            
+            <p class="text-xs text-slate-500" id="modal-action-description">
+                Specify the compliance or security justification for this action. The affected member will see this notice upon logging in.
+            </p>
+
+            <form id="disciplinary-form" class="space-y-3.5">
+                <input type="hidden" id="action-target-user-id">
+                <input type="hidden" id="action-target-status">
+
+                <div id="reason-container">
+                    <label for="action-reason" class="block text-xs font-semibold text-slate-600 mb-1">Stated Reason / Violation Summary</label>
+                    <textarea id="action-reason" rows="3" required placeholder="Describe the reason for this action..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeModal('disciplinary-modal')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl transition-all">Cancel</button>
+                    <button type="submit" id="confirm-action-btn" class="w-1/2 py-2.5 bg-red-600 hover:bg-red-700 text-xs font-bold text-white rounded-xl shadow-md transition-all">Apply Action</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: CREATE NEW OFFICE ROUTE ================= -->
     <div id="office-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
             <div class="flex justify-between items-center">
@@ -259,7 +283,7 @@
         </div>
     </div>
 
-    <!-- ================= MODAL 2: SEND BROADCAST NOTIFICATION ================= -->
+    <!-- ================= MODAL: SEND BROADCAST NOTIFICATION ================= -->
     <div id="broadcast-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
             <div class="flex justify-between items-center">
@@ -283,7 +307,7 @@
                 </div>
                 <div>
                     <label for="modal-broadcast-message" class="block text-xs font-semibold text-slate-600 mb-1">Notification Message</label>
-                    <textarea id="modal-broadcast-message" rows="3" required placeholder="Type the announcement announcement text here..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none"></textarea>
+                    <textarea id="modal-broadcast-message" rows="3" required placeholder="Type the announcement text here..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none"></textarea>
                 </div>
 
                 <div class="flex gap-2 pt-2">
@@ -316,14 +340,14 @@
 
             await refreshAdminConsole();
 
-            // Hook instant search filtering
             document.getElementById('user-search-input').addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase().trim();
                 const filtered = allUsersDirectory.filter(u => 
                     `${u.first_name} ${u.last_name}`.toLowerCase().includes(query) ||
                     (u.custom_profile_id && u.custom_profile_id.toLowerCase().includes(query)) ||
                     (u.office?.branch_name && u.office.branch_name.toLowerCase().includes(query)) ||
-                    u.email.toLowerCase().includes(query)
+                    u.email.toLowerCase().includes(query) ||
+                    (u.status && u.status.toLowerCase().includes(query))
                 );
                 renderUserDirectory(filtered);
             });
@@ -357,7 +381,7 @@
 
                 if (response.status === 401 || response.status === 403) {
                     document.getElementById('user-directory-tbody').innerHTML = `
-                        <tr><td colspan="6" class="text-center py-6 text-xs text-red-500 font-semibold">Session expired or unauthorized. Please re-login.</td></tr>
+                        <tr><td colspan="7" class="text-center py-6 text-xs text-red-500 font-semibold">Session expired or unauthorized. Please re-login.</td></tr>
                     `;
                     return;
                 }
@@ -369,13 +393,13 @@
                     renderUserDirectory(allUsersDirectory);
                 } else {
                     document.getElementById('user-directory-tbody').innerHTML = `
-                        <tr><td colspan="6" class="text-center py-6 text-xs text-red-500">${resData.message || 'Could not retrieve user records.'}</td></tr>
+                        <tr><td colspan="7" class="text-center py-6 text-xs text-red-500">${resData.message || 'Could not retrieve user records.'}</td></tr>
                     `;
                 }
             } catch (err) {
                 console.error("Directory fetch error:", err);
                 document.getElementById('user-directory-tbody').innerHTML = `
-                    <tr><td colspan="6" class="text-center py-6 text-xs text-red-500">Express server connection failed.</td></tr>
+                    <tr><td colspan="7" class="text-center py-6 text-xs text-red-500">Express server connection failed.</td></tr>
                 `;
             }
         }
@@ -385,7 +409,7 @@
             tbody.innerHTML = '';
 
             if (!users || users.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-xs text-slate-400">No matching user records found in workspace directory.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-xs text-slate-400">No matching user records found in workspace directory.</td></tr>`;
                 return;
             }
 
@@ -393,22 +417,47 @@
                 const isLeader = user.role === 'leader' || user.role === 'team_leader';
                 const isAdmin = user.role === 'admin' || user.role === 'global_admin';
                 
-                let badgeClass = "bg-purple-50 text-pnt-purple border border-purple-200";
+                let roleBadge = "bg-purple-50 text-pnt-purple border border-purple-200";
                 let roleLabel = "Member";
 
                 if (isAdmin) {
-                    badgeClass = "bg-red-50 text-red-600 border border-red-200";
+                    roleBadge = "bg-red-50 text-red-600 border border-red-200";
                     roleLabel = "Admin";
                 } else if (isLeader) {
-                    badgeClass = "bg-blue-50 text-[#0070c0] border border-blue-200";
+                    roleBadge = "bg-blue-50 text-[#0070c0] border border-blue-200";
                     roleLabel = "Team Leader";
                 }
+
+                // Account Status Styling
+                let statusBadge = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                const userStatus = (user.status || 'active').toLowerCase();
+
+                if (userStatus === 'warning') {
+                    statusBadge = "bg-amber-50 text-amber-700 border-amber-300";
+                } else if (userStatus === 'inactive') {
+                    statusBadge = "bg-slate-100 text-slate-600 border-slate-300";
+                } else if (userStatus === 'suspended') {
+                    statusBadge = "bg-orange-50 text-orange-700 border-orange-300 font-bold";
+                } else if (userStatus === 'banned' || userStatus === 'ban') {
+                    statusBadge = "bg-red-100 text-red-700 border-red-300 font-bold";
+                }
+
+                // Profile Image / Fallback Avatar
+                const avatarMarkup = user.avatar_url 
+                    ? `<img src="${user.avatar_url}" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0">`
+                    : `<div class="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center font-bold text-slate-600 text-xs shrink-0">${(user.first_name?.[0] || 'U')}${(user.last_name?.[0] || '')}</div>`;
 
                 const row = document.createElement('tr');
                 row.className = "hover:bg-slate-50/80 transition-colors";
                 row.innerHTML = `
-                    <td class="py-3 px-4 font-bold text-pnt-dark">
-                        ${user.first_name} ${user.last_name}
+                    <td class="py-3 px-4">
+                        <div class="flex items-center gap-3">
+                            ${avatarMarkup}
+                            <div>
+                                <div class="font-bold text-pnt-dark leading-tight">${user.first_name} ${user.last_name}</div>
+                                <div class="text-[10px] text-slate-400">${user.email}</div>
+                            </div>
+                        </div>
                     </td>
                     <td class="py-3 px-4 font-mono text-xs text-pnt-purple font-bold tracking-wider">
                         ${user.custom_profile_id || 'PNT-PENDING'}
@@ -416,28 +465,116 @@
                     <td class="py-3 px-4 text-xs text-slate-600">
                         ${user.office?.branch_name || 'Physical Branch'}
                     </td>
-                    <td class="py-3 px-4 text-xs text-slate-500">
-                        <div>${user.email}</div>
-                        <div class="text-[10px] text-slate-400">${user.phone_number || ''}</div>
-                    </td>
                     <td class="py-3 px-4">
-                        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${badgeClass}">
+                        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${roleBadge}">
                             ${roleLabel}
                         </span>
                     </td>
-                    <td class="py-3 px-4 text-right">
+                    <td class="py-3 px-4">
+                        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${statusBadge}" title="${user.status_reason ? 'Reason: ' + user.status_reason : ''}">
+                            ${userStatus}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
                         ${isAdmin ? `
                             <span class="text-[10px] font-mono text-slate-400 uppercase font-semibold">Protected</span>
                         ` : `
                             <button onclick="toggleUserRole('${user.id}', '${user.role}')" class="text-[11px] font-bold text-pnt-purple hover:underline bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2.5 py-1 rounded-lg transition-all">
-                                Switch to ${isLeader ? 'Member' : 'Leader'}
+                                Make ${isLeader ? 'Member' : 'Leader'}
                             </button>
+                        `}
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        ${isAdmin ? `
+                            <span class="text-[10px] font-mono text-slate-400 uppercase font-semibold">---</span>
+                        ` : `
+                            <select onchange="initiateDisciplinaryAction('${user.id}', '${user.first_name} ${user.last_name}', this)" class="bg-slate-50 border border-slate-200 text-[11px] font-semibold text-slate-700 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+                                <option value="" disabled selected>Action</option>
+                                <option value="active">Set Active</option>
+                                <option value="warning">Issue Warning</option>
+                                <option value="inactive">Mark Inactive</option>
+                                <option value="suspended">Suspend Account</option>
+                                <option value="ban">Ban User</option>
+                            </select>
                         `}
                     </td>
                 `;
                 tbody.appendChild(row);
             });
         }
+
+        // ==========================================
+        // DISCIPLINARY ACTIONS CONTROLLER
+        // ==========================================
+        function initiateDisciplinaryAction(userId, userName, selectEl) {
+            const targetStatus = selectEl.value;
+            selectEl.value = ""; // Reset dropdown immediately
+
+            if (!targetStatus) return;
+
+            document.getElementById('action-target-user-id').value = userId;
+            document.getElementById('action-target-status').value = targetStatus;
+            document.getElementById('action-reason').value = '';
+
+            const titleEl = document.getElementById('modal-action-title');
+            const descEl = document.getElementById('modal-action-description');
+            const reasonContainer = document.getElementById('reason-container');
+            const confirmBtn = document.getElementById('confirm-action-btn');
+
+            if (targetStatus === 'active') {
+                titleEl.textContent = `Restore ${userName} to Active?`;
+                descEl.textContent = `This will clear any active disciplinary flags and reinstate full platform access.`;
+                reasonContainer.classList.add('hidden');
+                document.getElementById('action-reason').required = false;
+                confirmBtn.className = "w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white rounded-xl shadow-md transition-all";
+                confirmBtn.textContent = "Confirm Active";
+            } else {
+                titleEl.textContent = `Apply ${targetStatus.toUpperCase()} to ${userName}`;
+                descEl.textContent = `Enter the compliance/security justification below. This reason will display directly on the member's terminal.`;
+                reasonContainer.classList.remove('hidden');
+                document.getElementById('action-reason').required = true;
+                confirmBtn.className = "w-1/2 py-2.5 bg-red-600 hover:bg-red-700 text-xs font-bold text-white rounded-xl shadow-md transition-all";
+                confirmBtn.textContent = `Apply ${targetStatus.toUpperCase()}`;
+            }
+
+            openModal('disciplinary-modal');
+        }
+
+        document.getElementById('disciplinary-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('confirm-action-btn');
+            const userId = document.getElementById('action-target-user-id').value;
+            const status = document.getElementById('action-target-status').value;
+            const reason = document.getElementById('action-reason').value;
+
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const response = await fetch(`/api/auth/users/${userId}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ status, reason })
+                });
+
+                const resData = await response.json();
+
+                if (resData.success) {
+                    alert(resData.message);
+                    closeModal('disciplinary-modal');
+                    fetchUserDirectory();
+                } else {
+                    alert(`Failed to update status: ${resData.message}`);
+                }
+            } catch (err) {
+                console.error("Disciplinary action error:", err);
+                alert("Server communication failed.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Apply Action';
+            }
+        });
 
         async function toggleUserRole(userId, currentRole) {
             const nextRole = (currentRole === 'leader' || currentRole === 'team_leader') ? 'member' : 'leader';
@@ -571,7 +708,6 @@
             document.getElementById(id).classList.add('hidden');
         }
 
-        // Form Submission: Create Office
         document.getElementById('create-office-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('save-office-btn');
@@ -607,7 +743,6 @@
             }
         });
 
-        // Form Submission: Send Broadcast Push
         document.getElementById('send-broadcast-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('send-broadcast-btn');

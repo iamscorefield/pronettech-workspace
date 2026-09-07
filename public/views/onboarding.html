@@ -30,7 +30,7 @@
         }
     </style>
 </head>
-<body class="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative selection:bg-pnt-purple selection:text-white overflow-x-hidden">
+<body class="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative selection:bg-pnt-purple selection:text-white overflow-x-hidden bg-slate-50 text-pnt-dark">
 
     <div class="sm:mx-auto sm:w-full sm:max-w-xl relative z-10">
         <div class="flex justify-center mb-4">
@@ -47,7 +47,7 @@
     </div>
 
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-xl relative z-10 px-4 sm:px-0">
-        <div class="glass-card py-8 px-6 sm:px-10 rounded-2xl shadow-xl relative overflow-hidden">
+        <div class="glass-card py-8 px-6 sm:px-10 rounded-2xl shadow-xl relative overflow-hidden bg-white border border-slate-200">
 
             <div id="progress-container" class="mb-8">
                 <div class="flex items-center justify-between text-xs text-slate-500 uppercase tracking-widest font-semibold mb-2">
@@ -59,6 +59,7 @@
                 </div>
             </div>
 
+            <!-- REGISTRATION MULTI-STEP FORM -->
             <form id="onboarding-form" class="space-y-6">
 
                 <div id="step-1-container" class="step-transition space-y-5">
@@ -81,7 +82,15 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label for="password" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Password</label>
-                            <input type="password" id="password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnt-purple/30 focus:border-pnt-purple transition-all text-sm" placeholder="••••••••">
+                            <div class="relative">
+                                <input type="password" id="password" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnt-purple/30 focus:border-pnt-purple transition-all text-sm" placeholder="••••••••">
+                                <button type="button" onclick="togglePasswordVisibility('password', 'eye-signup')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none">
+                                    <svg id="eye-signup" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                         <div>
                             <label for="phone_number" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Phone Number</label>
@@ -90,8 +99,8 @@
                     </div>
 
                     <div class="pt-2">
-                        <button type="button" id="next-btn" class="w-full btn-brand-gradient font-semibold py-3 px-4 rounded-xl shadow-lg shadow-pnt-purple/20 transition-all duration-300 text-sm flex items-center justify-center gap-2">
-                            Proceed to Office Selection
+                        <button type="button" id="next-btn" class="w-full btn-brand-gradient font-semibold py-3 px-4 rounded-xl shadow-lg shadow-pnt-purple/20 transition-all duration-300 text-sm flex items-center justify-center gap-2 text-white">
+                            Proceed to Office-Branch Selection
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         </button>
                     </div>
@@ -128,13 +137,14 @@
                         <button type="button" id="back-btn" class="w-1/3 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-pnt-dark font-semibold py-3 px-4 rounded-xl transition-all duration-300 text-sm">
                             Back
                         </button>
-                        <button type="submit" id="submit-btn" class="w-2/3 btn-brand-gradient font-semibold py-3 px-4 rounded-xl shadow-lg shadow-pnt-purple/20 transition-all duration-300 text-sm flex items-center justify-center gap-2">
+                        <button type="submit" id="submit-btn" class="w-2/3 btn-brand-gradient font-semibold py-3 px-4 rounded-xl shadow-lg shadow-pnt-purple/20 transition-all duration-300 text-sm flex items-center justify-center gap-2 text-white">
                             Finalize Profile Registration
                         </button>
                     </div>
                 </div>
             </form>
 
+            <!-- SIGN IN FORM -->
             <form id="login-form" class="step-transition hidden space-y-6">
                 <div class="space-y-5">
                     <div>
@@ -143,12 +153,23 @@
                     </div>
 
                     <div>
-                        <label for="login_password" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Password</label>
-                        <input type="password" id="login_password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnt-purple/30 focus:border-pnt-purple transition-all text-sm" placeholder="••••••••">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label for="login_password" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">Password</label>
+                            <button type="button" onclick="openForgotPasswordModal()" class="text-xs font-semibold text-pnt-purple hover:underline">Forgot Password?</button>
+                        </div>
+                        <div class="relative">
+                            <input type="password" id="login_password" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-3 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnt-purple/30 focus:border-pnt-purple transition-all text-sm" placeholder="••••••••">
+                            <button type="button" onclick="togglePasswordVisibility('login_password', 'eye-login')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none">
+                                <svg id="eye-login" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="pt-2">
-                        <button type="submit" class="w-full btn-brand-gradient font-semibold py-3 px-4 rounded-xl shadow-lg shadow-pnt-purple/20 transition-all duration-300 text-sm flex items-center justify-center gap-2">
+                        <button type="submit" class="w-full btn-brand-gradient font-semibold py-3 px-4 rounded-xl shadow-lg shadow-pnt-purple/20 transition-all duration-300 text-sm flex items-center justify-center gap-2 text-white">
                             Authenticate Account
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                         </button>
@@ -161,6 +182,24 @@
                 </div>
             </form>
 
+        </div>
+    </div>
+
+    <!-- FORGOT PASSWORD MODAL -->
+    <div id="forgot-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-sm rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold text-pnt-dark">Reset Password</h3>
+                <button type="button" onclick="closeForgotPasswordModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold leading-none">&times;</button>
+            </div>
+            <p class="text-xs text-slate-500">Enter your corporate email address and we'll dispatch a recovery link.</p>
+            <form id="forgot-form" class="space-y-3">
+                <input type="email" id="forgot-email" required placeholder="yourname@pronettech.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-pnt-dark focus:ring-1 focus:ring-pnt-purple focus:outline-none">
+                <div class="flex gap-2 pt-1">
+                    <button type="button" onclick="closeForgotPasswordModal()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl text-slate-600">Cancel</button>
+                    <button type="submit" id="forgot-btn" class="w-1/2 py-2.5 btn-brand-gradient text-white text-xs font-bold rounded-xl shadow-md">Send Link</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -190,11 +229,49 @@
             { id: "bc7285b8-9f66-5765-9f2f-d2f1f17647dc", branch_name: "Abuja Office", total_slots: 6 }
         ];
 
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"/>`;
+            } else {
+                input.type = 'password';
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>`;
+            }
+        }
+
+        function openForgotPasswordModal() { document.getElementById('forgot-modal').classList.remove('hidden'); }
+        function closeForgotPasswordModal() { document.getElementById('forgot-modal').classList.add('hidden'); }
+
+        document.getElementById('forgot-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('forgot-btn');
+            const email = document.getElementById('forgot-email').value.trim();
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+
+            try {
+                const res = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                alert(data.message);
+                if (data.success) closeForgotPasswordModal();
+            } catch (err) {
+                alert('Failed to send recovery request.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Send Link';
+            }
+        });
+
         toggleToLogin.addEventListener('click', () => {
             onboardingForm.classList.add('hidden');
             loginForm.classList.remove('hidden');
             progressContainer.classList.add('hidden');
-
             pageTitle.textContent = "Sign In to Workspace";
             pageSubtitle.textContent = "Enter your credentials to access your terminal.";
         });
@@ -203,10 +280,8 @@
             loginForm.classList.add('hidden');
             onboardingForm.classList.remove('hidden');
             progressContainer.classList.remove('hidden');
-
             pageTitle.textContent = "Welcome to Pronettech Workspace";
             pageSubtitle.textContent = "Let's get your corporate profile configured.";
-
             step2.classList.add('hidden');
             step1.classList.remove('hidden');
             stepLabel.textContent = "Step 1: Account Info";
@@ -221,7 +296,6 @@
                 const offices = await response.json();
                 renderOfficeGrid(offices);
             } catch (err) {
-                console.warn('Backend database offices offline, running fallbacks:', err.message);
                 renderOfficeGrid(fallbackOffices);
             }
         }
@@ -337,20 +411,13 @@
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify(payload)
                 });
                 const data = await response.json();
 
                 if (data.success) {
-                    localStorage.setItem('pnt_user', JSON.stringify({
-                        role: data.user.role,
-                        name: data.user.name,
-                        customId: data.user.customId,
-                        office_id: data.user.office_id,
-                        office_name: data.user.office_name
-                    }));
-
-                    alert('🔒 Session authenticated successfully!');
+                    localStorage.setItem('pnt_user', JSON.stringify(data.user));
 
                     if (data.user.role === 'admin' || data.user.role === 'global_admin') {
                         window.location.href = './admin.html';

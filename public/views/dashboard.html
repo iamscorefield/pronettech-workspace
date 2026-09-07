@@ -7,6 +7,7 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
     <link rel="stylesheet" href="/css/styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.paystack.co/v1/inline.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -66,6 +67,20 @@
             </div>
         </div>
     </nav>
+
+    <!-- Top Account Inactive / Expired Banner Alert -->
+    <div id="unpaid-warning-strip" class="hidden bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 text-white px-6 py-3 shadow-md relative z-20">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
+            <div class="flex items-center gap-2">
+                <span class="text-base">⚠️</span>
+                <span class="font-bold uppercase tracking-wider">Account Access Limited:</span>
+                <span id="unpaid-warning-text">Your membership validity is inactive or expired. Complete activation to unlock all services.</span>
+            </div>
+            <button onclick="document.getElementById('reactivate-membership-btn').click()" class="bg-white text-slate-900 font-bold px-4 py-1 rounded-lg text-[11px] shadow hover:bg-slate-100 transition-all uppercase tracking-wider">
+                Reactivate Now
+            </button>
+        </div>
+    </div>
 
     <main class="max-w-7xl mx-auto px-6 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
         
@@ -137,10 +152,9 @@
                 <div class="id-card-container w-full max-w-[300px] h-[465px] mx-auto">
                     <div id="id-card-flipper" class="id-card-inner relative w-full h-full shadow-2xl rounded-2xl">
                         
-                        <!-- ================= FRONT FACE ================= -->
+                        <!-- FRONT FACE -->
                         <div class="id-card-face absolute inset-0 w-full h-full bg-white rounded-2xl overflow-hidden border border-slate-200 flex flex-col justify-between">
                             
-                            <!-- Top Chevron Header -->
                             <div class="w-full h-11 relative">
                                 <svg class="w-full h-full" viewBox="0 0 300 44" preserveAspectRatio="none">
                                     <path d="M0,0 L150,0 L140,44 L0,44 Z" fill="#0070c0" />
@@ -149,7 +163,6 @@
                                 </svg>
                             </div>
 
-                            <!-- Logo & Reg Number Header -->
                             <div class="px-5 text-center -mt-1">
                                 <div class="flex items-center justify-center gap-2">
                                     <img src="/assets/images/logo.png" alt="ProNet-Tech" class="h-8 w-auto">
@@ -161,7 +174,6 @@
                                 <p class="text-[9px] font-semibold text-slate-700 tracking-wider mt-1.5">Reg No. 7331721</p>
                             </div>
 
-                            <!-- Interactive Photo Upload Box -->
                             <div class="relative mx-auto -mt-1 group cursor-pointer" onclick="document.getElementById('avatar-file-input').click()" title="Click to upload profile photo">
                                 <div class="w-28 h-32 border-[3px] border-[#1e3a8a] rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center shadow-sm relative">
                                     <img id="card-avatar-img" src="" alt="Profile Photo" class="w-full h-full object-cover hidden">
@@ -169,7 +181,6 @@
                                         <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z"></path>
                                     </svg>
 
-                                    <!-- Hover Camera Overlay -->
                                     <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[9px] font-bold">
                                         <svg class="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                         Change Photo
@@ -178,13 +189,11 @@
                                 <input type="file" id="avatar-file-input" accept="image/*" class="hidden" onchange="uploadAvatar(event)">
                             </div>
 
-                            <!-- Member Name & Role -->
                             <div class="text-center px-4 -mt-1">
                                 <h3 id="card-fullname" class="font-black text-base text-[#0070c0] uppercase tracking-tight">MEMBER NAME</h3>
                                 <p id="card-role" class="text-xs font-serif italic text-slate-600 font-medium">Member</p>
                             </div>
 
-                            <!-- QR Code & Globe Overlay Container -->
                             <div class="relative px-6 flex items-center justify-center">
                                 <div class="absolute right-0 bottom-0 w-28 h-28 opacity-15 pointer-events-none">
                                     <svg viewBox="0 0 200 200" fill="none" stroke="#0070c0" stroke-width="3">
@@ -196,11 +205,10 @@
                                 </div>
 
                                 <div class="w-16 h-16 bg-white p-1 rounded border border-slate-200 shadow-sm z-10 flex items-center justify-center">
-                                    <img id="card-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PNT-2026-10001&color=0D122B&bgcolor=FFFFFF" alt="QR Code" class="w-full h-full object-contain">
+                                    <img id="card-qr-img" src="" alt="QR Code" class="w-full h-full object-contain">
                                 </div>
                             </div>
 
-                            <!-- Bottom Chevron Arrow Ribbon -->
                             <div class="w-full h-9 relative">
                                 <svg class="w-full h-full" viewBox="0 0 300 36" preserveAspectRatio="none">
                                     <path d="M0,0 L120,0 L135,18 L120,36 L0,36 Z" fill="#ff7a00" />
@@ -210,22 +218,20 @@
                                 </svg>
                             </div>
 
+                            <div class="absolute left-0 top-1/3 bottom-0 w-2 bg-[#ff7a00]"></div>
+                            <div class="absolute right-0 top-1/3 bottom-0 w-2 bg-[#ff7a00]"></div>
                         </div>
 
-                        <!-- ================= BACK FACE ================= -->
+                        <!-- BACK FACE -->
                         <div class="id-card-face id-card-back absolute inset-0 w-full h-full bg-white rounded-2xl overflow-hidden border border-slate-200 flex flex-col justify-between p-4 text-center">
-                            
-                            <!-- Inner Frame Border Accent -->
                             <div class="absolute inset-2 border border-cyan-400 pointer-events-none rounded-xl"></div>
 
-                            <!-- Top Authorization Header -->
                             <div class="space-y-0.5 mt-1 relative z-10">
                                 <p class="text-[9px] text-slate-700 font-medium leading-tight">The bearer of this card is the</p>
                                 <p id="card-back-role" class="text-xs font-black text-slate-900 tracking-wider uppercase">MEMBER</p>
                                 <p class="text-[9px] text-slate-700 font-medium">of</p>
                             </div>
 
-                            <!-- Centered Mini Logo -->
                             <div class="flex items-center justify-center gap-1.5 relative z-10">
                                 <img src="/assets/images/logo.png" alt="ProNet-Tech" class="h-6 w-auto">
                                 <div class="text-left">
@@ -234,13 +240,11 @@
                                 </div>
                             </div>
 
-                            <!-- Legal Notice & Return Instructions -->
                             <div class="space-y-0.5 relative z-10 text-[9px] text-slate-800 leading-tight px-2">
                                 <p class="font-bold">This card is authorised for use only by ProNet-Tech Global Limited.</p>
                                 <p class="text-slate-600 font-medium">If found please return to</p>
                             </div>
 
-                            <!-- Contact Meta -->
                             <div class="space-y-1.5 text-left text-[8px] text-slate-700 px-3 relative z-10">
                                 <div class="flex items-start gap-1.5">
                                     <span class="text-[#0070c0] text-[9px] flex-shrink-0">📍</span>
@@ -256,7 +260,6 @@
                                 </div>
                             </div>
 
-                            <!-- Signature Stamp -->
                             <div class="relative z-10 flex flex-col items-center">
                                 <div class="h-9 flex items-center justify-center">
                                     <img src="/assets/images/signature.png" alt="Signature" class="h-8 w-auto object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
@@ -269,80 +272,106 @@
                                 </div>
                             </div>
 
-                            <!-- Vector Barcode -->
                             <div class="relative z-10 mb-1 px-4">
                                 <svg class="w-full h-7" viewBox="0 0 200 30" preserveAspectRatio="none">
-                                    <rect x="0" y="0" width="3" height="30" fill="#0D122B"/>
-                                    <rect x="5" y="0" width="1.5" height="30" fill="#0D122B"/>
-                                    <rect x="9" y="0" width="4" height="30" fill="#0D122B"/>
-                                    <rect x="15" y="0" width="2" height="30" fill="#0D122B"/>
-                                    <rect x="20" y="0" width="1" height="30" fill="#0D122B"/>
-                                    <rect x="23" y="0" width="3" height="30" fill="#0D122B"/>
-                                    <rect x="28" y="0" width="5" height="30" fill="#0D122B"/>
-                                    <rect x="35" y="0" width="2" height="30" fill="#0D122B"/>
-                                    <rect x="39" y="0" width="1" height="30" fill="#0D122B"/>
-                                    <rect x="42" y="0" width="4" height="30" fill="#0D122B"/>
-                                    <rect x="48" y="0" width="2.5" height="30" fill="#0D122B"/>
-                                    <rect x="53" y="0" width="1" height="30" fill="#0D122B"/>
-                                    <rect x="56" y="0" width="3.5" height="30" fill="#0D122B"/>
-                                    <rect x="62" y="0" width="2" height="30" fill="#0D122B"/>
-                                    <rect x="66" y="0" width="4" height="30" fill="#0D122B"/>
-                                    <rect x="72" y="0" width="1.5" height="30" fill="#0D122B"/>
-                                    <rect x="76" y="0" width="3" height="30" fill="#0D122B"/>
-                                    <rect x="81" y="0" width="1" height="30" fill="#0D122B"/>
-                                    <rect x="84" y="0" width="4.5" height="30" fill="#0D122B"/>
-                                    <rect x="91" y="0" width="2" height="30" fill="#0D122B"/>
-                                    <rect x="95" y="0" width="1" height="30" fill="#0D122B"/>
-                                    <rect x="98" y="0" width="3" height="30" fill="#0D122B"/>
-                                    <rect x="103" y="0" width="4" height="30" fill="#0D122B"/>
-                                    <rect x="109" y="0" width="1.5" height="30" fill="#0D122B"/>
-                                    <rect x="113" y="0" width="2.5" height="30" fill="#0D122B"/>
-                                    <rect x="118" y="0" width="4" height="30" fill="#0D122B"/>
-                                    <rect x="124" y="0" width="1" height="30" fill="#0D122B"/>
-                                    <rect x="127" y="0" width="3" height="30" fill="#0D122B"/>
-                                    <rect x="132" y="0" width="2" height="30" fill="#0D122B"/>
-                                    <rect x="136" y="0" width="4" height="30" fill="#0D122B"/>
-                                    <rect x="142" y="0" width="1.5" height="30" fill="#0D122B"/>
-                                    <rect x="146" y="0" width="3" height="30" fill="#0D122B"/>
-                                    <rect x="151" y="0" width="1" height="30" fill="#0D122B"/>
-                                    <rect x="154" y="0" width="4" height="30" fill="#0D122B"/>
-                                    <rect x="160" y="0" width="2" height="30" fill="#0D122B"/>
-                                    <rect x="164" y="0" width="3.5" height="30" fill="#0D122B"/>
-                                    <rect x="170" y="0" width="1.5" height="30" fill="#0D122B"/>
-                                    <rect x="174" y="0" width="3" height="30" fill="#0D122B"/>
-                                    <rect x="179" y="0" width="1" height="30" fill="#0D122B"/>
-                                    <rect x="182" y="0" width="4" height="30" fill="#0D122B"/>
-                                    <rect x="188" y="0" width="2" height="30" fill="#0D122B"/>
-                                    <rect x="192" y="0" width="3" height="30" fill="#0D122B"/>
-                                    <rect x="197" y="0" width="3" height="30" fill="#0D122B"/>
+                                    <rect x="0" y="0" width="3" height="30" fill="#0D122B"/><rect x="5" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="9" y="0" width="4" height="30" fill="#0D122B"/><rect x="15" y="0" width="2" height="30" fill="#0D122B"/><rect x="20" y="0" width="1" height="30" fill="#0D122B"/><rect x="23" y="0" width="3" height="30" fill="#0D122B"/><rect x="28" y="0" width="5" height="30" fill="#0D122B"/><rect x="35" y="0" width="2" height="30" fill="#0D122B"/><rect x="39" y="0" width="1" height="30" fill="#0D122B"/><rect x="42" y="0" width="4" height="30" fill="#0D122B"/><rect x="48" y="0" width="2.5" height="30" fill="#0D122B"/><rect x="53" y="0" width="1" height="30" fill="#0D122B"/><rect x="56" y="0" width="3.5" height="30" fill="#0D122B"/><rect x="62" y="0" width="2" height="30" fill="#0D122B"/><rect x="66" y="0" width="4" height="30" fill="#0D122B"/><rect x="72" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="76" y="0" width="3" height="30" fill="#0D122B"/><rect x="81" y="0" width="1" height="30" fill="#0D122B"/><rect x="84" y="0" width="4.5" height="30" fill="#0D122B"/><rect x="91" y="0" width="2" height="30" fill="#0D122B"/><rect x="95" y="0" width="1" height="30" fill="#0D122B"/><rect x="98" y="0" width="3" height="30" fill="#0D122B"/><rect x="103" y="0" width="4" height="30" fill="#0D122B"/><rect x="109" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="113" y="0" width="2.5" height="30" fill="#0D122B"/><rect x="118" y="0" width="4" height="30" fill="#0D122B"/><rect x="124" y="0" width="1" height="30" fill="#0D122B"/><rect x="127" y="0" width="3" height="30" fill="#0D122B"/><rect x="132" y="0" width="2" height="30" fill="#0D122B"/><rect x="136" y="0" width="4" height="30" fill="#0D122B"/><rect x="142" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="146" y="0" width="3" height="30" fill="#0D122B"/><rect x="151" y="0" width="1" height="30" fill="#0D122B"/><rect x="154" y="0" width="4" height="30" fill="#0D122B"/><rect x="160" y="0" width="2" height="30" fill="#0D122B"/><rect x="164" y="0" width="3.5" height="30" fill="#0D122B"/><rect x="170" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="174" y="0" width="3" height="30" fill="#0D122B"/><rect x="179" y="0" width="1" height="30" fill="#0D122B"/><rect x="182" y="0" width="4" height="30" fill="#0D122B"/><rect x="188" y="0" width="2" height="30" fill="#0D122B"/><rect x="192" y="0" width="3" height="30" fill="#0D122B"/><rect x="197" y="0" width="3" height="30" fill="#0D122B"/>
                                 </svg>
                             </div>
 
-                            <!-- Side Accent Borders -->
                             <div class="absolute left-0 top-1/3 bottom-0 w-2 bg-[#ff7a00]"></div>
                             <div class="absolute right-0 top-1/3 bottom-0 w-2 bg-[#ff7a00]"></div>
-
                         </div>
 
                     </div>
                 </div>
 
+                <!-- ACTION BUTTONS -->
                 <div class="mt-6 space-y-3">
-                    <button id="download-soft-copy-btn" class="w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 text-pnt-dark font-semibold py-2.5 px-4 rounded-xl text-xs transition-all duration-300">
-                        Download Digital Softcopy (₦1,500)
+                    <button id="download-soft-copy-btn" class="w-full bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-400 font-semibold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 shadow-sm flex items-center justify-center gap-2 cursor-not-allowed">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span>Download Digital Softcopy</span>
+                        <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md font-mono text-[11px]">₦2,000</span>
                     </button>
-                    <button id="order-hard-copy-btn" class="w-full btn-brand-gradient font-semibold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 shadow-md">
-                        Order Physical Hardcopy Card (₦4,500)
+                    
+                    <button id="reactivate-membership-btn" class="w-full btn-brand-gradient text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2">
+                        <span>Reactivate Your Membership</span>
+                        <span class="bg-white/20 px-2 py-0.5 rounded-md font-mono text-[11px]">₦3,000</span>
                     </button>
                 </div>
+
+                <!-- ======================================================== -->
+                <!-- 4-BOX DIGITAL COUNTDOWN CLOCK COMPONENT                   -->
+                <!-- Exact reproduction of screenshot with DAYS, HOURS, MINS, SECS -->
+                <!-- ======================================================== -->
+                <div class="mt-4 bg-[#4A154B] p-4 rounded-2xl shadow-inner border border-purple-900/30 text-white">
+                    <div class="text-[9px] font-bold text-center tracking-widest uppercase text-purple-200 mb-2.5">
+                        Membership Validity Countdown
+                    </div>
+                    
+                    <div class="grid grid-cols-4 gap-2 text-center">
+                        <!-- Days Box -->
+                        <div class="bg-[#3F0E40]/90 border border-white/10 rounded-xl py-2 px-1 flex flex-col items-center justify-center shadow">
+                            <span id="timer-days" class="text-xl sm:text-2xl font-black text-pnt-gold leading-none">00</span>
+                            <span class="text-[8px] font-bold uppercase tracking-widest text-purple-200 mt-1">Days</span>
+                        </div>
+
+                        <!-- Hours Box -->
+                        <div class="bg-[#3F0E40]/90 border border-white/10 rounded-xl py-2 px-1 flex flex-col items-center justify-center shadow">
+                            <span id="timer-hours" class="text-xl sm:text-2xl font-black text-white leading-none">00</span>
+                            <span class="text-[8px] font-bold uppercase tracking-widest text-purple-200 mt-1">Hours</span>
+                        </div>
+
+                        <!-- Mins Box -->
+                        <div class="bg-[#3F0E40]/90 border border-white/10 rounded-xl py-2 px-1 flex flex-col items-center justify-center shadow">
+                            <span id="timer-mins" class="text-xl sm:text-2xl font-black text-white leading-none">00</span>
+                            <span class="text-[8px] font-bold uppercase tracking-widest text-purple-200 mt-1">Mins</span>
+                        </div>
+
+                        <!-- Secs Box -->
+                        <div class="bg-[#3F0E40]/90 border border-white/10 rounded-xl py-2 px-1 flex flex-col items-center justify-center shadow">
+                            <span id="timer-secs" class="text-xl sm:text-2xl font-black text-pnt-gold leading-none">00</span>
+                            <span class="text-[8px] font-bold uppercase tracking-widest text-purple-200 mt-1">Secs</span>
+                        </div>
+                    </div>
+
+                    <!-- Explicit Expiration Date string -->
+                    <div class="mt-3 text-center border-t border-white/10 pt-2 text-[10px] text-purple-200 flex items-center justify-between px-1">
+                        <span class="text-[9px] uppercase tracking-wider text-purple-300">Valid Until:</span>
+                        <span id="timer-date-readout" class="font-mono font-bold text-white">Pending Activation</span>
+                    </div>
+                </div>
+
             </div>
         </div>
 
     </main>
 
+    <!-- ================= MODAL: DISCIPLINARY ALERT ================= -->
+    <div id="disciplinary-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-red-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4 text-center">
+            <div class="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+                ⚠️
+            </div>
+            <h3 class="text-base font-bold text-red-600 uppercase tracking-wider" id="disciplinary-title">Compliance Alert</h3>
+            <p class="text-xs text-slate-600 leading-relaxed bg-red-50/60 border border-red-100 p-4 rounded-xl text-left font-mono" id="disciplinary-reason">
+                Loading compliance notice details...
+            </p>
+            <button type="button" onclick="document.getElementById('disciplinary-modal').classList.add('hidden')" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md">
+                Acknowledge Notice
+            </button>
+        </div>
+    </div>
+
     <script>
+        // ==========================================
+        // PAYSTACK GATEWAY INTEGRATION CONFIGURATION
+        // ==========================================
+        // Replace this key with your live public key (pk_live_xxxx) when ready
+        const PAYSTACK_PUBLIC_KEY = 'pk_test_sample_key_here';
+
         let currentUser = null;
         let liveTasks = [];
+        let countdownTimerInterval = null;
 
         // 3D Card Flip Handler
         const flipBtn = document.getElementById('flip-card-btn');
@@ -354,7 +383,6 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Fetch fresh session user data from the server
                 const authCheck = await fetch('/api/auth/me', { credentials: 'include' });
                 const authData = await authCheck.json();
 
@@ -388,6 +416,12 @@
                 const verificationUrl = `${window.location.origin}/verify.html?id=${encodeURIComponent(userCode)}`;
                 document.getElementById('card-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}&color=0D122B&bgcolor=FFFFFF`;
 
+                // Handle Membership Expiration & Live Clock
+                initCountdownEngine(currentUser.membership_expires_at);
+
+                // Handle Disciplinary Action Alert
+                checkDisciplinaryStatus(currentUser);
+
                 fetchTasks();
                 fetchWeeklyAttendance();
             } catch (err) {
@@ -395,6 +429,147 @@
                 window.location.href = '/views/onboarding.html';
             }
         });
+
+        // ==========================================
+        // COUNTDOWN ENGINE WITH REAL-TIME TICKER
+        // ==========================================
+        function initCountdownEngine(expiresAtString) {
+            const warningStrip = document.getElementById('unpaid-warning-strip');
+            const softcopyBtn = document.getElementById('download-soft-copy-btn');
+            const dateReadout = document.getElementById('timer-date-readout');
+
+            if (!expiresAtString) {
+                setClockExpired("Unpaid / Inactive");
+                warningStrip.classList.remove('hidden');
+                dateReadout.textContent = "Inactive (Payment Required)";
+                return;
+            }
+
+            const targetDate = new Date(expiresAtString).getTime();
+
+            // Function to calculate and update digits
+            function tick() {
+                const now = new Date().getTime();
+                const diff = targetDate - now;
+
+                if (diff <= 0) {
+                    clearInterval(countdownTimerInterval);
+                    setClockExpired("Expired");
+                    warningStrip.classList.remove('hidden');
+                    dateReadout.textContent = "Expired (Renewal Required)";
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+                document.getElementById('timer-days').textContent = String(days).padStart(2, '0');
+                document.getElementById('timer-hours').textContent = String(hours).padStart(2, '0');
+                document.getElementById('timer-mins').textContent = String(mins).padStart(2, '0');
+                document.getElementById('timer-secs').textContent = String(secs).padStart(2, '0');
+
+                // Format visible date string
+                const d = new Date(expiresAtString);
+                dateReadout.textContent = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+
+                // Unlock softcopy button if valid
+                softcopyBtn.className = "w-full btn-brand-gradient text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer";
+                softcopyBtn.innerHTML = `
+                    <span>Download Digital Softcopy</span>
+                    <span class="bg-white/20 px-2 py-0.5 rounded-md font-mono text-[11px]">₦2,000</span>
+                `;
+            }
+
+            tick();
+            countdownTimerInterval = setInterval(tick, 1000);
+        }
+
+        function setClockExpired(label) {
+            document.getElementById('timer-days').textContent = "00";
+            document.getElementById('timer-hours').textContent = "00";
+            document.getElementById('timer-mins').textContent = "00";
+            document.getElementById('timer-secs').textContent = "00";
+
+            const softcopyBtn = document.getElementById('download-soft-copy-btn');
+            softcopyBtn.className = "w-full bg-slate-100 border border-slate-300 text-slate-400 font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 cursor-not-allowed";
+            softcopyBtn.innerHTML = `
+                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <span>Digital Softcopy Locked</span>
+                <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md font-mono text-[11px]">₦2,000</span>
+            `;
+        }
+
+        // ==========================================
+        // DISCIPLINARY STATUS DETECTOR
+        // ==========================================
+        function checkDisciplinaryStatus(user) {
+            const status = (user.status || 'active').toLowerCase();
+            if (['warning', 'inactive', 'suspended', 'ban', 'banned'].includes(status)) {
+                const modal = document.getElementById('disciplinary-modal');
+                const title = document.getElementById('disciplinary-title');
+                const reason = document.getElementById('disciplinary-reason');
+
+                title.textContent = `Official Notice: Status ${status.toUpperCase()}`;
+                reason.textContent = user.status_reason 
+                    ? `Reason Given: "${user.status_reason}"`
+                    : "Your account is currently flagged under administrative review.";
+
+                modal.classList.remove('hidden');
+            }
+        }
+
+        // ==========================================
+        // PAYSTACK PAYMENT WORKFLOW
+        // ==========================================
+        document.getElementById('download-soft-copy-btn').addEventListener('click', () => {
+            if (currentUser.is_expired || !currentUser.membership_expires_at) {
+                alert("🔒 Softcopy Download Locked: Please complete your annual membership reactivation before downloading your digital card.");
+                return;
+            }
+
+            initiatePaystack(2000, 'Digital Softcopy ID Card', () => {
+                alert('🎉 Payment verified! Your high-resolution ID badge has been unlocked.');
+            });
+        });
+
+        document.getElementById('reactivate-membership-btn').addEventListener('click', () => {
+            initiatePaystack(3000, 'Annual Membership Reactivation', () => {
+                alert('🎉 Membership successfully reactivated for another year!');
+                window.location.reload();
+            });
+        });
+
+        function initiatePaystack(amountInNaira, purpose, onSuccess) {
+            if (typeof PaystackPop === 'undefined') {
+                alert("Payment gateway unreachable. Please verify your internet connection.");
+                return;
+            }
+
+            const handler = PaystackPop.setup({
+                key: PAYSTACK_PUBLIC_KEY,
+                email: currentUser.email || 'member@pronettech.com',
+                amount: amountInNaira * 100, // kobo
+                currency: 'NGN',
+                metadata: {
+                    custom_fields: [
+                        { display_name: "Member Name", variable_name: "member_name", value: currentUser.name },
+                        { display_name: "Workspace ID", variable_name: "workspace_id", value: currentUser.customId },
+                        { display_name: "Purpose", variable_name: "purpose", value: purpose }
+                    ]
+                },
+                callback: function(response) {
+                    console.log('Payment reference:', response.reference);
+                    if (onSuccess) onSuccess(response);
+                },
+                onClose: function() {
+                    console.log('Payment modal closed.');
+                }
+            });
+
+            handler.openIframe();
+        }
 
         // Real-time Photo Upload Handler
         async function uploadAvatar(event) {
@@ -439,7 +614,6 @@
         // ==========================================
         // DYNAMIC ATTENDANCE SYSTEM INTEGRATION
         // ==========================================
-
         document.getElementById('mark-attendance-btn').addEventListener('click', async () => {
             try {
                 const response = await fetch('/api/attendance/checkin', {
@@ -528,7 +702,6 @@
         // ==========================================
         // DYNAMIC TASK MANAGEMENT INTEGRATION
         // ==========================================
-
         async function fetchTasks() {
             try {
                 if (!currentUser || !currentUser.id) {
