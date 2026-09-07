@@ -367,7 +367,7 @@
         // PAYSTACK GATEWAY INTEGRATION CONFIGURATION
         // ==========================================
         // Replace this key with your live public key (pk_live_xxxx) when ready
-        const PAYSTACK_PUBLIC_KEY = 'pk_test_sample_key_here';
+        const PAYSTACK_PUBLIC_KEY = 'pk_live_ccd08c29cebcb52ee9c5a97b44df82d3413351ec';
 
         let currentUser = null;
         let liveTasks = [];
@@ -524,43 +524,62 @@
         // PAYSTACK PAYMENT WORKFLOW
         // ==========================================
         document.getElementById('download-soft-copy-btn').addEventListener('click', () => {
-            if (currentUser.is_expired || !currentUser.membership_expires_at) {
-                alert("🔒 Softcopy Download Locked: Please complete your annual membership reactivation before downloading your digital card.");
-                return;
-            }
-
-            initiatePaystack(2000, 'Digital Softcopy ID Card', () => {
-                alert('🎉 Payment verified! Your high-resolution ID badge has been unlocked.');
+            initiatePaystack(2000, 'softcopy', async (response) => {
+                try {
+                    const res = await fetch('/api/marketplace/verify-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ reference: response.reference, purpose: 'softcopy' })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        alert('🎉 Payment verified! Generating your official digital ID...');
+                        window.print();
+                    } else {
+                        alert(`Verification warning: ${result.message}`);
+                    }
+                } catch (err) {
+                    alert('Could not contact the verification server.');
+                }
             });
         });
 
         document.getElementById('reactivate-membership-btn').addEventListener('click', () => {
-            initiatePaystack(3000, 'Annual Membership Reactivation', () => {
-                alert('🎉 Membership successfully reactivated for another year!');
-                window.location.reload();
+            initiatePaystack(3000, 'renewal', async (response) => {
+                try {
+                    const res = await fetch('/api/marketplace/verify-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ reference: response.reference, purpose: 'renewal' })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        alert('🎉 Membership successfully reactivated for 1 year!');
+                        window.location.reload();
+                    } else {
+                        alert(`Renewal warning: ${result.message}`);
+                    }
+                } catch (err) {
+                    alert('Could not contact the verification server.');
+                }
             });
         });
 
         function initiatePaystack(amountInNaira, purpose, onSuccess) {
             if (typeof PaystackPop === 'undefined') {
-                alert("Payment gateway unreachable. Please verify your internet connection.");
+                alert("Payment gateway unreachable. Please check your internet connection.");
                 return;
             }
 
             const handler = PaystackPop.setup({
                 key: PAYSTACK_PUBLIC_KEY,
                 email: currentUser.email || 'member@pronettech.com',
-                amount: amountInNaira * 100, // kobo
+                amount: amountInNaira * 100, // Amount in kobo
                 currency: 'NGN',
-                metadata: {
-                    custom_fields: [
-                        { display_name: "Member Name", variable_name: "member_name", value: currentUser.name },
-                        { display_name: "Workspace ID", variable_name: "workspace_id", value: currentUser.customId },
-                        { display_name: "Purpose", variable_name: "purpose", value: purpose }
-                    ]
-                },
+                ref: 'PNT-' + purpose.toUpperCase() + '-' + Date.now(),
                 callback: function(response) {
-                    console.log('Payment reference:', response.reference);
                     if (onSuccess) onSuccess(response);
                 },
                 onClose: function() {
