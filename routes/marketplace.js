@@ -58,7 +58,7 @@ router.post('/order/certificate', protect, async (req, res) => {
                 amount_paid,
                 payment_reference,
                 status: 'paid',
-                certificate_url: `https://cdn.pronettech.com/certs/verified_${req.user.id}.pdf` // Mocking path mapping for digital softcopies
+                certificate_url: `https://cdn.pronettech.com/certs/verified_${req.user.id}.pdf`
             }])
             .select();
 
@@ -71,6 +71,87 @@ router.post('/order/certificate', protect, async (req, res) => {
         });
     } catch (err) {
         return res.status(500).json({ success: false, message: `Credential issuance error: ${err.message}` });
+    }
+});
+
+// ===================================================
+// 3. SECURE PAYSTACK VERIFICATION (SOFTCOPY & RENEWAL)
+// Reads PAYSTACK_SECRET_KEY automatically from .env
+// ===================================================
+router.post('/verify-payment', protect, async (req, res) => {
+    const { reference, purpose } = req.body;
+
+    if (!reference) {
+        return res.status(400).json({ success: false, message: 'Transaction reference is missing.' });
+    }
+
+    try {
+        const paystackSecret = process.env.PAYSTACK_SECRET_KEY;
+        if (!paystackSecret) {
+            return res.status(500).json({ success: false, message: 'Server configuration error: missing Secret Key.' });
+        }
+
+        const paystackRes = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${paystackSecret}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await paystackRes.json();
+
+        if (result.status && result.data.status === 'success') {
+            const amountPaidInNaira = result.data.amount / 100; // Paystack sends amounts in kobo
+
+            // A. Digital Softcopy Verification (₦2,000)
+            if (purpose === 'softcopy') {
+                if (amountPaidInNaira < 2000) {
+                    return res.status(400).json({ success: false, message: 'Paid amount is below ₦2,000 threshold.' });
+                }
+
+                await supabase
+                    .from('id_card_orders')
+                    .insert([{
+                        profile_id: req.user.id,
+                        fulfillment_type: 'softcopy_only',
+                        amount_paid: amountPaidInNaira,
+                        payment_reference: reference,
+                        status: 'paid'
+                    }]);
+
+                return res.status(200).json({ 
+                    success: true, 
+                    message: 'Payment verified! Softcopy unlocked.', 
+                    downloadUnlocked: true 
+                });
+            }
+
+            // B. Annual Membership Renewal Verification (₦3,000)
+            if (purpose === 'renewal') {
+                if (amountPaidInNaira < 3000) {
+                    return res.status(400).json({ success: false, message: 'Paid amount is below ₦3,000 threshold.' });
+                }
+
+                await supabase
+                    .from('profiles')
+                    .update({ status: 'active' })
+                    .eq('id', req.user.id);
+
+                return res.status(200).json({ 
+                    success: true, 
+                    message: 'Membership renewed successfully!', 
+                    renewed: true 
+                });
+            }
+
+            return res.status(400).json({ success: false, message: 'Invalid payment purpose specified.' });
+        }
+
+        return res.status(400).json({ success: false, message: 'Paystack could not confirm this transaction.' });
+    } catch (err) {
+        console.error('Payment verification failed:', err);
+        return res.status(500).json({ success: false, message: `Server transaction error: ${err.message}` });
     }
 });
 

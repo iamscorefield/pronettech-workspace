@@ -331,14 +331,13 @@
 
                     <!-- ACTION BUTTONS -->
                     <div class="mt-6 space-y-3">
-                        <button id="download-soft-copy-btn" class="w-full bg-slate-100 border border-slate-300 text-slate-400 font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 cursor-not-allowed transition-all">
-                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <button id="download-soft-copy-btn" class="w-full btn-brand-gradient text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer">
                             <span>Download Digital Softcopy</span>
-                            <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md font-mono text-[11px]">₦2,000</span>
+                            <span class="bg-white/20 px-2 py-0.5 rounded-md font-mono text-[11px]">₦2,000</span>
                         </button>
                         
                         <button id="reactivate-membership-btn" class="w-full btn-brand-gradient text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2">
-                            <span>Reactivate Your Membership</span>
+                            <span>Reactivate Leadership Status</span>
                             <span class="bg-white/20 px-2 py-0.5 rounded-md font-mono text-[11px]">₦3,000</span>
                         </button>
                     </div>
@@ -448,8 +447,8 @@
         // ==========================================
         // PAYSTACK GATEWAY INTEGRATION CONFIGURATION
         // ==========================================
-        // Replace this key with your live public key (pk_live_xxxx) when ready
-        const PAYSTACK_PUBLIC_KEY = 'pk_test_sample_key_here';
+        // Paste your Live Public Key (pk_live_...) inside the quotes below:
+        const PAYSTACK_PUBLIC_KEY = 'pk_live_ccd08c29cebcb52ee9c5a97b44df82d3413351ec';
 
         let currentUser = null;
         let pendingUsers = [];
@@ -523,7 +522,6 @@
         // ==========================================
         function initCountdownEngine(expiresAtString) {
             const warningStrip = document.getElementById('unpaid-warning-strip');
-            const softcopyBtn = document.getElementById('download-soft-copy-btn');
             const dateReadout = document.getElementById('timer-date-readout');
 
             if (!expiresAtString) {
@@ -559,12 +557,6 @@
 
                 const d = new Date(expiresAtString);
                 dateReadout.textContent = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-
-                softcopyBtn.className = "w-full btn-brand-gradient text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer";
-                softcopyBtn.innerHTML = `
-                    <span>Download Digital Softcopy</span>
-                    <span class="bg-white/20 px-2 py-0.5 rounded-md font-mono text-[11px]">₦2,000</span>
-                `;
             }
 
             tick();
@@ -576,14 +568,6 @@
             document.getElementById('timer-hours').textContent = "00";
             document.getElementById('timer-mins').textContent = "00";
             document.getElementById('timer-secs').textContent = "00";
-
-            const softcopyBtn = document.getElementById('download-soft-copy-btn');
-            softcopyBtn.className = "w-full bg-slate-100 border border-slate-300 text-slate-400 font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 cursor-not-allowed";
-            softcopyBtn.innerHTML = `
-                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                <span>Digital Softcopy Locked</span>
-                <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md font-mono text-[11px]">₦2,000</span>
-            `;
         }
 
         // ==========================================
@@ -606,50 +590,69 @@
         }
 
         // ==========================================
-        // PAYSTACK INLINE CHECKOUT HANDLERS
+        // PAYSTACK PAYMENT WORKFLOW (LEADER)
         // ==========================================
         document.getElementById('download-soft-copy-btn').addEventListener('click', () => {
-            if (currentUser.is_expired || !currentUser.membership_expires_at) {
-                alert("🔒 Softcopy Download Locked: Please complete your annual membership reactivation before downloading your digital credentials.");
-                return;
-            }
-
-            initiatePaystackPayment(2000, 'Digital Softcopy ID Card', () => {
-                alert('🎉 Payment verified successfully! Your digital credentials are now unlocked for download.');
+            initiatePaystack(2000, 'softcopy', async (response) => {
+                try {
+                    const res = await fetch('/api/marketplace/verify-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ reference: response.reference, purpose: 'softcopy' })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        alert('🎉 Payment verified! Generating your official digital ID...');
+                        window.print();
+                    } else {
+                        alert(`Verification warning: ${result.message}`);
+                    }
+                } catch (err) {
+                    alert('Could not contact the verification server.');
+                }
             });
         });
 
         document.getElementById('reactivate-membership-btn').addEventListener('click', () => {
-            initiatePaystackPayment(3000, 'Annual Leadership Renewal', () => {
-                alert('🎉 Membership successfully reactivated for another calendar year!');
-                window.location.reload();
+            initiatePaystack(3000, 'renewal', async (response) => {
+                try {
+                    const res = await fetch('/api/marketplace/verify-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ reference: response.reference, purpose: 'renewal' })
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        alert('🎉 Leadership credentials renewed for 1 year!');
+                        window.location.reload();
+                    } else {
+                        alert(`Renewal warning: ${result.message}`);
+                    }
+                } catch (err) {
+                    alert('Could not contact the verification server.');
+                }
             });
         });
 
-        function initiatePaystackPayment(amountInNaira, title, onSuccessCallback) {
+        function initiatePaystack(amountInNaira, purpose, onSuccess) {
             if (typeof PaystackPop === 'undefined') {
-                alert('Payment gateway failed to initialize. Please check your internet connection.');
+                alert("Payment gateway unreachable. Please check your internet connection.");
                 return;
             }
 
             const handler = PaystackPop.setup({
                 key: PAYSTACK_PUBLIC_KEY,
                 email: currentUser.email || 'leader@pronettech.com',
-                amount: amountInNaira * 100,
+                amount: amountInNaira * 100, // Amount in kobo
                 currency: 'NGN',
-                metadata: {
-                    custom_fields: [
-                        { display_name: "Member Name", variable_name: "member_name", value: currentUser.name },
-                        { display_name: "Workspace ID", variable_name: "workspace_id", value: currentUser.customId },
-                        { display_name: "Purpose", variable_name: "purpose", value: title }
-                    ]
-                },
+                ref: 'PNT-LDR-' + purpose.toUpperCase() + '-' + Date.now(),
                 callback: function(response) {
-                    console.log('Paystack transaction reference:', response.reference);
-                    if (onSuccessCallback) onSuccessCallback(response);
+                    if (onSuccess) onSuccess(response);
                 },
                 onClose: function() {
-                    console.log('Transaction window closed by user.');
+                    console.log('Payment modal closed.');
                 }
             });
 
