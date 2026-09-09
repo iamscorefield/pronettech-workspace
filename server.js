@@ -9,6 +9,7 @@ const attendanceRoutes = require('./routes/attendance');
 const communityRoutes = require('./routes/community');
 const marketplaceRoutes = require('./routes/marketplace');
 const taskRoutes = require('./routes/tasks');
+const downlineRoutes = require('./routes/downline');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -39,17 +40,23 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Dynamic Office Fetching Route directly connected to Supabase
+// Dynamic Office Fetching Route (Supports real-time state filtering)
 app.get('/api/offices', async (req, res) => {
     try {
-        const { data, error } = await supabase
+        const { state } = req.query;
+        let query = supabase
             .from('offices')
             .select('*')
             .order('branch_name', { ascending: true });
 
+        if (state && state.trim() !== '') {
+            query = query.ilike('state', `%${state.trim()}%`);
+        }
+
+        const { data, error } = await query;
         if (error) throw error;
         
-        res.status(200).json(data);
+        res.status(200).json(data || []);
     } catch (err) {
         console.error('Error fetching offices:', err.message);
         res.status(500).json({ success: false, message: 'Database query failed' });
@@ -116,6 +123,8 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/downline', downlineRoutes);
+app.use('/api/downlines', downlineRoutes);
 
 // Frontend Page Routing
 app.get('/', (req, res) => {

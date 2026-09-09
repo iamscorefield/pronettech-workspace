@@ -21,6 +21,15 @@
                             gold: '#FFC107',
                             blue: '#0070c0'
                         }
+                    },
+                    keyframes: {
+                        'attention-zoom': {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.035)', boxShadow: '0 10px 25px -5px rgba(106, 27, 191, 0.4)' }
+                        }
+                    },
+                    animation: {
+                        'attention-pulse': 'attention-zoom 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                     }
                 }
             }
@@ -48,39 +57,16 @@
 </head>
 <body class="min-h-full pb-12 relative overflow-x-hidden bg-white text-pnt-dark">
 
-    <nav class="glass-card sticky top-0 z-50 border-b px-6 py-4">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="flex items-center justify-center">
-                    <img src="/assets/images/logo.png" alt="Pronettech Logo" class="h-10 w-auto rounded-lg">
-                </div>
-                <div>
-                    <h2 class="font-bold text-sm tracking-tight text-pnt-dark flex items-center gap-2">
-                        Pronettech Workspace 
-                        <span id="leader-office-badge" class="bg-purple-50 border border-purple-200 text-pnt-purple text-[10px] px-2 py-0.5 rounded-full font-bold">Loading...</span>
-                    </h2>
-                    <p class="text-[10px] text-pnt-purple font-semibold tracking-wider uppercase">Sub-Admin Terminal</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <span id="user-badge-id" class="hidden sm:inline-block pnt-id-badge text-xs px-3 py-1.5 rounded-full font-mono">PNT-LEADER</span>
-                <button id="logout-btn" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-300">
-                    Sign Out
-                </button>
-            </div>
-        </div>
-    </nav>
-
     <!-- Top Account Inactive / Expired Warning Strip -->
     <div id="unpaid-warning-strip" class="hidden bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 text-white px-6 py-3 shadow-md relative z-20">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
             <div class="flex items-center gap-2">
                 <span class="text-base">⚠️</span>
                 <span class="font-bold uppercase tracking-wider">Leadership Inactive:</span>
-                <span id="unpaid-warning-text">Your annual leadership credentials are expired or inactive. Renew to retain verified status.</span>
+                <span id="unpaid-warning-text">Your annual leadership credentials are expired or inactive. Activate now to deploy tasks and manage branch operations.</span>
             </div>
-            <button onclick="document.getElementById('reactivate-membership-btn').click()" class="bg-white text-slate-900 font-bold px-4 py-1 rounded-lg text-[11px] shadow hover:bg-slate-100 transition-all uppercase tracking-wider">
-                Reactivate Leadership
+            <button id="strip-reactivate-btn" class="bg-white text-slate-900 font-bold px-4 py-1.5 rounded-lg text-[11px] shadow hover:bg-slate-100 transition-all uppercase tracking-wider cursor-pointer">
+                Activate Leadership Now
             </button>
         </div>
     </div>
@@ -89,40 +75,50 @@
 
         <!-- Top Telemetry Row -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div class="glass-card p-6 rounded-2xl flex items-center justify-between">
+            
+            <div onclick="window.location.href='/views/team.html'" class="glass-card p-6 rounded-2xl flex items-center justify-between cursor-pointer hover:border-pnt-purple/50 hover:shadow-md transition-all group" title="Click to inspect all regional branch members">
                 <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Regional Members</p>
+                    <div class="flex items-center gap-1.5">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-pnt-purple transition-colors">Total Regional Members</p>
+                        <span class="text-[10px] text-pnt-purple font-bold opacity-0 group-hover:opacity-100 transition-opacity">View ➔</span>
+                    </div>
                     <h3 class="text-3xl font-bold mt-1 text-pnt-dark" id="stat-team-size">0</h3>
                 </div>
-                <div class="w-12 h-12 bg-purple-50 border border-purple-100 rounded-xl flex items-center justify-center text-pnt-purple">
+                <div class="w-12 h-12 bg-purple-50 border border-purple-100 rounded-xl flex items-center justify-center text-pnt-purple group-hover:scale-105 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                 </div>
             </div>
 
-            <div class="glass-card p-6 rounded-2xl flex items-center justify-between">
+            <div onclick="document.getElementById('pending-queue').scrollIntoView({behavior: 'smooth'})" class="glass-card p-6 rounded-2xl flex items-center justify-between cursor-pointer hover:border-emerald-300 hover:shadow-md transition-all group" title="Click to audit live attendance check-ins">
                 <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Present Today</p>
+                    <div class="flex items-center gap-1.5">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-emerald-600 transition-colors">Present Today</p>
+                        <span class="text-[10px] text-emerald-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">Audit ➔</span>
+                    </div>
                     <h3 class="text-3xl font-bold mt-1 text-emerald-600" id="stat-present-count">0</h3>
                 </div>
-                <div class="w-12 h-12 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-center text-emerald-600">
+                <div class="w-12 h-12 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-center text-emerald-600 group-hover:scale-105 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
             </div>
 
-            <div class="glass-card p-6 rounded-2xl flex items-center justify-between col-span-1">
+            <div onclick="document.getElementById('pending-registrations-queue').scrollIntoView({behavior: 'smooth'})" class="glass-card p-6 rounded-2xl flex items-center justify-between col-span-1 cursor-pointer hover:border-amber-300 hover:shadow-md transition-all group" title="Click to review pending onboarding requests">
                 <div>
-                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pending Approvals</p>
+                    <div class="flex items-center gap-1.5">
+                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-amber-600 transition-colors">Pending Approvals</p>
+                        <span class="text-[10px] text-amber-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">Review ➔</span>
+                    </div>
                     <h3 class="text-3xl font-bold mt-1 text-amber-600" id="stat-pending-count">0</h3>
                 </div>
-                <div class="w-12 h-12 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-center text-amber-600">
+                <div class="w-12 h-12 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-center text-amber-600 group-hover:scale-105 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
             </div>
+
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <!-- Left Side Operations -->
             <div class="lg:col-span-2 space-y-6">
 
                 <!-- Management Directives -->
@@ -189,7 +185,7 @@
                 <div class="glass-card p-6 rounded-2xl relative overflow-hidden">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Leader ID Badge</h3>
-                        <button id="flip-card-btn" class="text-xs font-bold text-pnt-purple bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3 py-1 rounded-full transition-all flex items-center gap-1.5 shadow-sm">
+                        <button id="flip-card-btn" class="text-xs font-bold text-pnt-purple bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3 py-1 rounded-full transition-all flex items-center gap-1.5 shadow-sm cursor-pointer">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                             Flip Card
                         </button>
@@ -329,16 +325,17 @@
                         </div>
                     </div>
 
-                    <!-- ACTION BUTTONS -->
+                    <!-- ACTION BUTTONS: DYNAMICALLY CONTROLLED VIA ENTITLEMENTS -->
                     <div class="mt-6 space-y-3">
-                        <button id="download-soft-copy-btn" class="w-full btn-brand-gradient text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer">
-                            <span>Download Digital Softcopy</span>
-                            <span class="bg-white/20 px-2 py-0.5 rounded-md font-mono text-[11px]">₦2,000</span>
+                        <button id="download-soft-copy-btn" class="w-full bg-slate-50 hover:bg-slate-100 border border-slate-300 text-slate-700 font-semibold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-sm flex items-center justify-center gap-2 cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            <span id="softcopy-btn-text">Download Digital Softcopy</span>
+                            <span id="softcopy-btn-badge" class="bg-purple-100 text-pnt-purple px-2 py-0.5 rounded-md font-mono text-[11px] font-bold">₦2,000</span>
                         </button>
                         
-                        <button id="reactivate-membership-btn" class="w-full btn-brand-gradient text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2">
-                            <span>Reactivate Leadership Status</span>
-                            <span class="bg-white/20 px-2 py-0.5 rounded-md font-mono text-[11px]">₦3,000</span>
+                        <button id="reactivate-membership-btn" class="w-full btn-brand-gradient text-white font-semibold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer">
+                            <span id="renewal-btn-text">Reactivate Leadership Status</span>
+                            <span id="renewal-btn-badge" class="bg-white/20 px-2 py-0.5 rounded-md font-mono text-[11px] font-bold">₦3,000</span>
                         </button>
                     </div>
 
@@ -379,9 +376,9 @@
                 </div>
 
                 <!-- Deploy Task Form to Branch Members -->
-                <div class="glass-card p-6 rounded-2xl border-purple-100">
+                <div class="glass-card p-6 rounded-2xl border-purple-100" id="task-deploy-card">
                     <h3 class="text-sm font-semibold text-pnt-purple uppercase tracking-wider mb-1">Assign Member Task</h3>
-                    <p class="text-slate-500 text-xs mb-4">Deploy action items directly to member terminal dashboards.</p>
+                    <p class="text-slate-500 text-xs mb-4" id="task-deploy-desc">Deploy action items directly to member terminal dashboards.</p>
                     
                     <form id="task-deployer-form" class="space-y-4">
                         <div>
@@ -396,14 +393,14 @@
                             <label for="task-description" class="block text-xs text-slate-600 font-medium mb-1.5">Task Description</label>
                             <textarea id="task-description" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple text-xs" placeholder="What are the specific guidelines or milestones..."></textarea>
                         </div>
-                        <button type="submit" class="w-full btn-brand-gradient font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-md text-white">
+                        <button type="submit" id="deploy-task-btn" class="w-full btn-brand-gradient font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-md text-white cursor-pointer">
                             Deploy Live Task
                         </button>
                     </form>
                 </div>
 
                 <!-- Escalate Incident Form -->
-                <div class="glass-card p-6 rounded-2xl">
+                <div class="glass-card p-6 rounded-2xl" id="incident-escalate-card">
                     <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Escalate Incident</h3>
                     <p class="text-slate-500 text-xs mb-4">Direct secure communication pipeline straight to Global Owner dashboard.</p>
                     
@@ -416,7 +413,7 @@
                             <label for="report-details" class="block text-xs text-slate-600 font-medium mb-1.5">Detailed Report</label>
                             <textarea id="report-details" rows="4" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple text-xs" placeholder="Describe regional logistics issues, compliance events, or hardware failures..."></textarea>
                         </div>
-                        <button type="submit" class="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-pnt-dark font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-sm">
+                        <button type="submit" id="escalate-btn" class="w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-pnt-dark font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-sm cursor-pointer">
                             Dispatch Incident Log
                         </button>
                     </form>
@@ -426,6 +423,29 @@
         </div>
 
     </main>
+
+    <!-- MODAL: TRANSACTION CELEBRATION POPUP -->
+    <div id="payment-success-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4 text-center relative">
+            <button type="button" onclick="closeSuccessModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer transition-colors">&times;</button>
+            
+            <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-emerald-100">
+                ✓
+            </div>
+            
+            <h3 class="text-lg font-extrabold text-pnt-dark" id="modal-success-title">Payment Confirmed!</h3>
+            
+            <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 border border-slate-100 p-4 rounded-xl text-center" id="modal-success-msg">
+                Your transaction was processed successfully.
+            </p>
+            
+            <div id="modal-action-slot" class="pt-2">
+                <button type="button" onclick="closeSuccessModal()" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">
+                    Continue to Terminal
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- DISCIPLINARY POPUP MODAL -->
     <div id="disciplinary-alert-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -437,33 +457,67 @@
             <p class="text-xs text-slate-600 leading-relaxed bg-red-50/60 border border-red-100 p-4 rounded-xl text-left font-mono" id="leader-alert-reason">
                 Loading compliance notice details...
             </p>
-            <button type="button" onclick="document.getElementById('disciplinary-alert-modal').classList.add('hidden')" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md">
+            <button type="button" onclick="document.getElementById('disciplinary-alert-modal').classList.add('hidden')" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">
                 Acknowledge & Dismiss
             </button>
         </div>
     </div>
 
+    <!-- Mount Universal Responsive Navigation -->
+    <script src="/js/nav.js"></script>
+
     <script>
-        // ==========================================
-        // PAYSTACK GATEWAY INTEGRATION CONFIGURATION
-        // ==========================================
-        // Paste your Live Public Key (pk_live_...) inside the quotes below:
         const PAYSTACK_PUBLIC_KEY = 'pk_live_ccd08c29cebcb52ee9c5a97b44df82d3413351ec';
 
         let currentUser = null;
+        let userEntitlements = { hasPaidSoftcopy: false, isMembershipActive: false };
         let pendingUsers = [];
         let pendingLogs = [];
         let activeTasks = [];
         let myAssignedTasks = [];
         let countdownTimerInterval = null;
 
-        // 3D Card Flipper
         const flipBtn = document.getElementById('flip-card-btn');
         const cardFlipper = document.getElementById('id-card-flipper');
         
         flipBtn.addEventListener('click', () => {
             cardFlipper.classList.toggle('is-flipped');
         });
+
+        document.getElementById('strip-reactivate-btn').addEventListener('click', () => {
+            document.getElementById('reactivate-membership-btn').click();
+        });
+
+        function showSuccessModal(type) {
+            const modal = document.getElementById('payment-success-modal');
+            const title = document.getElementById('modal-success-title');
+            const msg = document.getElementById('modal-success-msg');
+            const actionSlot = document.getElementById('modal-action-slot');
+
+            if (type === 'softcopy') {
+                title.textContent = "🎉 Congratulations!";
+                msg.innerHTML = "Your official digital softcopy ID card is paid for and ready to download. You can now save or print your high-resolution badge anytime.";
+                actionSlot.innerHTML = `
+                    <button type="button" onclick="window.print(); closeSuccessModal();" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer flex items-center justify-center gap-2">
+                        Download & Print ID Card ➔
+                    </button>
+                `;
+            } else if (type === 'renewal') {
+                title.textContent = "🎉 Congratulations!";
+                msg.innerHTML = "You have successfully activated your annual leadership status! Keep managing tasks, attendance, and branch operations seamlessly.";
+                actionSlot.innerHTML = `
+                    <button type="button" onclick="closeSuccessModal(); window.location.reload();" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">
+                        Enjoy Your Leadership Status ➔
+                    </button>
+                `;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('payment-success-modal').classList.add('hidden');
+        }
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -476,23 +530,19 @@
                 }
 
                 currentUser = authData.user;
-                if (currentUser.role !== 'leader' && currentUser.role !== 'admin') {
+                if (currentUser.role !== 'leader' && currentUser.role !== 'team_leader' && currentUser.role !== 'admin') {
                     alert('Access Forbidden: Security tier parameter mismatch.');
                     window.location.href = '/views/dashboard.html';
                     return;
                 }
 
                 localStorage.setItem('pnt_user', JSON.stringify(currentUser));
-                document.getElementById('leader-office-badge').textContent = currentUser.office_name || 'No Region';
-                document.getElementById('user-badge-id').textContent = currentUser.customId || 'PNT-LEADER';
 
-                // Populate ID Badge Information
                 document.getElementById('card-fullname').textContent = (currentUser.name || 'Team Leader').toUpperCase();
                 const userRole = currentUser.role ? currentUser.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Team Leader';
                 document.getElementById('card-role').textContent = userRole;
                 document.getElementById('card-back-role').textContent = userRole.toUpperCase();
 
-                // Load Leader avatar
                 if (currentUser.avatar_url) {
                     const avatarImg = document.getElementById('card-avatar-img');
                     const placeholder = document.getElementById('card-avatar-placeholder');
@@ -501,13 +551,12 @@
                     placeholder.classList.add('hidden');
                 }
 
-                // QR Code
                 const userCode = currentUser.customId || 'PNT-LEADER-01';
                 const verificationUrl = `${window.location.origin}/verify.html?id=${encodeURIComponent(userCode)}`;
                 document.getElementById('card-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}&color=0D122B&bgcolor=FFFFFF`;
 
-                // Render Live 4-Box Clock & Disciplinary Alerts
                 initCountdownEngine(currentUser.membership_expires_at);
+                await syncEntitlementUI();
                 checkDisciplinaryStatus(currentUser);
 
                 refreshLeaderData();
@@ -518,7 +567,100 @@
         });
 
         // ==========================================
-        // 4-BOX COUNTDOWN ENGINE WITH REAL-TIME TICKER
+        // DYNAMIC BUTTON STATE CONTROLLER
+        // ==========================================
+        async function syncEntitlementUI() {
+            try {
+                const res = await fetch('/api/marketplace/my-entitlements', { credentials: 'include' });
+                const data = await res.json();
+
+                if (data.success && data.entitlements) {
+                    userEntitlements = data.entitlements;
+
+                    const softcopyBtn = document.getElementById('download-soft-copy-btn');
+                    const softcopyText = document.getElementById('softcopy-btn-text');
+                    const softcopyBadge = document.getElementById('softcopy-btn-badge');
+
+                    const renewalBtn = document.getElementById('reactivate-membership-btn');
+                    const renewalText = document.getElementById('renewal-btn-text');
+                    const renewalBadge = document.getElementById('renewal-btn-badge');
+
+                    // 1. Softcopy ID Button State
+                    if (userEntitlements.hasPaidSoftcopy) {
+                        softcopyBtn.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer";
+                        softcopyText.textContent = "✓ Download Official Digital ID";
+                        softcopyBadge.className = "bg-white/20 text-white px-2 py-0.5 rounded-md font-mono text-[10px] uppercase";
+                        softcopyBadge.textContent = "Paid";
+                        softcopyBtn.classList.remove('animate-attention-pulse');
+                    } else {
+                        softcopyBtn.className = "w-full bg-purple-50 hover:bg-purple-100 border-2 border-pnt-purple text-pnt-purple font-bold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer animate-attention-pulse";
+                        softcopyText.textContent = "Pay & Unlock Digital Softcopy";
+                        softcopyBadge.className = "bg-pnt-purple text-white px-2 py-0.5 rounded-md font-mono text-[11px] font-bold";
+                        softcopyBadge.textContent = "₦2,000";
+                    }
+
+                    // 2. Annual Leadership Renewal Button State
+                    if (userEntitlements.isMembershipActive) {
+                        renewalBtn.className = "w-full bg-emerald-50 border border-emerald-300 text-emerald-800 font-bold py-3 px-4 rounded-xl text-xs shadow-none flex items-center justify-center gap-2 cursor-default";
+                        renewalText.textContent = "✓ Leadership Active & Verified";
+                        renewalBadge.className = "bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-md font-mono text-[10px] uppercase";
+                        renewalBadge.textContent = "Active";
+                        renewalBtn.classList.remove('animate-attention-pulse');
+                    } else {
+                        renewalBtn.className = "w-full btn-brand-gradient text-white font-bold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-xl flex items-center justify-center gap-2 cursor-pointer animate-attention-pulse";
+                        renewalText.textContent = "Activate Leadership Status";
+                        renewalBadge.className = "bg-white/25 px-2 py-0.5 rounded-md font-mono text-[11px] font-bold";
+                        renewalBadge.textContent = "₦3,000";
+                    }
+
+                    applyLeaderLockoutEnforcement(userEntitlements.isMembershipActive);
+                }
+            } catch (err) {
+                console.error("Could not sync entitlements:", err);
+            }
+        }
+
+        // ==========================================
+        // HARD LOCKOUT ENFORCEMENT (LEADER)
+        // ==========================================
+        function applyLeaderLockoutEnforcement(isActive) {
+            const deployBtn = document.getElementById('deploy-task-btn');
+            const escalateBtn = document.getElementById('escalate-btn');
+            const taskDesc = document.getElementById('task-deploy-desc');
+
+            if (!isActive) {
+                if (deployBtn) {
+                    deployBtn.disabled = true;
+                    deployBtn.className = "w-full bg-slate-200 text-slate-400 border border-slate-300 font-bold py-2.5 rounded-xl text-xs shadow-none cursor-not-allowed";
+                    deployBtn.textContent = "🔒 Leadership Inactive (Locked)";
+                }
+                if (escalateBtn) {
+                    escalateBtn.disabled = true;
+                    escalateBtn.className = "w-full bg-slate-200 text-slate-400 border border-slate-300 font-bold py-2.5 rounded-xl text-xs shadow-none cursor-not-allowed";
+                    escalateBtn.textContent = "🔒 Escalation Channel Locked";
+                }
+                if (taskDesc) {
+                    taskDesc.textContent = "Task deployment and executive actions are locked. Please activate leadership status above.";
+                }
+            } else {
+                if (deployBtn) {
+                    deployBtn.disabled = false;
+                    deployBtn.className = "w-full btn-brand-gradient font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-md text-white cursor-pointer";
+                    deployBtn.textContent = "Deploy Live Task";
+                }
+                if (escalateBtn) {
+                    escalateBtn.disabled = false;
+                    escalateBtn.className = "w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-pnt-dark font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-sm cursor-pointer";
+                    escalateBtn.textContent = "Dispatch Incident Log";
+                }
+                if (taskDesc) {
+                    taskDesc.textContent = "Deploy action items directly to member terminal dashboards.";
+                }
+            }
+        }
+
+        // ==========================================
+        // COUNTDOWN ENGINE
         // ==========================================
         function initCountdownEngine(expiresAtString) {
             const warningStrip = document.getElementById('unpaid-warning-strip');
@@ -527,7 +669,8 @@
             if (!expiresAtString) {
                 setClockExpired();
                 warningStrip.classList.remove('hidden');
-                dateReadout.textContent = "Inactive (Renewal Required)";
+                dateReadout.textContent = "Unpaid (Activation Required)";
+                applyLeaderLockoutEnforcement(false);
                 return;
             }
 
@@ -542,8 +685,11 @@
                     setClockExpired();
                     warningStrip.classList.remove('hidden');
                     dateReadout.textContent = "Expired (Renewal Required)";
+                    applyLeaderLockoutEnforcement(false);
                     return;
                 }
+
+                warningStrip.classList.add('hidden');
 
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -570,9 +716,6 @@
             document.getElementById('timer-secs').textContent = "00";
         }
 
-        // ==========================================
-        // DISCIPLINARY POPUP DETECTOR
-        // ==========================================
         function checkDisciplinaryStatus(user) {
             const status = (user.status || 'active').toLowerCase();
             if (['warning', 'inactive', 'suspended', 'ban', 'banned'].includes(status)) {
@@ -590,9 +733,14 @@
         }
 
         // ==========================================
-        // PAYSTACK PAYMENT WORKFLOW (LEADER)
+        // PAYSTACK PAYMENTS
         // ==========================================
         document.getElementById('download-soft-copy-btn').addEventListener('click', () => {
+            if (userEntitlements.hasPaidSoftcopy) {
+                window.print();
+                return;
+            }
+
             initiatePaystack(2000, 'softcopy', async (response) => {
                 try {
                     const res = await fetch('/api/marketplace/verify-payment', {
@@ -603,18 +751,23 @@
                     });
                     const result = await res.json();
                     if (result.success) {
-                        alert('🎉 Payment verified! Generating your official digital ID...');
-                        window.print();
+                        await syncEntitlementUI();
+                        showSuccessModal('softcopy');
                     } else {
-                        alert(`Verification warning: ${result.message}`);
+                        alert(`Verification note: ${result.message}`);
                     }
                 } catch (err) {
-                    alert('Could not contact the verification server.');
+                    alert('Could not contact verification server.');
                 }
             });
         });
 
         document.getElementById('reactivate-membership-btn').addEventListener('click', () => {
+            if (userEntitlements.isMembershipActive) {
+                alert("✅ Your leadership status is already active and valid.");
+                return;
+            }
+
             initiatePaystack(3000, 'renewal', async (response) => {
                 try {
                     const res = await fetch('/api/marketplace/verify-payment', {
@@ -625,13 +778,12 @@
                     });
                     const result = await res.json();
                     if (result.success) {
-                        alert('🎉 Leadership credentials renewed for 1 year!');
-                        window.location.reload();
+                        showSuccessModal('renewal');
                     } else {
-                        alert(`Renewal warning: ${result.message}`);
+                        alert(`Verification note: ${result.message}`);
                     }
                 } catch (err) {
-                    alert('Could not contact the verification server.');
+                    alert('Could not contact verification server.');
                 }
             });
         });
@@ -645,7 +797,7 @@
             const handler = PaystackPop.setup({
                 key: PAYSTACK_PUBLIC_KEY,
                 email: currentUser.email || 'leader@pronettech.com',
-                amount: amountInNaira * 100, // Amount in kobo
+                amount: amountInNaira * 100,
                 currency: 'NGN',
                 ref: 'PNT-LDR-' + purpose.toUpperCase() + '-' + Date.now(),
                 callback: function(response) {
@@ -659,7 +811,6 @@
             handler.openIframe();
         }
 
-        // Real-time Photo Upload Handler
         async function uploadAvatar(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -694,11 +845,6 @@
             }
         }
 
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('pnt_user');
-            window.location.href = '/views/onboarding.html';
-        });
-
         async function refreshLeaderData() {
             if (!currentUser.id) return;
             await fetchLeaderAssignedDirectives();
@@ -710,7 +856,6 @@
             }
         }
 
-        // 0. TASKS ASSIGNED BY ADMIN DIRECTLY TO THIS LEADER
         async function fetchLeaderAssignedDirectives() {
             const container = document.getElementById('leader-assigned-tasks-list');
             try {
@@ -744,10 +889,10 @@
 
                 if (task.status === 'assigned') {
                     badgeClass = "bg-blue-50 border-blue-200 text-blue-700";
-                    actionBtn = `<button onclick="updateLeaderTaskStatus('${task.id}', 'in_progress')" class="bg-pnt-purple hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all">Start Directive</button>`;
+                    actionBtn = `<button onclick="updateLeaderTaskStatus('${task.id}', 'in_progress')" class="bg-pnt-purple hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer">Start Directive</button>`;
                 } else if (task.status === 'in_progress') {
                     badgeClass = "bg-amber-50 border-amber-200 text-amber-700";
-                    actionBtn = `<button onclick="updateLeaderTaskStatus('${task.id}', 'completed')" class="bg-pnt-orange hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all">Mark Directive Complete</button>`;
+                    actionBtn = `<button onclick="updateLeaderTaskStatus('${task.id}', 'completed')" class="bg-pnt-orange hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer">Mark Directive Complete</button>`;
                 } else if (task.status === 'completed') {
                     badgeClass = "bg-purple-50 border-purple-200 text-pnt-purple animate-pulse";
                     actionBtn = `<span class="text-[11px] text-slate-400 font-semibold italic">Sent to Admin for verification...</span>`;
@@ -756,7 +901,7 @@
                     actionBtn = `<span class="text-[11px] text-emerald-600 font-bold">✓ Approved by Admin</span>`;
                 } else if (task.status === 'rejected') {
                     badgeClass = "bg-red-50 border-red-200 text-red-700";
-                    actionBtn = `<button onclick="updateLeaderTaskStatus('${task.id}', 'in_progress')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all">Retry Directive</button>`;
+                    actionBtn = `<button onclick="updateLeaderTaskStatus('${task.id}', 'in_progress')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer">Retry Directive</button>`;
                 }
 
                 const card = document.createElement('div');
@@ -800,7 +945,6 @@
             }
         }
 
-        // 1. REGIONAL METRICS & STATS
         async function fetchRegionalMetrics() {
             try {
                 const response = await fetch(`/api/attendance/metrics/office/${currentUser.office_id}`, { credentials: 'include' });
@@ -822,7 +966,6 @@
             }
         }
 
-        // 2. NEW USER REGISTRATIONS
         async function fetchPendingRegistrations() {
             try {
                 const response = await fetch(`/api/auth/pending/office/${currentUser.office_id}`, { credentials: 'include' });
@@ -863,10 +1006,10 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2.5 w-full sm:w-auto">
-                        <button onclick="rejectRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300">
+                        <button onclick="rejectRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 cursor-pointer">
                             Reject
                         </button>
-                        <button onclick="approveRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-pnt-purple hover:opacity-90 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 shadow-sm">
+                        <button onclick="approveRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-pnt-purple hover:opacity-90 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 shadow-sm cursor-pointer">
                             Approve Account
                         </button>
                     </div>
@@ -918,7 +1061,6 @@
             }
         }
 
-        // 3. REAL-TIME ATTENDANCE VERIFICATION
         async function fetchPendingAttendance() {
             try {
                 const response = await fetch(`/api/attendance/pending/office/${currentUser.office_id}`, { credentials: 'include' });
@@ -943,8 +1085,8 @@
             }
 
             pendingLogs.forEach(log => {
-                const initials = `${log.profiles.first_name[0] || ''}${log.profiles.last_name[0] || ''}`.toUpperCase();
-                const fullName = `${log.profiles.first_name} ${log.profiles.last_name}`;
+                const initials = `${log.profiles?.first_name?.[0] || ''}${log.profiles?.last_name?.[0] || ''}`.toUpperCase();
+                const fullName = `${log.profiles?.first_name || ''} ${log.profiles?.last_name || ''}`;
                 const timestamp = new Date(log.marked_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
                 const card = document.createElement('div');
@@ -952,18 +1094,18 @@
                 card.innerHTML = `
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-pnt-dark">
-                            ${initials}
+                            ${initials || 'U'}
                         </div>
                         <div>
                             <h4 class="font-bold text-sm text-pnt-dark">${fullName}</h4>
-                            <p class="text-xs text-slate-500 font-mono mt-0.5">${log.profiles.custom_profile_id || 'PNT-MEMBER'} • marked at ${timestamp}</p>
+                            <p class="text-xs text-slate-500 font-mono mt-0.5">${log.profiles?.custom_profile_id || 'PNT-MEMBER'} • marked at ${timestamp}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2.5 w-full sm:w-auto">
-                        <button onclick="verifyAttendance('${log.id}', 'rejected')" class="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300">
+                        <button onclick="verifyAttendance('${log.id}', 'rejected')" class="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 cursor-pointer">
                             Reject
                         </button>
-                        <button onclick="verifyAttendance('${log.id}', 'confirmed')" class="flex-1 sm:flex-none bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300">
+                        <button onclick="verifyAttendance('${log.id}', 'confirmed')" class="flex-1 sm:flex-none bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 cursor-pointer">
                             Approve
                         </button>
                     </div>
@@ -994,7 +1136,6 @@
             }
         }
 
-        // 4. TASK MANAGEMENT LOGIC
         async function fetchAllTasks() {
             try {
                 const response = await fetch(`/api/tasks/office/${currentUser.office_id}`, { credentials: 'include' });
@@ -1039,8 +1180,8 @@
                             ${task.status.replace('_', ' ')}
                         </span>
                         ${task.status === 'completed' ? `
-                            <button onclick="evaluateTask('${task.id}', 'approved')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded transition-all">Approve</button>
-                            <button onclick="evaluateTask('${task.id}', 'rejected')" class="bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded transition-all">Reject</button>
+                            <button onclick="evaluateTask('${task.id}', 'approved')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded transition-all cursor-pointer">Approve</button>
+                            <button onclick="evaluateTask('${task.id}', 'rejected')" class="bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded transition-all cursor-pointer">Reject</button>
                         ` : ''}
                     </div>
                 `;
@@ -1050,6 +1191,11 @@
 
         document.getElementById('task-deployer-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (!userEntitlements.isMembershipActive) {
+                alert('🔒 Action Blocked: You must activate your annual leadership status first.');
+                return;
+            }
 
             const title = document.getElementById('task-title').value;
             const assigneeCustomId = document.getElementById('task-member-id').value;
@@ -1089,7 +1235,6 @@
                 const response = await fetch(`/api/tasks/${taskId}/status`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
                     body: JSON.stringify({ status: decision })
                 });
 
@@ -1106,9 +1251,13 @@
             }
         }
 
-        // 5. INCIDENT ESCALATION
         document.getElementById('escalation-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (!userEntitlements.isMembershipActive) {
+                alert('🔒 Action Blocked: You must activate your annual leadership status first.');
+                return;
+            }
 
             const subject = document.getElementById('report-subject').value;
             const details = document.getElementById('report-details').value;
