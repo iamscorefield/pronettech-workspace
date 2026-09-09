@@ -162,7 +162,7 @@
                                         <p class="text-[8px] font-bold text-[#ff7a00] tracking-wider uppercase">Global Ltd.</p>
                                     </div>
                                 </div>
-                                <p class="text-[9px] font-semibold text-slate-700 tracking-wider mt-1.5">Reg No. 7331721</p>
+                                <p id="card-id-number" class="text-[9px] font-bold text-pnt-purple tracking-wider mt-1.5 font-mono">ID: PNT-PENDING</p>
                             </div>
 
                             <div class="relative mx-auto -mt-1 group cursor-pointer" onclick="document.getElementById('avatar-file-input').click()" title="Click to upload profile photo">
@@ -247,7 +247,7 @@
                                 </div>
                                 <div class="flex items-center gap-1.5">
                                     <span class="text-[#0070c0] text-[9px] flex-shrink-0">✉️</span>
-                                    <p class="font-medium text-slate-800">pmvteamafrican@gmail.com</p>
+                                    <p class="font-medium text-slate-800">info@pronettech.net</p>
                                 </div>
                             </div>
 
@@ -440,6 +440,9 @@
                 document.getElementById('card-role').textContent = userRole;
                 document.getElementById('card-back-role').textContent = userRole.toUpperCase();
 
+                const userCode = currentUser.customId || 'PNT-2026-10001';
+                document.getElementById('card-id-number').textContent = `ID: ${userCode}`;
+
                 if (currentUser.avatar_url) {
                     const avatarImg = document.getElementById('card-avatar-img');
                     const placeholder = document.getElementById('card-avatar-placeholder');
@@ -448,7 +451,6 @@
                     placeholder.classList.add('hidden');
                 }
 
-                const userCode = currentUser.customId || 'PNT-2026-10001';
                 const verificationUrl = `${window.location.origin}/verify.html?id=${encodeURIComponent(userCode)}`;
                 document.getElementById('card-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}&color=0D122B&bgcolor=FFFFFF`;
 
@@ -483,7 +485,6 @@
                     const renewalText = document.getElementById('renewal-btn-text');
                     const renewalBadge = document.getElementById('renewal-btn-badge');
 
-                    // 1. Softcopy ID Button State
                     if (userEntitlements.hasPaidSoftcopy) {
                         softcopyBtn.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer";
                         softcopyText.textContent = "✓ Download Official Digital ID";
@@ -497,7 +498,6 @@
                         softcopyBadge.textContent = "₦2,000";
                     }
 
-                    // 2. Annual Membership Renewal Button State
                     if (userEntitlements.isMembershipActive) {
                         renewalBtn.className = "w-full bg-emerald-50 border border-emerald-300 text-emerald-800 font-bold py-3 px-4 rounded-xl text-xs shadow-none flex items-center justify-center gap-2 cursor-default";
                         renewalText.textContent = "✓ Membership Active & Verified";
@@ -518,9 +518,6 @@
             }
         }
 
-        // ==========================================
-        // HARD PAYWALL LOCKOUT
-        // ==========================================
         function applyLockoutEnforcement(isActive) {
             const attBtn = document.getElementById('mark-attendance-btn');
             const attDesc = document.getElementById('attendance-desc-text');
@@ -538,9 +535,6 @@
             }
         }
 
-        // ==========================================
-        // COUNTDOWN ENGINE
-        // ==========================================
         function initCountdownEngine(expiresAtString) {
             const warningStrip = document.getElementById('unpaid-warning-strip');
             const dateReadout = document.getElementById('timer-date-readout');
@@ -611,9 +605,6 @@
             }
         }
 
-        // ==========================================
-        // PAYSTACK PAYMENT INTEGRATION
-        // ==========================================
         document.getElementById('download-soft-copy-btn').addEventListener('click', () => {
             if (userEntitlements.hasPaidSoftcopy) {
                 window.print();
@@ -675,7 +666,7 @@
 
             const handler = PaystackPop.setup({
                 key: PAYSTACK_PUBLIC_KEY,
-                email: currentUser.email || 'member@pronettech.com',
+                email: currentUser.email || 'member@pronettech.net',
                 amount: amountInNaira * 100,
                 currency: 'NGN',
                 ref: 'PNT-' + purpose.toUpperCase() + '-' + Date.now(),
@@ -724,9 +715,6 @@
             }
         }
 
-        // ==========================================
-        // ATTENDANCE LOGGING
-        // ==========================================
         document.getElementById('mark-attendance-btn').addEventListener('click', async () => {
             if (!userEntitlements.isMembershipActive) {
                 alert('🔒 Action Blocked: You must activate your annual membership first.');
@@ -817,9 +805,6 @@
             });
         }
 
-        // ==========================================
-        // TASKS
-        // ==========================================
         async function fetchTasks() {
             try {
                 if (!currentUser || !currentUser.id) return;
