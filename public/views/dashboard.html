@@ -21,6 +21,15 @@
                             gold: '#FFC107',
                             blue: '#0070c0'
                         }
+                    },
+                    keyframes: {
+                        'attention-zoom': {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.035)', boxShadow: '0 10px 25px -5px rgba(106, 27, 191, 0.4)' }
+                        }
+                    },
+                    animation: {
+                        'attention-pulse': 'attention-zoom 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                     }
                 }
             }
@@ -48,36 +57,16 @@
 </head>
 <body class="min-h-full pb-12 relative overflow-x-hidden bg-white text-pnt-dark">
 
-    <nav class="glass-card sticky top-0 z-50 border-b px-6 py-4">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="flex items-center justify-center">
-                    <img src="/assets/images/logo.png" alt="Pronettech Logo" class="h-10 w-auto rounded-lg">
-                </div>
-                <div>
-                    <h2 class="font-bold text-sm tracking-tight text-pnt-dark">Pronettech Workspace</h2>
-                    <p class="text-[10px] text-pnt-purple font-semibold tracking-wider uppercase">Member Hub</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <span id="user-badge-id" class="hidden sm:inline-block pnt-id-badge text-xs px-3 py-1.5 rounded-full font-mono">PNT-2026-Loading</span>
-                <button id="logout-btn" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-300">
-                    Sign Out
-                </button>
-            </div>
-        </div>
-    </nav>
-
     <!-- Top Account Inactive / Expired Banner Alert -->
     <div id="unpaid-warning-strip" class="hidden bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 text-white px-6 py-3 shadow-md relative z-20">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
             <div class="flex items-center gap-2">
                 <span class="text-base">⚠️</span>
                 <span class="font-bold uppercase tracking-wider">Account Access Limited:</span>
-                <span id="unpaid-warning-text">Your membership validity is inactive or expired. Complete activation to unlock all services.</span>
+                <span id="unpaid-warning-text">Your annual membership validity is inactive. Pay registration to unlock attendance and actions.</span>
             </div>
-            <button onclick="document.getElementById('reactivate-membership-btn').click()" class="bg-white text-slate-900 font-bold px-4 py-1 rounded-lg text-[11px] shadow hover:bg-slate-100 transition-all uppercase tracking-wider">
-                Reactivate Now
+            <button id="strip-reactivate-btn" class="bg-white text-slate-900 font-bold px-4 py-1.5 rounded-lg text-[11px] shadow hover:bg-slate-100 transition-all uppercase tracking-wider cursor-pointer">
+                Activate Membership Now
             </button>
         </div>
     </div>
@@ -93,17 +82,19 @@
                 </div>
             </div>
 
-            <div class="glass-card p-8 rounded-2xl text-center relative overflow-hidden">
+            <!-- Attendance Action Desk -->
+            <div class="glass-card p-8 rounded-2xl text-center relative overflow-hidden" id="attendance-card-box">
                 <div class="absolute -top-10 -right-10 w-32 h-32 bg-pnt-purple/5 rounded-full blur-2xl pointer-events-none"></div>
                 <h2 class="text-xl font-bold mb-2 text-pnt-dark">Ready for Daily Logging?</h2>
-                <p class="text-slate-500 text-sm max-w-md mx-auto mb-6">Tap the button below to register your local coordinates and dispatch an instant verification ping to your Team Leader.</p>
+                <p class="text-slate-500 text-sm max-w-md mx-auto mb-6" id="attendance-desc-text">Tap the button below to register your local coordinates and dispatch an instant verification ping to your Team Leader.</p>
                 
-                <button id="mark-attendance-btn" class="btn-brand-gradient inline-flex items-center gap-3 font-bold px-8 py-4 rounded-2xl shadow-xl shadow-pnt-purple/20 transform hover:-translate-y-0.5 transition-all duration-300">
+                <button id="mark-attendance-btn" class="btn-brand-gradient inline-flex items-center gap-3 font-bold px-8 py-4 rounded-2xl shadow-xl shadow-pnt-purple/20 transform hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
                     <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Mark Today's Attendance
                 </button>
             </div>
 
+            <!-- Assigned Tasks -->
             <div class="glass-card p-6 rounded-2xl space-y-4">
                 <div class="flex justify-between items-center">
                     <div>
@@ -119,7 +110,7 @@
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div class="glass-card p-6 rounded-2xl hover:border-pnt-purple/30 transition-all duration-300 cursor-pointer">
+                <div onclick="window.location.href='/views/community.html'" class="glass-card p-6 rounded-2xl hover:border-pnt-purple/30 transition-all duration-300 cursor-pointer">
                     <div class="w-10 h-10 bg-purple-50 border border-purple-100 rounded-xl flex items-center justify-center mb-4 text-pnt-purple">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 012 2h2v4l.586-.586z"></path></svg>
                     </div>
@@ -127,7 +118,7 @@
                     <p class="text-slate-500 text-xs leading-relaxed">Search open problem forums and interact with teammates dynamically.</p>
                 </div>
 
-                <div class="glass-card p-6 rounded-2xl hover:border-pnt-orange/30 transition-all duration-300 cursor-pointer">
+                <div onclick="window.location.href='/views/announcements.html'" class="glass-card p-6 rounded-2xl hover:border-pnt-orange/30 transition-all duration-300 cursor-pointer">
                     <div class="w-10 h-10 bg-orange-50 border border-orange-100 rounded-xl flex items-center justify-center mb-4 text-pnt-orange">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                     </div>
@@ -142,7 +133,7 @@
             <div class="glass-card p-6 rounded-2xl relative overflow-hidden">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">Official Corporate ID</h3>
-                    <button id="flip-card-btn" class="text-xs font-bold text-pnt-purple bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3 py-1 rounded-full transition-all flex items-center gap-1.5 shadow-sm">
+                    <button id="flip-card-btn" class="text-xs font-bold text-pnt-purple bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3 py-1 rounded-full transition-all flex items-center gap-1.5 shadow-sm cursor-pointer">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                         Flip Card
                     </button>
@@ -285,56 +276,48 @@
                     </div>
                 </div>
 
-                <!-- ACTION BUTTONS -->
+                <!-- ACTION BUTTONS: DYNAMICALLY CONTROLLED VIA ENTITLEMENTS -->
                 <div class="mt-6 space-y-3">
-                    <button id="download-soft-copy-btn" class="w-full bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-400 font-semibold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 shadow-sm flex items-center justify-center gap-2 cursor-not-allowed">
+                    <button id="download-soft-copy-btn" class="w-full bg-slate-50 hover:bg-slate-100 border border-slate-300 text-slate-700 font-semibold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-sm flex items-center justify-center gap-2 cursor-pointer">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                        <span>Download Digital Softcopy</span>
-                        <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md font-mono text-[11px]">₦2,000</span>
+                        <span id="softcopy-btn-text">Download Digital Softcopy</span>
+                        <span id="softcopy-btn-badge" class="bg-purple-100 text-pnt-purple px-2 py-0.5 rounded-md font-mono text-[11px] font-bold">₦2,000</span>
                     </button>
                     
-                    <button id="reactivate-membership-btn" class="w-full btn-brand-gradient text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2">
-                        <span>Reactivate Your Membership</span>
-                        <span class="bg-white/20 px-2 py-0.5 rounded-md font-mono text-[11px]">₦3,000</span>
+                    <button id="reactivate-membership-btn" class="w-full btn-brand-gradient text-white font-semibold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer">
+                        <span id="renewal-btn-text">Reactivate Your Membership</span>
+                        <span id="renewal-btn-badge" class="bg-white/20 px-2 py-0.5 rounded-md font-mono text-[11px] font-bold">₦3,000</span>
                     </button>
                 </div>
 
-                <!-- ======================================================== -->
-                <!-- 4-BOX DIGITAL COUNTDOWN CLOCK COMPONENT                   -->
-                <!-- Exact reproduction of screenshot with DAYS, HOURS, MINS, SECS -->
-                <!-- ======================================================== -->
+                <!-- 4-BOX DIGITAL COUNTDOWN CLOCK COMPONENT -->
                 <div class="mt-4 bg-[#4A154B] p-4 rounded-2xl shadow-inner border border-purple-900/30 text-white">
                     <div class="text-[9px] font-bold text-center tracking-widest uppercase text-purple-200 mb-2.5">
                         Membership Validity Countdown
                     </div>
                     
                     <div class="grid grid-cols-4 gap-2 text-center">
-                        <!-- Days Box -->
                         <div class="bg-[#3F0E40]/90 border border-white/10 rounded-xl py-2 px-1 flex flex-col items-center justify-center shadow">
                             <span id="timer-days" class="text-xl sm:text-2xl font-black text-pnt-gold leading-none">00</span>
                             <span class="text-[8px] font-bold uppercase tracking-widest text-purple-200 mt-1">Days</span>
                         </div>
 
-                        <!-- Hours Box -->
                         <div class="bg-[#3F0E40]/90 border border-white/10 rounded-xl py-2 px-1 flex flex-col items-center justify-center shadow">
                             <span id="timer-hours" class="text-xl sm:text-2xl font-black text-white leading-none">00</span>
                             <span class="text-[8px] font-bold uppercase tracking-widest text-purple-200 mt-1">Hours</span>
                         </div>
 
-                        <!-- Mins Box -->
                         <div class="bg-[#3F0E40]/90 border border-white/10 rounded-xl py-2 px-1 flex flex-col items-center justify-center shadow">
                             <span id="timer-mins" class="text-xl sm:text-2xl font-black text-white leading-none">00</span>
                             <span class="text-[8px] font-bold uppercase tracking-widest text-purple-200 mt-1">Mins</span>
                         </div>
 
-                        <!-- Secs Box -->
                         <div class="bg-[#3F0E40]/90 border border-white/10 rounded-xl py-2 px-1 flex flex-col items-center justify-center shadow">
                             <span id="timer-secs" class="text-xl sm:text-2xl font-black text-pnt-gold leading-none">00</span>
                             <span class="text-[8px] font-bold uppercase tracking-widest text-purple-200 mt-1">Secs</span>
                         </div>
                     </div>
 
-                    <!-- Explicit Expiration Date string -->
                     <div class="mt-3 text-center border-t border-white/10 pt-2 text-[10px] text-purple-200 flex items-center justify-between px-1">
                         <span class="text-[9px] uppercase tracking-wider text-purple-300">Valid Until:</span>
                         <span id="timer-date-readout" class="font-mono font-bold text-white">Pending Activation</span>
@@ -346,7 +329,30 @@
 
     </main>
 
-    <!-- ================= MODAL: DISCIPLINARY ALERT ================= -->
+    <!-- MODAL: TRANSACTION CELEBRATION POPUP -->
+    <div id="payment-success-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4 text-center relative">
+            <button type="button" onclick="closeSuccessModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer transition-colors">&times;</button>
+            
+            <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-emerald-100">
+                ✓
+            </div>
+            
+            <h3 class="text-lg font-extrabold text-pnt-dark" id="modal-success-title">Payment Confirmed!</h3>
+            
+            <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 border border-slate-100 p-4 rounded-xl text-center" id="modal-success-msg">
+                Your transaction was processed successfully.
+            </p>
+            
+            <div id="modal-action-slot" class="pt-2">
+                <button type="button" onclick="closeSuccessModal()" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">
+                    Continue to Terminal
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: DISCIPLINARY ALERT -->
     <div id="disciplinary-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-red-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4 text-center">
             <div class="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
@@ -356,30 +362,64 @@
             <p class="text-xs text-slate-600 leading-relaxed bg-red-50/60 border border-red-100 p-4 rounded-xl text-left font-mono" id="disciplinary-reason">
                 Loading compliance notice details...
             </p>
-            <button type="button" onclick="document.getElementById('disciplinary-modal').classList.add('hidden')" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md">
+            <button type="button" onclick="document.getElementById('disciplinary-modal').classList.add('hidden')" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">
                 Acknowledge Notice
             </button>
         </div>
     </div>
 
+    <!-- Mount Universal Responsive Navigation -->
+    <script src="/js/nav.js"></script>
+
     <script>
-        // ==========================================
-        // PAYSTACK GATEWAY INTEGRATION CONFIGURATION
-        // ==========================================
-        // Replace this key with your live public key (pk_live_xxxx) when ready
         const PAYSTACK_PUBLIC_KEY = 'pk_live_ccd08c29cebcb52ee9c5a97b44df82d3413351ec';
 
         let currentUser = null;
+        let userEntitlements = { hasPaidSoftcopy: false, isMembershipActive: false };
         let liveTasks = [];
         let countdownTimerInterval = null;
 
-        // 3D Card Flip Handler
         const flipBtn = document.getElementById('flip-card-btn');
         const cardFlipper = document.getElementById('id-card-flipper');
         
         flipBtn.addEventListener('click', () => {
             cardFlipper.classList.toggle('is-flipped');
         });
+
+        document.getElementById('strip-reactivate-btn').addEventListener('click', () => {
+            document.getElementById('reactivate-membership-btn').click();
+        });
+
+        function showSuccessModal(type) {
+            const modal = document.getElementById('payment-success-modal');
+            const title = document.getElementById('modal-success-title');
+            const msg = document.getElementById('modal-success-msg');
+            const actionSlot = document.getElementById('modal-action-slot');
+
+            if (type === 'softcopy') {
+                title.textContent = "🎉 Congratulations!";
+                msg.innerHTML = "Your official digital softcopy ID card is paid for and ready to download. You can now save or print your high-resolution badge anytime.";
+                actionSlot.innerHTML = `
+                    <button type="button" onclick="window.print(); closeSuccessModal();" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer flex items-center justify-center gap-2">
+                        Download & Print ID Card ➔
+                    </button>
+                `;
+            } else if (type === 'renewal') {
+                title.textContent = "🎉 Congratulations!";
+                msg.innerHTML = "You have successfully activated your annual membership! Keep enjoying all features of your ProNet-Tech workspace membership.";
+                actionSlot.innerHTML = `
+                    <button type="button" onclick="closeSuccessModal(); window.location.reload();" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">
+                        Enjoy Your Membership ➔
+                    </button>
+                `;
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('payment-success-modal').classList.add('hidden');
+        }
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -394,15 +434,12 @@
                 currentUser = authData.user;
                 localStorage.setItem('pnt_user', JSON.stringify(currentUser));
 
-                // Populate Dynamic Card Details
-                document.getElementById('user-badge-id').textContent = currentUser.customId || 'PNT-PENDING';
                 document.getElementById('card-fullname').textContent = (currentUser.name || 'Workspace Member').toUpperCase();
                 
                 const userRole = currentUser.role ? currentUser.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Member';
                 document.getElementById('card-role').textContent = userRole;
                 document.getElementById('card-back-role').textContent = userRole.toUpperCase();
 
-                // Load existing profile avatar
                 if (currentUser.avatar_url) {
                     const avatarImg = document.getElementById('card-avatar-img');
                     const placeholder = document.getElementById('card-avatar-placeholder');
@@ -411,15 +448,12 @@
                     placeholder.classList.add('hidden');
                 }
 
-                // Vector QR Code with actual User Identifier
                 const userCode = currentUser.customId || 'PNT-2026-10001';
                 const verificationUrl = `${window.location.origin}/verify.html?id=${encodeURIComponent(userCode)}`;
                 document.getElementById('card-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}&color=0D122B&bgcolor=FFFFFF`;
 
-                // Handle Membership Expiration & Live Clock
                 initCountdownEngine(currentUser.membership_expires_at);
-
-                // Handle Disciplinary Action Alert
+                await syncEntitlementUI();
                 checkDisciplinaryStatus(currentUser);
 
                 fetchTasks();
@@ -431,34 +465,110 @@
         });
 
         // ==========================================
-        // COUNTDOWN ENGINE WITH REAL-TIME TICKER
+        // DYNAMIC BUTTON STATE CONTROLLER
+        // ==========================================
+        async function syncEntitlementUI() {
+            try {
+                const res = await fetch('/api/marketplace/my-entitlements', { credentials: 'include' });
+                const data = await res.json();
+
+                if (data.success && data.entitlements) {
+                    userEntitlements = data.entitlements;
+
+                    const softcopyBtn = document.getElementById('download-soft-copy-btn');
+                    const softcopyText = document.getElementById('softcopy-btn-text');
+                    const softcopyBadge = document.getElementById('softcopy-btn-badge');
+
+                    const renewalBtn = document.getElementById('reactivate-membership-btn');
+                    const renewalText = document.getElementById('renewal-btn-text');
+                    const renewalBadge = document.getElementById('renewal-btn-badge');
+
+                    // 1. Softcopy ID Button State
+                    if (userEntitlements.hasPaidSoftcopy) {
+                        softcopyBtn.className = "w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer";
+                        softcopyText.textContent = "✓ Download Official Digital ID";
+                        softcopyBadge.className = "bg-white/20 text-white px-2 py-0.5 rounded-md font-mono text-[10px] uppercase";
+                        softcopyBadge.textContent = "Paid";
+                        softcopyBtn.classList.remove('animate-attention-pulse');
+                    } else {
+                        softcopyBtn.className = "w-full bg-purple-50 hover:bg-purple-100 border-2 border-pnt-purple text-pnt-purple font-bold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer animate-attention-pulse";
+                        softcopyText.textContent = "Pay & Unlock Digital Softcopy";
+                        softcopyBadge.className = "bg-pnt-purple text-white px-2 py-0.5 rounded-md font-mono text-[11px] font-bold";
+                        softcopyBadge.textContent = "₦2,000";
+                    }
+
+                    // 2. Annual Membership Renewal Button State
+                    if (userEntitlements.isMembershipActive) {
+                        renewalBtn.className = "w-full bg-emerald-50 border border-emerald-300 text-emerald-800 font-bold py-3 px-4 rounded-xl text-xs shadow-none flex items-center justify-center gap-2 cursor-default";
+                        renewalText.textContent = "✓ Membership Active & Verified";
+                        renewalBadge.className = "bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-md font-mono text-[10px] uppercase";
+                        renewalBadge.textContent = "Valid";
+                        renewalBtn.classList.remove('animate-attention-pulse');
+                    } else {
+                        renewalBtn.className = "w-full btn-brand-gradient text-white font-bold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-xl flex items-center justify-center gap-2 cursor-pointer animate-attention-pulse";
+                        renewalText.textContent = "Activate Annual Membership";
+                        renewalBadge.className = "bg-white/25 px-2 py-0.5 rounded-md font-mono text-[11px] font-bold";
+                        renewalBadge.textContent = "₦3,000";
+                    }
+
+                    applyLockoutEnforcement(userEntitlements.isMembershipActive);
+                }
+            } catch (err) {
+                console.error("Could not sync entitlements:", err);
+            }
+        }
+
+        // ==========================================
+        // HARD PAYWALL LOCKOUT
+        // ==========================================
+        function applyLockoutEnforcement(isActive) {
+            const attBtn = document.getElementById('mark-attendance-btn');
+            const attDesc = document.getElementById('attendance-desc-text');
+
+            if (!isActive) {
+                attBtn.disabled = true;
+                attBtn.className = "bg-slate-200 text-slate-400 border border-slate-300 font-bold px-8 py-4 rounded-2xl shadow-none cursor-not-allowed inline-flex items-center gap-2";
+                attBtn.innerHTML = `🔒 Membership Inactive (View Only Mode)`;
+                attDesc.textContent = "Attendance marking and task submission are locked. Please activate your annual membership to unlock daily terminal functions.";
+            } else {
+                attBtn.disabled = false;
+                attBtn.className = "btn-brand-gradient inline-flex items-center gap-3 font-bold px-8 py-4 rounded-2xl shadow-xl shadow-pnt-purple/20 transform hover:-translate-y-0.5 transition-all duration-300 cursor-pointer";
+                attBtn.innerHTML = `<svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Mark Today's Attendance`;
+                attDesc.textContent = "Tap the button below to register your local coordinates and dispatch an instant verification ping to your Team Leader.";
+            }
+        }
+
+        // ==========================================
+        // COUNTDOWN ENGINE
         // ==========================================
         function initCountdownEngine(expiresAtString) {
             const warningStrip = document.getElementById('unpaid-warning-strip');
-            const softcopyBtn = document.getElementById('download-soft-copy-btn');
             const dateReadout = document.getElementById('timer-date-readout');
 
             if (!expiresAtString) {
-                setClockExpired("Unpaid / Inactive");
+                setClockExpired();
                 warningStrip.classList.remove('hidden');
-                dateReadout.textContent = "Inactive (Payment Required)";
+                dateReadout.textContent = "Unpaid (Activation Required)";
+                applyLockoutEnforcement(false);
                 return;
             }
 
             const targetDate = new Date(expiresAtString).getTime();
 
-            // Function to calculate and update digits
             function tick() {
                 const now = new Date().getTime();
                 const diff = targetDate - now;
 
                 if (diff <= 0) {
                     clearInterval(countdownTimerInterval);
-                    setClockExpired("Expired");
+                    setClockExpired();
                     warningStrip.classList.remove('hidden');
                     dateReadout.textContent = "Expired (Renewal Required)";
+                    applyLockoutEnforcement(false);
                     return;
                 }
+
+                warningStrip.classList.add('hidden');
 
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -470,40 +580,21 @@
                 document.getElementById('timer-mins').textContent = String(mins).padStart(2, '0');
                 document.getElementById('timer-secs').textContent = String(secs).padStart(2, '0');
 
-                // Format visible date string
                 const d = new Date(expiresAtString);
                 dateReadout.textContent = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-
-                // Unlock softcopy button if valid
-                softcopyBtn.className = "w-full btn-brand-gradient text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer";
-                softcopyBtn.innerHTML = `
-                    <span>Download Digital Softcopy</span>
-                    <span class="bg-white/20 px-2 py-0.5 rounded-md font-mono text-[11px]">₦2,000</span>
-                `;
             }
 
             tick();
             countdownTimerInterval = setInterval(tick, 1000);
         }
 
-        function setClockExpired(label) {
+        function setClockExpired() {
             document.getElementById('timer-days').textContent = "00";
             document.getElementById('timer-hours').textContent = "00";
             document.getElementById('timer-mins').textContent = "00";
             document.getElementById('timer-secs').textContent = "00";
-
-            const softcopyBtn = document.getElementById('download-soft-copy-btn');
-            softcopyBtn.className = "w-full bg-slate-100 border border-slate-300 text-slate-400 font-semibold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 cursor-not-allowed";
-            softcopyBtn.innerHTML = `
-                <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                <span>Digital Softcopy Locked</span>
-                <span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded-md font-mono text-[11px]">₦2,000</span>
-            `;
         }
 
-        // ==========================================
-        // DISCIPLINARY STATUS DETECTOR
-        // ==========================================
         function checkDisciplinaryStatus(user) {
             const status = (user.status || 'active').toLowerCase();
             if (['warning', 'inactive', 'suspended', 'ban', 'banned'].includes(status)) {
@@ -521,9 +612,14 @@
         }
 
         // ==========================================
-        // PAYSTACK PAYMENT WORKFLOW
+        // PAYSTACK PAYMENT INTEGRATION
         // ==========================================
         document.getElementById('download-soft-copy-btn').addEventListener('click', () => {
+            if (userEntitlements.hasPaidSoftcopy) {
+                window.print();
+                return;
+            }
+
             initiatePaystack(2000, 'softcopy', async (response) => {
                 try {
                     const res = await fetch('/api/marketplace/verify-payment', {
@@ -534,18 +630,23 @@
                     });
                     const result = await res.json();
                     if (result.success) {
-                        alert('🎉 Payment verified! Generating your official digital ID...');
-                        window.print();
+                        await syncEntitlementUI();
+                        showSuccessModal('softcopy');
                     } else {
-                        alert(`Verification warning: ${result.message}`);
+                        alert(`Verification note: ${result.message}`);
                     }
                 } catch (err) {
-                    alert('Could not contact the verification server.');
+                    alert('Could not contact verification server.');
                 }
             });
         });
 
         document.getElementById('reactivate-membership-btn').addEventListener('click', () => {
+            if (userEntitlements.isMembershipActive) {
+                alert("✅ Your annual membership is already active and valid.");
+                return;
+            }
+
             initiatePaystack(3000, 'renewal', async (response) => {
                 try {
                     const res = await fetch('/api/marketplace/verify-payment', {
@@ -556,13 +657,12 @@
                     });
                     const result = await res.json();
                     if (result.success) {
-                        alert('🎉 Membership successfully reactivated for 1 year!');
-                        window.location.reload();
+                        showSuccessModal('renewal');
                     } else {
-                        alert(`Renewal warning: ${result.message}`);
+                        alert(`Verification note: ${result.message}`);
                     }
                 } catch (err) {
-                    alert('Could not contact the verification server.');
+                    alert('Could not contact verification server.');
                 }
             });
         });
@@ -576,7 +676,7 @@
             const handler = PaystackPop.setup({
                 key: PAYSTACK_PUBLIC_KEY,
                 email: currentUser.email || 'member@pronettech.com',
-                amount: amountInNaira * 100, // Amount in kobo
+                amount: amountInNaira * 100,
                 currency: 'NGN',
                 ref: 'PNT-' + purpose.toUpperCase() + '-' + Date.now(),
                 callback: function(response) {
@@ -590,7 +690,6 @@
             handler.openIframe();
         }
 
-        // Real-time Photo Upload Handler
         async function uploadAvatar(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -625,15 +724,15 @@
             }
         }
 
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('pnt_user');
-            window.location.href = '/views/onboarding.html';
-        });
-
         // ==========================================
-        // DYNAMIC ATTENDANCE SYSTEM INTEGRATION
+        // ATTENDANCE LOGGING
         // ==========================================
         document.getElementById('mark-attendance-btn').addEventListener('click', async () => {
+            if (!userEntitlements.isMembershipActive) {
+                alert('🔒 Action Blocked: You must activate your annual membership first.');
+                return;
+            }
+
             try {
                 const response = await fetch('/api/attendance/checkin', {
                     method: 'POST',
@@ -657,7 +756,7 @@
                 }
             } catch (err) {
                 console.error('Error logging attendance:', err);
-                alert('Connection with Express server lost.');
+                alert('Connection with server lost.');
             }
         });
 
@@ -683,7 +782,7 @@
             historyContainer.innerHTML = '';
 
             const weeklyLogMap = {};
-            logs.forEach(log => {
+            (logs || []).forEach(log => {
                 const logDay = new Date(log.marked_time).getDay();
                 weeklyLogMap[logDay] = log.status;
             });
@@ -719,24 +818,16 @@
         }
 
         // ==========================================
-        // DYNAMIC TASK MANAGEMENT INTEGRATION
+        // TASKS
         // ==========================================
         async function fetchTasks() {
             try {
-                if (!currentUser || !currentUser.id) {
-                    renderTasks();
-                    return;
-                }
-
+                if (!currentUser || !currentUser.id) return;
                 const response = await fetch(`/api/tasks/user/${currentUser.id}`, { credentials: 'include' });
                 const resData = await response.json();
                 
-                if (resData.success) {
-                    liveTasks = resData.data;
-                    renderTasks();
-                } else {
-                    renderTasks();
-                }
+                liveTasks = resData.success ? resData.data : [];
+                renderTasks();
             } catch (err) {
                 console.error("Failed to query database tasks:", err);
                 renderTasks();
@@ -747,7 +838,7 @@
             const listContainer = document.getElementById('tasks-list');
             listContainer.innerHTML = '';
 
-            if (liveTasks.length === 0) {
+            if (!liveTasks || liveTasks.length === 0) {
                 listContainer.innerHTML = `<p class="text-xs text-slate-400 py-2">No tasks assigned yet. You're completely up to date!</p>`;
                 return;
             }
@@ -756,21 +847,25 @@
                 let badgeClass = "bg-slate-100 border-slate-200 text-slate-600";
                 let actionButton = "";
 
-                if (task.status === 'assigned') {
-                    badgeClass = "bg-purple-50 border-purple-200 text-pnt-purple";
-                    actionButton = `<button onclick="updateTaskStatus('${task.id}', 'in_progress')" class="bg-pnt-purple hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all">Start Work</button>`;
-                } else if (task.status === 'in_progress') {
-                    badgeClass = "bg-amber-50 border-amber-200 text-amber-700";
-                    actionButton = `<button onclick="updateTaskStatus('${task.id}', 'completed')" class="bg-pnt-orange hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all">Mark Complete</button>`;
-                } else if (task.status === 'completed') {
-                    badgeClass = "bg-purple-50 border-purple-200 text-pnt-purple animate-pulse";
-                    actionButton = `<span class="text-[11px] text-slate-400 font-semibold italic">Awaiting verification...</span>`;
-                } else if (task.status === 'approved') {
-                    badgeClass = "bg-emerald-50 border-emerald-200 text-emerald-700";
-                    actionButton = `<span class="text-[11px] text-emerald-600 font-bold">✓ Approved</span>`;
-                } else if (task.status === 'rejected') {
-                    badgeClass = "bg-red-50 border-red-200 text-red-700";
-                    actionButton = `<button onclick="updateTaskStatus('${task.id}', 'in_progress')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all">Retry Task</button>`;
+                if (!userEntitlements.isMembershipActive) {
+                    actionButton = `<span class="text-[11px] text-slate-400 font-semibold italic">🔒 Pay to unlock</span>`;
+                } else {
+                    if (task.status === 'assigned') {
+                        badgeClass = "bg-purple-50 border-purple-200 text-pnt-purple";
+                        actionButton = `<button onclick="updateTaskStatus('${task.id}', 'in_progress')" class="bg-pnt-purple hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer">Start Work</button>`;
+                    } else if (task.status === 'in_progress') {
+                        badgeClass = "bg-amber-50 border-amber-200 text-amber-700";
+                        actionButton = `<button onclick="updateTaskStatus('${task.id}', 'completed')" class="bg-pnt-orange hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer">Mark Complete</button>`;
+                    } else if (task.status === 'completed') {
+                        badgeClass = "bg-purple-50 border-purple-200 text-pnt-purple animate-pulse";
+                        actionButton = `<span class="text-[11px] text-slate-400 font-semibold italic">Awaiting verification...</span>`;
+                    } else if (task.status === 'approved') {
+                        badgeClass = "bg-emerald-50 border-emerald-200 text-emerald-700";
+                        actionButton = `<span class="text-[11px] text-emerald-600 font-bold">✓ Approved</span>`;
+                    } else if (task.status === 'rejected') {
+                        badgeClass = "bg-red-50 border-red-200 text-red-700";
+                        actionButton = `<button onclick="updateTaskStatus('${task.id}', 'in_progress')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer">Retry Task</button>`;
+                    }
                 }
 
                 const taskElement = document.createElement('div');
@@ -792,6 +887,11 @@
         }
 
         async function updateTaskStatus(taskId, nextStatus) {
+            if (!userEntitlements.isMembershipActive) {
+                alert('🔒 Action Blocked: You must activate your annual membership first.');
+                return;
+            }
+
             try {
                 const response = await fetch(`/api/tasks/${taskId}/status`, {
                     method: 'PATCH',
@@ -803,18 +903,14 @@
                 const resData = await response.json();
 
                 if (resData.success) {
-                    let notifyMessage = `Task state transitioned to ${nextStatus.replace('_', ' ')}!`;
-                    if (nextStatus === 'completed') {
-                        notifyMessage = `🎉 Task marked complete! Sent to Admin & Team Leader queues for review.`;
-                    }
-                    alert(notifyMessage);
+                    alert(nextStatus === 'completed' ? '🎉 Task marked complete! Sent to reviewer.' : `Task updated to ${nextStatus}.`);
                     fetchTasks();
                 } else {
-                    alert(`Failed to update task status: ${resData.message}`);
+                    alert(`Failed to update task: ${resData.message}`);
                 }
             } catch (err) {
                 console.error("Error patching task status:", err);
-                alert("Express backend server connection lost.");
+                alert("Server connection lost.");
             }
         }
     </script>

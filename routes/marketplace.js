@@ -4,7 +4,60 @@ const supabase = require('../config/supabase');
 const { protect, authorize } = require('../middleware/auth');
 
 // ===================================================
-// 1. ORDERS: DISPATCH ID CARD GENERATOR APPLICATION
+// 1. ENTITLEMENTS TELEMETRY (LIVE PAYMENT STATUS CHECK)
+// Checks if Softcopy & Annual Renewal are currently paid
+// ===================================================
+router.get('/my-entitlements', protect, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // Check user profile for active validity & softcopy flag
+        const { data: profile, error: profErr } = await supabase
+            .from('profiles')
+            .select('membership_expires_at, has_paid_softcopy, status')
+            .eq('id', userId)
+            .single();
+
+        if (profErr) throw profErr;
+
+        // Check ID card orders table for any paid softcopy orders
+        const { data: softcopyOrders } = await supabase
+            .from('id_card_orders')
+            .select('id')
+            .eq('profile_id', userId)
+            .eq('status', 'paid')
+            .in('fulfillment_type', ['softcopy_only', 'both']);
+
+        const now = new Date();
+        const expiresAt = profile?.membership_expires_at ? new Date(profile.membership_expires_at) : null;
+        let isMembershipActive = false;
+        let daysRemaining = 0;
+
+        if (expiresAt && !isNaN(expiresAt.getTime()) && expiresAt > now) {
+            isMembershipActive = true;
+            daysRemaining = Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24));
+        }
+
+        const hasPaidSoftcopy = Boolean(profile?.has_paid_softcopy) || (Array.isArray(softcopyOrders) && softcopyOrders.length > 0);
+
+        return res.status(200).json({
+            success: true,
+            entitlements: {
+                hasPaidSoftcopy,
+                isMembershipActive,
+                daysRemaining,
+                expiresAt: profile?.membership_expires_at || null,
+                accountStatus: profile?.status || 'pending'
+            }
+        });
+    } catch (err) {
+        console.error('Error querying entitlements:', err);
+        return res.status(500).json({ success: false, message: 'Could not fetch entitlement status.' });
+    }
+});
+
+// ===================================================
+// 2. ORDERS: DISPATCH ID CARD GENERATOR APPLICATION
 // ===================================================
 router.post('/order/idcard', protect, async (req, res) => {
     const { fulfillment_type, amount_paid, payment_reference, shipping_address } = req.body;
@@ -18,11 +71,11 @@ router.post('/order/idcard', protect, async (req, res) => {
             .from('id_card_orders')
             .insert([{
                 profile_id: req.user.id,
-                fulfillment_type, // 'softcopy_only', 'hardcopy_only', or 'both'
+                fulfillment_type,
                 amount_paid,
                 payment_reference,
                 shipping_address,
-                status: 'paid' // Automatically shifts status following successful gateway payment check
+                status: 'paid'
             }])
             .select();
 
@@ -39,7 +92,7 @@ router.post('/order/idcard', protect, async (req, res) => {
 });
 
 // ===================================================
-// 2. CERTIFICATES: ISSUE KNOWLEDGE RECOGNITION BADGE
+// 3. CERTIFICATES: ISSUE KNOWLEDGE RECOGNITION BADGE
 // ===================================================
 router.post('/order/certificate', protect, async (req, res) => {
     const { course_knowledge_title, fulfillment_type, amount_paid, payment_reference } = req.body;
@@ -75,13 +128,10 @@ router.post('/order/certificate', protect, async (req, res) => {
 });
 
 // ===================================================
-// 3. SECURE PAYSTACK VERIFICATION (SOFTCOPY & RENEWAL)
-// Reads PAYSTACK_SECRET_KEY automatically from .env
+// 4. SECURE PAYSTACK VERIFICATION (SOFTCOPY & RENEWAL)
 // ===================================================
 router.post('/verify-payment', protect, async (req, res) => {
     const { reference, purpose } = req.body;
-
-    console.log('[DEBUG] Incoming verify payload:', { reference, purpose, userId: req.user?.id });
 
     if (!reference) {
         return res.status(400).json({ success: false, message: 'Transaction reference is missing.' });
@@ -90,7 +140,6 @@ router.post('/verify-payment', protect, async (req, res) => {
     try {
         const rawSecret = process.env.PAYSTACK_SECRET_KEY;
         if (!rawSecret) {
-            console.error('[DEBUG ERROR] PAYSTACK_SECRET_KEY environment variable is not defined in process.env!');
             return res.status(500).json({ success: false, message: 'Server configuration error: missing Secret Key.' });
         }
 
@@ -105,19 +154,17 @@ router.post('/verify-payment', protect, async (req, res) => {
         });
 
         const result = await paystackRes.json();
-        console.log('[DEBUG] Paystack API HTTP Status:', paystackRes.status);
-        console.log('[DEBUG] Paystack API Response Body:', JSON.stringify(result));
 
         if (result.status && result.data && result.data.status === 'success') {
-            const amountPaidInNaira = result.data.amount / 100; // Paystack sends amounts in kobo
+            const amountPaidInNaira = result.data.amount / 100;
 
             // A. Digital Softcopy Verification (₦2,000)
             if (purpose === 'softcopy') {
                 if (amountPaidInNaira < 2000) {
-                    console.warn(`[DEBUG WARNING] Softcopy payment amount insufficient: ₦${amountPaidInNaira}`);
                     return res.status(400).json({ success: false, message: 'Paid amount is below ₦2,000 threshold.' });
                 }
 
+                // Insert into orders table
                 await supabase
                     .from('id_card_orders')
                     .insert([{
@@ -127,6 +174,12 @@ router.post('/verify-payment', protect, async (req, res) => {
                         payment_reference: reference,
                         status: 'paid'
                     }]);
+
+                // Update has_paid_softcopy directly on profiles
+                await supabase
+                    .from('profiles')
+                    .update({ has_paid_softcopy: true })
+                    .eq('id', req.user.id);
 
                 return res.status(200).json({ 
                     success: true, 
@@ -138,11 +191,9 @@ router.post('/verify-payment', protect, async (req, res) => {
             // B. Annual Membership Renewal Verification (₦3,000)
             if (purpose === 'renewal') {
                 if (amountPaidInNaira < 3000) {
-                    console.warn(`[DEBUG WARNING] Renewal payment amount insufficient: ₦${amountPaidInNaira}`);
                     return res.status(400).json({ success: false, message: 'Paid amount is below ₦3,000 threshold.' });
                 }
 
-                // Add 1 year to current expiration
                 const oneYearFromNow = new Date();
                 oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
 
@@ -164,13 +215,11 @@ router.post('/verify-payment', protect, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid payment purpose specified.' });
         }
 
-        console.error('[DEBUG REJECTION] Paystack transaction verify failed:', result.message || result);
         return res.status(400).json({ 
             success: false, 
             message: result.message || 'Paystack could not confirm this transaction.' 
         });
     } catch (err) {
-        console.error('[DEBUG FATAL] Payment verification server error:', err);
         return res.status(500).json({ success: false, message: `Server transaction error: ${err.message}` });
     }
 });

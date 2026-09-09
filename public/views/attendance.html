@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronettech Workspace | Branch Attendance & ID Desk</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pnt: {
+                            dark: '#0D122B',
+                            purple: '#6A1BBF',
+                            'purple-light': '#9D4EDD',
+                            orange: '#FF7A00',
+                            gold: '#FFC107',
+                            blue: '#0070c0'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-full pb-12 relative overflow-x-hidden bg-slate-50 text-pnt-dark">
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-6 space-y-6">
+
+        <!-- Header -->
+        <div class="glass-card p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-extrabold text-pnt-dark tracking-tight">Regional Attendance & ID Console</h2>
+                <p class="text-xs text-slate-500 mt-1" id="hub-office-subtitle">Audit physical check-ins and verified ID card generation for your branch.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span id="branch-badge" class="bg-purple-50 text-pnt-purple border border-purple-200 text-xs font-bold px-3 py-1.5 rounded-xl font-mono">Loading Hub...</span>
+            </div>
+        </div>
+
+        <!-- Metric Telemetry Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div onclick="switchView('attendance')" class="bg-white border border-slate-200 hover:border-emerald-400 p-5 rounded-2xl shadow-sm cursor-pointer transition-all group">
+                <div class="flex justify-between items-center">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-emerald-600 transition-colors">Today's Clock-ins</p>
+                    <span class="text-[10px] text-emerald-600 font-bold font-mono">View Logs ➔</span>
+                </div>
+                <h3 class="text-3xl font-bold text-emerald-600 mt-1" id="metric-clocked-in">0</h3>
+            </div>
+
+            <div onclick="switchView('id-cards')" class="bg-white border border-slate-200 hover:border-pnt-purple/40 p-5 rounded-2xl shadow-sm cursor-pointer transition-all group">
+                <div class="flex justify-between items-center">
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-pnt-purple transition-colors">Digital IDs Issued</p>
+                    <span class="text-[10px] text-pnt-purple font-bold font-mono">Inspect IDs ➔</span>
+                </div>
+                <h3 class="text-3xl font-bold text-pnt-purple mt-1" id="metric-ids-issued">0</h3>
+            </div>
+
+            <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Branch Personnel</p>
+                <h3 class="text-3xl font-bold text-slate-900 mt-1" id="metric-total-branch-users">0</h3>
+            </div>
+        </div>
+
+        <!-- View Switcher Tabs -->
+        <div class="flex border-b border-slate-200 gap-4">
+            <button id="tab-btn-att" onclick="switchView('attendance')" class="pb-3 text-xs font-bold border-b-2 border-pnt-purple text-pnt-purple flex items-center gap-2 cursor-pointer transition-all">
+                <span>Branch Attendance Ledger</span>
+                <span id="badge-att-count" class="bg-purple-100 text-pnt-purple px-2 py-0.5 rounded-full text-[10px]">0</span>
+            </button>
+            <button id="tab-btn-ids" onclick="switchView('id-cards')" class="pb-3 text-xs font-semibold text-slate-500 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-2 cursor-pointer transition-all">
+                <span>Member ID Cards & Badges</span>
+                <span id="badge-ids-count" class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[10px]">0</span>
+            </button>
+        </div>
+
+        <!-- SECTION 1: ATTENDANCE LEDGER -->
+        <div id="section-attendance" class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h3 class="text-sm font-bold text-slate-800">Branch Daily Attendance Stream</h3>
+                <input type="text" id="att-search-input" placeholder="Search by name, ID or time..." class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs w-full sm:w-64 focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 border-b border-slate-100 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
+                        <tr>
+                            <th class="py-3 px-4">Member Name</th>
+                            <th class="py-3 px-4">Workspace ID</th>
+                            <th class="py-3 px-4">Clock-in Time</th>
+                            <th class="py-3 px-4">Geofence Status</th>
+                            <th class="py-3 px-4 text-right">Verification</th>
+                        </tr>
+                    </thead>
+                    <tbody id="att-tbody" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="5" class="text-center py-8 text-slate-400">Loading attendance records...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECTION 2: MEMBER ID CARDS & BADGES -->
+        <div id="section-id-cards" class="hidden bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h3 class="text-sm font-bold text-slate-800">Branch Member Identity Roster & Cards</h3>
+                <input type="text" id="ids-search-input" placeholder="Search member IDs..." class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs w-full sm:w-64 focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 border-b border-slate-100 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
+                        <tr>
+                            <th class="py-3 px-4">Personnel Profile</th>
+                            <th class="py-3 px-4">Workspace ID</th>
+                            <th class="py-3 px-4">Phone Contact</th>
+                            <th class="py-3 px-4">Digital Softcopy ID</th>
+                            <th class="py-3 px-4">Annual Validity</th>
+                            <th class="py-3 px-4 text-right">Verification Badge</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ids-tbody" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="6" class="text-center py-8 text-slate-400">Loading branch member IDs...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="/js/nav.js"></script>
+
+    <script>
+        let currentLeader = null;
+        let attendanceLogs = [];
+        let branchRoster = [];
+        let currentView = 'attendance';
+
+        function switchView(view) {
+            currentView = view;
+            const attBtn = document.getElementById('tab-btn-att');
+            const idsBtn = document.getElementById('tab-btn-ids');
+            const attSection = document.getElementById('section-attendance');
+            const idsSection = document.getElementById('section-id-cards');
+
+            if (view === 'attendance') {
+                attBtn.className = "pb-3 text-xs font-bold border-b-2 border-pnt-purple text-pnt-purple flex items-center gap-2 cursor-pointer transition-all";
+                idsBtn.className = "pb-3 text-xs font-semibold text-slate-500 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-2 cursor-pointer transition-all";
+                attSection.classList.remove('hidden');
+                idsSection.classList.add('hidden');
+            } else {
+                idsBtn.className = "pb-3 text-xs font-bold border-b-2 border-pnt-purple text-pnt-purple flex items-center gap-2 cursor-pointer transition-all";
+                attBtn.className = "pb-3 text-xs font-semibold text-slate-500 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-2 cursor-pointer transition-all";
+                idsSection.classList.remove('hidden');
+                attSection.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const authRes = await fetch('/api/auth/me', { credentials: 'include' });
+                const authData = await authRes.json();
+
+                if (!authData.success) {
+                    window.location.href = '/views/onboarding.html';
+                    return;
+                }
+
+                currentLeader = authData.user;
+                if (currentLeader.role !== 'leader' && currentLeader.role !== 'team_leader' && currentLeader.role !== 'admin') {
+                    window.location.href = '/views/dashboard.html';
+                    return;
+                }
+
+                document.getElementById('branch-badge').textContent = currentLeader.office_name || 'Regional Office Hub';
+
+                await Promise.all([
+                    fetchBranchAttendance(),
+                    fetchBranchMemberIDs()
+                ]);
+
+                document.getElementById('att-search-input').addEventListener('input', (e) => {
+                    const q = e.target.value.toLowerCase().trim();
+                    const filtered = attendanceLogs.filter(log =>
+                        `${log.profiles?.first_name} ${log.profiles?.last_name}`.toLowerCase().includes(q) ||
+                        (log.profiles?.custom_profile_id && log.profiles.custom_profile_id.toLowerCase().includes(q))
+                    );
+                    renderAttendanceTable(filtered);
+                });
+
+                document.getElementById('ids-search-input').addEventListener('input', (e) => {
+                    const q = e.target.value.toLowerCase().trim();
+                    const filtered = branchRoster.filter(m =>
+                        `${m.first_name} ${m.last_name}`.toLowerCase().includes(q) ||
+                        (m.custom_profile_id && m.custom_profile_id.toLowerCase().includes(q)) ||
+                        (m.phone_number && m.phone_number.includes(q))
+                    );
+                    renderIDsTable(filtered);
+                });
+
+            } catch (err) {
+                console.error("Initialization error:", err);
+            }
+        });
+
+        async function fetchBranchAttendance() {
+            if (!currentLeader.office_id) return;
+            try {
+                const res = await fetch(`/api/attendance/office/${currentLeader.office_id}/today`, { credentials: 'include' });
+                const data = await res.json();
+
+                if (data.success) {
+                    attendanceLogs = data.attendance || [];
+                    document.getElementById('metric-clocked-in').textContent = attendanceLogs.length;
+                    document.getElementById('badge-att-count').textContent = attendanceLogs.length;
+                    renderAttendanceTable(attendanceLogs);
+                }
+            } catch (err) {
+                console.error("Attendance query failure:", err);
+            }
+        }
+
+        function renderAttendanceTable(logs) {
+            const tbody = document.getElementById('att-tbody');
+            tbody.innerHTML = '';
+
+            if (!logs || logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400 font-medium">No check-ins logged for this branch today yet.</td></tr>`;
+                return;
+            }
+
+            logs.forEach(log => {
+                const time = log.clock_in ? new Date(log.clock_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50/70 transition-colors";
+                row.innerHTML = `
+                    <td class="py-3 px-4">
+                        <div class="font-bold text-slate-900">${log.profiles?.first_name || 'Member'} ${log.profiles?.last_name || ''}</div>
+                        <div class="text-[10px] text-slate-400 font-mono">${log.profiles?.email || 'N/A'}</div>
+                    </td>
+                    <td class="py-3 px-4 font-mono font-bold text-pnt-purple">${log.profiles?.custom_profile_id || 'PENDING'}</td>
+                    <td class="py-3 px-4 font-mono text-slate-600">${time}</td>
+                    <td class="py-3 px-4">
+                        <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                            Geofence Verified
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        <span class="text-[10px] font-bold text-emerald-600 uppercase">Confirmed</span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function fetchBranchMemberIDs() {
+            try {
+                let res = await fetch('/api/downlines/office-roster', { credentials: 'include' });
+                if (!res.ok) {
+                    res = await fetch('/api/downline/office-roster', { credentials: 'include' });
+                }
+                const data = await res.json();
+
+                if (data.success) {
+                    branchRoster = data.roster || [];
+                    document.getElementById('metric-total-branch-users').textContent = branchRoster.length;
+                    document.getElementById('badge-ids-count').textContent = branchRoster.length;
+
+                    const issuedCount = branchRoster.filter(m => m.has_paid_softcopy).length;
+                    document.getElementById('metric-ids-issued').textContent = issuedCount;
+
+                    renderIDsTable(branchRoster);
+                }
+            } catch (err) {
+                console.error("Member roster query error:", err);
+            }
+        }
+
+        function renderIDsTable(roster) {
+            const tbody = document.getElementById('ids-tbody');
+            tbody.innerHTML = '';
+
+            if (!roster || roster.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400 font-medium">No personnel registered in this branch office roster.</td></tr>`;
+                return;
+            }
+
+            roster.forEach(member => {
+                const isPaid = member.has_paid_softcopy;
+                const isAnnualValid = Boolean(member.membership_expires_at && new Date(member.membership_expires_at) > new Date());
+                const avatar = member.avatar_url 
+                    ? `<img src="${member.avatar_url}" class="w-8 h-8 rounded-full object-cover">`
+                    : `<div class="w-8 h-8 rounded-full bg-purple-100 text-pnt-purple font-bold flex items-center justify-center text-xs">${(member.first_name?.[0] || 'U')}</div>`;
+
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50/70 transition-colors";
+                row.innerHTML = `
+                    <td class="py-3 px-4">
+                        <div class="flex items-center gap-2.5">
+                            ${avatar}
+                            <div>
+                                <div class="font-bold text-slate-900">${member.first_name} ${member.last_name}</div>
+                                <div class="text-[10px] text-slate-400 font-mono">${member.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 font-mono font-bold text-pnt-purple">${member.custom_profile_id || 'PENDING'}</td>
+                    <td class="py-3 px-4 font-mono text-slate-600">${member.phone_number || 'N/A'}</td>
+                    <td class="py-3 px-4">
+                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md ${isPaid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'}">
+                            ${isPaid ? 'Unlocked (Paid)' : 'Unpaid (Locked)'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md ${isAnnualValid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-600 border border-red-200'}">
+                            ${isAnnualValid ? 'Valid' : 'Expired'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        <a href="/verify.html?id=${encodeURIComponent(member.custom_profile_id || '')}" target="_blank" class="text-xs font-bold text-pnt-purple hover:underline">
+                            Inspect ID ➔
+                        </a>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>
