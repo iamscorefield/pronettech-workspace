@@ -116,6 +116,55 @@
 
     </main>
 
+    <!-- ================= MODAL: USER PROFILE INSPECTOR ================= -->
+    <div id="user-profile-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 relative">
+            <button type="button" onclick="closeModal('user-profile-modal')" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
+            
+            <div class="flex items-center gap-3.5 border-b border-slate-100 pb-4">
+                <div id="inspect-avatar-container" class="w-14 h-14 rounded-full bg-pnt-purple text-white font-bold flex items-center justify-center text-base overflow-hidden shrink-0 border-2 border-purple-200 shadow-sm">
+                    --
+                </div>
+                <div class="overflow-hidden">
+                    <h3 id="inspect-fullname" class="text-base font-black text-slate-900 leading-tight">Full Name</h3>
+                    <p id="inspect-custom-id" class="text-xs font-mono text-pnt-purple font-bold mt-0.5">PNT-PENDING</p>
+                    <span id="inspect-role-badge" class="inline-block mt-1 text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-purple-50 text-pnt-purple border border-purple-200">Member</span>
+                </div>
+            </div>
+
+            <div class="space-y-2 text-xs">
+                <div class="flex justify-between py-1 border-b border-slate-50">
+                    <span class="text-slate-400 font-medium">Email Address:</span>
+                    <span id="inspect-email" class="font-mono text-slate-800 font-semibold">--</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-50">
+                    <span class="text-slate-400 font-medium">Phone Number:</span>
+                    <span id="inspect-phone" class="font-mono text-slate-800 font-semibold">--</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-50">
+                    <span class="text-slate-400 font-medium">State / Residence:</span>
+                    <span id="inspect-state" class="text-slate-800 font-semibold">--</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-50">
+                    <span class="text-slate-400 font-medium">Branch Office:</span>
+                    <span id="inspect-branch" class="text-slate-800 font-semibold">--</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-50">
+                    <span class="text-slate-400 font-medium">Sponsor ID:</span>
+                    <span id="inspect-sponsor" class="font-mono text-slate-800 font-semibold">--</span>
+                </div>
+                <div class="flex justify-between py-1">
+                    <span class="text-slate-400 font-medium">Account Status:</span>
+                    <span id="inspect-status" class="uppercase font-bold text-emerald-600">--</span>
+                </div>
+            </div>
+
+            <button type="button" onclick="closeModal('user-profile-modal')" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer mt-2">
+                Close Inspector
+            </button>
+        </div>
+    </div>
+
     <!-- Mount Universal Responsive Navigation -->
     <script src="/js/nav.js"></script>
 
@@ -167,10 +216,8 @@
                 const isAdmin = currentUser.role === 'admin' || currentUser.role === 'global_admin';
                 const isLeader = currentUser.role === 'leader' || currentUser.role === 'team_leader';
 
-                // Display Sponsor ID
                 document.getElementById('user-sponsor-display').textContent = currentUser.customId || 'PNT-ADMIN';
 
-                // Copy referral link handler
                 document.getElementById('copy-ref-btn').addEventListener('click', () => {
                     const refLink = `${window.location.origin}/views/onboarding.html?ref=${encodeURIComponent(currentUser.customId)}`;
                     navigator.clipboard.writeText(refLink).then(() => {
@@ -179,7 +226,6 @@
                 });
 
                 if (isAdmin) {
-                    // ADMIN VIEW CONFIGURATION: Full Workspace Tree
                     document.getElementById('hub-title').textContent = "Enterprise Organization & Downlines Tree";
                     document.getElementById('hub-subtitle').textContent = "Global directory of all workspace accounts and their direct upline/downline relationships.";
                     document.getElementById('tab-primary-title').textContent = "All Workspace Accounts";
@@ -188,21 +234,18 @@
 
                     await fetchAdminTree();
                 } else {
-                    // LEADER / MEMBER CONFIGURATION
                     document.getElementById('tab-primary-title').textContent = "My Direct Downlines";
                     document.getElementById('tab-secondary-title').textContent = isLeader ? "Branch Office Roster" : "Regional Colleagues";
 
                     await fetchMemberNetwork();
                     if (isLeader) {
                         await fetchBranchRoster();
-                        // Auto-switch to Branch Roster tab if user has 0 downlines but branch roster has members
                         if (masterRecords.length === 0 && secondaryRecords.length > 0) {
                             activateSecondaryTab();
                         }
                     }
                 }
 
-                // Search Filter Handler
                 document.getElementById('network-search').addEventListener('input', (e) => {
                     const q = e.target.value.toLowerCase().trim();
                     const targetList = activeTab === 'primary' ? masterRecords : secondaryRecords;
@@ -212,7 +255,8 @@
                         (item.sponsor_id && item.sponsor_id.toLowerCase().includes(q)) ||
                         (item.state && item.state.toLowerCase().includes(q)) ||
                         (item.office?.branch_name && item.office.branch_name.toLowerCase().includes(q)) ||
-                        (item.office_name && item.office_name.toLowerCase().includes(q))
+                        (item.office_name && item.office_name.toLowerCase().includes(q)) ||
+                        (item.email && item.email.toLowerCase().includes(q))
                     );
                     renderTable(filtered);
                 });
@@ -223,7 +267,6 @@
             }
         });
 
-        // 1. ADMIN: Fetch full organizational downline tree
         async function fetchAdminTree() {
             try {
                 const res = await fetch('/api/auth/users/all', { credentials: 'include' });
@@ -235,12 +278,10 @@
                     document.getElementById('stat-count-1').textContent = masterRecords.length;
                     document.getElementById('badge-primary-count').textContent = masterRecords.length;
 
-                    // Unique states represented
                     const states = new Set(masterRecords.map(m => m.state).filter(Boolean));
                     document.getElementById('stat-label-2').textContent = "States Represented";
                     document.getElementById('stat-count-2').textContent = states.size;
 
-                    // Calculate active rate
                     const activeCount = masterRecords.filter(m => m.status === 'active').length;
                     const rate = masterRecords.length > 0 ? Math.round((activeCount / masterRecords.length) * 100) : 0;
                     document.getElementById('stat-label-3').textContent = "Account Active Rate";
@@ -256,7 +297,6 @@
             }
         }
 
-        // 2. MEMBER / LEADER: Fetch Downlines (with route fallback)
         async function fetchMemberNetwork() {
             try {
                 let res = await fetch('/api/downline/my-network', { credentials: 'include' });
@@ -285,7 +325,6 @@
             }
         }
 
-        // 3. LEADER: Fetch Branch Roster (with route fallback)
         async function fetchBranchRoster() {
             try {
                 let res = await fetch('/api/downline/office-roster', { credentials: 'include' });
@@ -325,9 +364,10 @@
             }
 
             list.forEach(member => {
+                const initials = `${member.first_name?.[0] || ''}${member.last_name?.[0] || ''}`.toUpperCase() || 'U';
                 const avatar = member.avatar_url 
-                    ? `<img src="${member.avatar_url}" class="w-7 h-7 rounded-full object-cover shrink-0">`
-                    : `<div class="w-7 h-7 rounded-full bg-purple-100 text-pnt-purple font-bold flex items-center justify-center text-[10px] shrink-0">${(member.first_name?.[0] || 'U')}</div>`;
+                    ? `<img src="${member.avatar_url}" class="w-8 h-8 rounded-full object-cover shrink-0 cursor-pointer hover:scale-105 transition-transform" onclick='inspectUserProfile(${JSON.stringify(member)})' title="Click to inspect profile">`
+                    : `<div class="w-8 h-8 rounded-full bg-purple-100 text-pnt-purple font-bold flex items-center justify-center text-xs shrink-0 cursor-pointer hover:scale-105 transition-transform" onclick='inspectUserProfile(${JSON.stringify(member)})' title="Click to inspect profile">${initials}</div>`;
 
                 const isAnnualPaid = Boolean(member.membership_expires_at && new Date(member.membership_expires_at) > new Date());
                 const status = (member.status || 'active').toLowerCase();
@@ -374,6 +414,35 @@
                 tbody.appendChild(row);
             });
         }
+
+        function inspectUserProfile(user) {
+            document.getElementById('inspect-fullname').textContent = `${user.first_name} ${user.last_name}`;
+            document.getElementById('inspect-custom-id').textContent = user.custom_profile_id || 'PNT-PENDING';
+            document.getElementById('inspect-email').textContent = user.email || 'N/A';
+            document.getElementById('inspect-phone').textContent = user.phone_number || 'N/A';
+            document.getElementById('inspect-state').textContent = user.state ? `${user.state}, Nigeria` : 'Not Specified';
+            document.getElementById('inspect-branch').textContent = user.office?.branch_name || user.office_name || 'Central Workspace Hub';
+            document.getElementById('inspect-sponsor').textContent = user.sponsor_id || 'None';
+            document.getElementById('inspect-status').textContent = user.status || 'active';
+
+            const roleBadge = document.getElementById('inspect-role-badge');
+            const isAdmin = user.role === 'admin' || user.role === 'global_admin';
+            const isLeader = user.role === 'leader' || user.role === 'team_leader';
+            roleBadge.textContent = isAdmin ? 'Admin' : (isLeader ? 'Team Leader' : 'Member');
+
+            const avatarContainer = document.getElementById('inspect-avatar-container');
+            const initials = `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase() || 'U';
+            if (user.avatar_url) {
+                avatarContainer.innerHTML = `<img src="${user.avatar_url}" class="w-full h-full object-cover">`;
+            } else {
+                avatarContainer.innerHTML = `<span class="font-bold text-base">${initials}</span>`;
+            }
+
+            openModal('user-profile-modal');
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
     </script>
 </body>
 </html>

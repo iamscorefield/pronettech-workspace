@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronettech Workspace | Financial Ledger & CashBook</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pnt: {
+                            dark: '#0D122B',
+                            purple: '#6A1BBF',
+                            'purple-light': '#9D4EDD',
+                            orange: '#FF7A00',
+                            gold: '#FFC107'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-full pb-12 relative overflow-x-hidden bg-slate-50 text-pnt-dark">
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-8 space-y-6">
+
+        <!-- Header -->
+        <div class="glass-card p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-black text-pnt-dark tracking-tight">Enterprise Financial Ledger</h2>
+                <p class="text-xs text-slate-500 mt-0.5">CashBook income logs, branch expenditure records, and live account reserves</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="fetchFinancialData()" class="inline-flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-semibold px-3 py-2 rounded-xl text-xs transition-all cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Sync
+                </button>
+                <button onclick="openModal('entry-modal')" class="btn-brand-gradient text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition-all cursor-pointer">
+                    + Record Entry
+                </button>
+            </div>
+        </div>
+
+        <!-- CashBook Summary Metrics -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-xs">
+                <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Net Cash Reserve</span>
+                <h3 class="text-2xl font-black text-pnt-purple mt-1" id="metric-net-balance">₦0</h3>
+                <p class="text-[10px] text-slate-400 mt-0.5">Current operational liquid balance</p>
+            </div>
+
+            <div class="bg-white border border-emerald-100 p-5 rounded-2xl shadow-xs">
+                <span class="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider">Total Cash-In</span>
+                <h3 class="text-2xl font-black text-emerald-600 mt-1" id="metric-total-in">₦0</h3>
+                <p class="text-[10px] text-slate-400 mt-0.5">IDs, subscriptions & deposits</p>
+            </div>
+
+            <div class="bg-white border border-rose-100 p-5 rounded-2xl shadow-xs">
+                <span class="text-[11px] font-semibold text-rose-600 uppercase tracking-wider">Total Cash-Out</span>
+                <h3 class="text-2xl font-black text-rose-600 mt-1" id="metric-total-out">₦0</h3>
+                <p class="text-[10px] text-slate-400 mt-0.5">Branch expenses & disbursements</p>
+            </div>
+
+            <div class="bg-white border border-amber-100 p-5 rounded-2xl shadow-xs">
+                <span class="text-[11px] font-semibold text-amber-600 uppercase tracking-wider">Pending Approvals</span>
+                <h3 class="text-2xl font-black text-amber-600 mt-1" id="metric-pending-count">0</h3>
+                <p class="text-[10px] text-slate-400 mt-0.5">Fund requests awaiting audit</p>
+            </div>
+        </div>
+
+        <!-- Controls: Filter & Search -->
+        <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <select id="filter-type" onchange="applyFilters()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none">
+                    <option value="all">All Flow (In & Out)</option>
+                    <option value="in">Cash In Only (+)</option>
+                    <option value="out">Cash Out Only (-)</option>
+                </select>
+                <select id="filter-status" onchange="applyFilters()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none">
+                    <option value="all">All Statuses</option>
+                    <option value="approved">Approved</option>
+                    <option value="pending">Pending Admin Sign-off</option>
+                </select>
+            </div>
+            <input type="text" id="ledger-search" placeholder="Search reference, description, or user..." class="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs w-full sm:w-80 focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+        </div>
+
+        <!-- Master Transaction Ledger Table -->
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
+                        <tr>
+                            <th class="py-3 px-4">Entity / Initiator</th>
+                            <th class="py-3 px-4">Category & Note</th>
+                            <th class="py-3 px-4">Direction</th>
+                            <th class="py-3 px-4">Amount</th>
+                            <th class="py-3 px-4">Reference</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4 text-right">Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledger-tbody" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="7" class="text-center py-10 text-slate-400 font-medium">Synchronizing ledger stream...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal: Record Cash In / Out -->
+    <div id="entry-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden p-6 space-y-4 relative">
+            <button type="button" onclick="closeModal('entry-modal')" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
+            
+            <div class="border-b border-slate-100 pb-2">
+                <h3 class="text-base font-bold text-slate-900">Post CashBook Transaction</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Add verified branch deposit or debit request</p>
+            </div>
+
+            <form id="ledger-form" class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Flow Direction</label>
+                        <select id="form-entry-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                            <option value="in">Cash In (+ Income)</option>
+                            <option value="out">Cash Out (- Expense)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-1">Amount (₦)</label>
+                        <input type="number" id="form-amount" required min="1" step="any" placeholder="0.00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Category</label>
+                    <input type="text" id="form-category" required placeholder="e.g., Office Supplies, Softcopy ID, Logistics" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Description / Memo</label>
+                    <textarea id="form-notes" rows="2" placeholder="Itemized justification or note..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none"></textarea>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeModal('entry-modal')" class="w-1/2 py-2.5 bg-slate-100 text-slate-600 text-xs font-semibold rounded-xl cursor-pointer">Cancel</button>
+                    <button type="submit" id="submit-entry-btn" class="w-1/2 py-2.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-md cursor-pointer">Post Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mount Universal Responsive Navigation -->
+    <script src="/js/nav.js"></script>
+
+    <script>
+        let currentUser = null;
+        let masterTransactions = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/auth/me', { credentials: 'include' });
+                const data = await res.json();
+                if (!data.success || (data.user.role !== 'admin' && data.user.role !== 'global_admin')) {
+                    window.location.href = '/views/dashboard.html';
+                    return;
+                }
+                currentUser = data.user;
+                await fetchFinancialData();
+
+                document.getElementById('ledger-search').addEventListener('input', applyFilters);
+            } catch (err) {
+                window.location.href = '/views/onboarding.html';
+            }
+        });
+
+        async function fetchFinancialData() {
+            try {
+                const res = await fetch('/api/auth/users/all', { credentials: 'include' });
+                const data = await res.json();
+
+                if (data.success) {
+                    const users = data.data || [];
+                    masterTransactions = [];
+
+                    // Reconstruct baseline system deposits from automated user workflows
+                    users.forEach(u => {
+                        if (u.has_paid_softcopy) {
+                            masterTransactions.push({
+                                id: `tx-id-${u.id}`,
+                                initiator: `${u.first_name} ${u.last_name}`,
+                                meta: u.email,
+                                category: 'Softcopy ID Card',
+                                notes: 'Digital credential access purchase',
+                                direction: 'in',
+                                amount: 2000,
+                                reference: `PNT-ID-${u.custom_profile_id || 'AUTO'}`,
+                                status: 'approved',
+                                created_at: u.created_at
+                            });
+                        }
+                        if (u.membership_expires_at) {
+                            masterTransactions.push({
+                                id: `tx-ren-${u.id}`,
+                                initiator: `${u.first_name} ${u.last_name}`,
+                                meta: u.email,
+                                category: 'Annual Renewal',
+                                notes: 'Annual workspace access maintenance',
+                                direction: 'in',
+                                amount: 3000,
+                                reference: `PNT-REN-${u.custom_profile_id || 'AUTO'}`,
+                                status: 'approved',
+                                created_at: u.membership_expires_at
+                            });
+                        }
+                    });
+
+                    // Sort newest transactions first
+                    masterTransactions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                    computeLedgerMetrics(masterTransactions);
+                    renderLedgerTable(masterTransactions);
+                }
+            } catch (err) {
+                console.error("Ledger sync error:", err);
+                document.getElementById('ledger-tbody').innerHTML = `<tr><td colspan="7" class="text-center py-8 text-rose-500 font-medium">Unable to load transactional ledger records.</td></tr>`;
+            }
+        }
+
+        function computeLedgerMetrics(entries) {
+            let totalIn = 0;
+            let totalOut = 0;
+            let pendingCount = 0;
+
+            entries.forEach(e => {
+                if (e.status === 'pending') {
+                    pendingCount++;
+                } else if (e.direction === 'in') {
+                    totalIn += e.amount;
+                } else if (e.direction === 'out') {
+                    totalOut += e.amount;
+                }
+            });
+
+            const netBalance = totalIn - totalOut;
+
+            document.getElementById('metric-net-balance').textContent = `₦${netBalance.toLocaleString()}`;
+            document.getElementById('metric-total-in').textContent = `₦${totalIn.toLocaleString()}`;
+            document.getElementById('metric-total-out').textContent = `₦${totalOut.toLocaleString()}`;
+            document.getElementById('metric-pending-count').textContent = pendingCount;
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('ledger-search').value.toLowerCase().trim();
+            const flow = document.getElementById('filter-type').value;
+            const status = document.getElementById('filter-status').value;
+
+            const filtered = masterTransactions.filter(tx => {
+                const matchesFlow = flow === 'all' || tx.direction === flow;
+                const matchesStatus = status === 'all' || tx.status === status;
+                const matchesQuery = !query || 
+                    tx.initiator.toLowerCase().includes(query) ||
+                    tx.category.toLowerCase().includes(query) ||
+                    (tx.notes && tx.notes.toLowerCase().includes(query)) ||
+                    tx.reference.toLowerCase().includes(query);
+
+                return matchesFlow && matchesStatus && matchesQuery;
+            });
+
+            renderLedgerTable(filtered);
+        }
+
+        function renderLedgerTable(entries) {
+            const tbody = document.getElementById('ledger-tbody');
+            tbody.innerHTML = '';
+
+            if (!entries || entries.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-slate-400 font-medium">No matching ledger records located.</td></tr>`;
+                return;
+            }
+
+            entries.forEach(item => {
+                const isCashIn = item.direction === 'in';
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50/70 transition-colors";
+
+                row.innerHTML = `
+                    <td class="py-3 px-4">
+                        <span class="font-bold text-slate-900">${item.initiator}</span>
+                        <div class="text-[10px] text-slate-400 font-mono">${item.meta || 'Authorized Member'}</div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="font-semibold text-slate-700">${item.category}</span>
+                        <div class="text-[10px] text-slate-400 truncate max-w-xs">${item.notes || '---'}</div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${isCashIn ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
+                            ${isCashIn ? '+ Cash In' : '- Cash Out'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 font-mono font-bold ${isCashIn ? 'text-emerald-700' : 'text-rose-600'}">
+                        ${isCashIn ? '+' : '-'}₦${item.amount.toLocaleString()}
+                    </td>
+                    <td class="py-3 px-4 font-mono text-[11px] text-slate-600">${item.reference}</td>
+                    <td class="py-3 px-4">
+                        <span class="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${item.status === 'approved' ? 'bg-slate-100 text-slate-700' : 'bg-amber-100 text-amber-800'}">
+                            ${item.status}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right text-slate-400 font-mono text-[11px]">
+                        ${new Date(item.created_at).toLocaleDateString()}
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        document.getElementById('ledger-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const direction = document.getElementById('form-entry-type').value;
+            const amount = parseFloat(document.getElementById('form-amount').value);
+            const category = document.getElementById('form-category').value.trim();
+            const notes = document.getElementById('form-notes').value.trim();
+
+            const newEntry = {
+                id: `entry-${Date.now()}`,
+                initiator: `${currentUser.first_name || 'Admin'} ${currentUser.last_name || ''}`,
+                meta: currentUser.email,
+                category,
+                notes,
+                direction,
+                amount,
+                reference: `MAN-${Date.now().toString().slice(-6)}`,
+                status: 'approved',
+                created_at: new Date().toISOString()
+            };
+
+            masterTransactions.unshift(newEntry);
+            computeLedgerMetrics(masterTransactions);
+            applyFilters();
+
+            document.getElementById('ledger-form').reset();
+            closeModal('entry-modal');
+        });
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    </script>
+</body>
+</html>

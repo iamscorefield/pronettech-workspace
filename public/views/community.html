@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronettech Workspace | Help Desk & Community</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pnt: {
+                            dark: '#0D122B',
+                            purple: '#6A1BBF',
+                            'purple-light': '#9D4EDD',
+                            orange: '#FF7A00',
+                            gold: '#FFC107'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-full pb-12 relative overflow-x-hidden bg-slate-50 text-pnt-dark">
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 mt-8 space-y-8">
+
+        <!-- Header Card -->
+        <div class="glass-card p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-xl font-black text-pnt-dark tracking-tight">Help Desk & Community Forum</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Collaborate with colleagues, ask operational questions, and escalate urgent issues</p>
+            </div>
+            <button onclick="openModal('new-post-modal')" class="btn-brand-gradient text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer">
+                + New Discussion / Ticket
+            </button>
+        </div>
+
+        <!-- Feed / Discussions Stream -->
+        <div class="space-y-4" id="community-feed">
+            <div class="bg-white border border-slate-200 p-8 rounded-2xl text-center text-xs text-slate-400">
+                Loading community discussions...
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL: CREATE POST / TICKET -->
+    <div id="new-post-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 relative">
+            <button type="button" onclick="closeModal('new-post-modal')" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
+            
+            <div class="border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-pnt-dark">Create Community Post or Ticket</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Broadcast a question or escalate an operational inquiry to leaders and admins.</p>
+            </div>
+
+            <form id="create-post-form" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Post Type</label>
+                    <select id="post-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
+                        <option value="discussion">General Discussion / Question</option>
+                        <option value="incident">Escalation / Incident Ticket</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Subject / Headline</label>
+                    <input type="text" id="post-subject" required placeholder="Brief summary of your inquiry..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Detailed Message / Context</label>
+                    <textarea id="post-details" rows="4" required placeholder="Describe your question or incident in detail..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none"></textarea>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeModal('new-post-modal')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer">Cancel</button>
+                    <button type="submit" id="submit-post-btn" class="w-1/2 py-2.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-md transition-all cursor-pointer">Publish Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mount Universal Responsive Navigation -->
+    <script src="/js/nav.js"></script>
+
+    <script>
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/auth/me', { credentials: 'include' });
+                const data = await res.json();
+                if (!data.success) {
+                    window.location.href = '/views/onboarding.html';
+                    return;
+                }
+                currentUser = data.user;
+                await fetchCommunityFeed();
+            } catch (err) {
+                window.location.href = '/views/onboarding.html';
+            }
+        });
+
+        async function fetchCommunityFeed() {
+            try {
+                const res = await fetch('/api/community/incidents', { credentials: 'include' });
+                const data = await res.json();
+                if (data.success) {
+                    renderFeed(data.data || []);
+                } else {
+                    document.getElementById('community-feed').innerHTML = `<div class="bg-white border border-slate-200 p-8 rounded-2xl text-center text-xs text-slate-400">No discussions found. Be the first to post!</div>`;
+                }
+            } catch (err) {
+                document.getElementById('community-feed').innerHTML = `<div class="bg-white border border-slate-200 p-8 rounded-2xl text-center text-xs text-red-400">Failed to load community stream.</div>`;
+            }
+        }
+
+        function renderFeed(posts) {
+            const container = document.getElementById('community-feed');
+            container.innerHTML = '';
+
+            if (posts.length === 0) {
+                container.innerHTML = `<div class="bg-white border border-slate-200 p-8 rounded-2xl text-center text-xs text-slate-400">No community posts or tickets active.</div>`;
+                return;
+            }
+
+            posts.forEach(post => {
+                const isIncident = post.type === 'incident' || post.details;
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-3";
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full ${post.status === 'resolved' ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">${isIncident ? 'Incident Ticket' : 'Community Discussion'}</span>
+                        </div>
+                        <span class="text-[10px] font-mono text-slate-400">${new Date(post.created_at || Date.now()).toLocaleDateString()}</span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">${post.subject}</h3>
+                        <p class="text-xs text-slate-600 mt-1 leading-relaxed">${post.details || post.message}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        document.getElementById('create-post-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-post-btn');
+            const subject = document.getElementById('post-subject').value;
+            const details = document.getElementById('post-details').value;
+
+            btn.disabled = true;
+            btn.textContent = 'Publishing...';
+
+            try {
+                const res = await fetch('/api/community/incidents', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ subject, details })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('💬 Discussion / Ticket published successfully!');
+                    document.getElementById('create-post-form').reset();
+                    closeModal('new-post-modal');
+                    fetchCommunityFeed();
+                } else {
+                    alert(`Failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Connection error.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Publish Post';
+            }
+        });
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    </script>
+</body>
+</html>

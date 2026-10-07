@@ -69,7 +69,7 @@ router.get('/me', protect, async (req, res) => {
 
         const { data: profile, error: profErr } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, email, phone_number, bio, state, sponsor_id, role, status, status_reason, membership_expires_at, has_paid_softcopy, custom_profile_id, office_id, avatar_url')
+            .select('id, first_name, last_name, email, phone_number, bio, state, sponsor_id, role, status, status_reason, membership_expires_at, has_paid_softcopy, custom_profile_id, office_id, avatar_url, permissions')
             .eq('id', userId)
             .single();
 
@@ -111,6 +111,7 @@ router.get('/me', protect, async (req, res) => {
             user: {
                 id: profile.id,
                 role: profile.role,
+                permissions: profile.permissions || null,
                 status: profile.status,
                 status_reason: profile.status_reason || null,
                 membership_expires_at: profile.membership_expires_at || null,
@@ -398,7 +399,6 @@ router.post('/signup', async (req, res) => {
 
         const userId = authData.user.id;
 
-        // Strict Zero-Mock: membership_expires_at is null, has_paid_softcopy is false
         const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .insert([{
@@ -463,7 +463,7 @@ router.post('/login', async (req, res) => {
 
         const { data: profile, error: profErr } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, email, phone_number, bio, state, sponsor_id, role, status, status_reason, membership_expires_at, has_paid_softcopy, custom_profile_id, office_id, avatar_url')
+            .select('id, first_name, last_name, email, phone_number, bio, state, sponsor_id, role, status, status_reason, membership_expires_at, has_paid_softcopy, custom_profile_id, office_id, avatar_url, permissions')
             .eq('id', data.user.id)
             .single();
 
@@ -509,7 +509,8 @@ router.post('/login', async (req, res) => {
             message: 'Authentication successful.',
             user: { 
                 id: profile.id, 
-                role: profile.role, 
+                role: profile.role,
+                permissions: profile.permissions || null,
                 status: profile.status, 
                 status_reason: profile.status_reason || null, 
                 membership_expires_at: profile.membership_expires_at || null,
@@ -535,7 +536,7 @@ router.post('/login', async (req, res) => {
 // ===================================================
 // 8. LEADER REGISTRATION CONTROLS
 // ===================================================
-router.get('/pending/office/:officeId', protect, authorize('leader', 'admin'), async (req, res) => {
+router.get('/pending/office/:officeId', protect, authorize('leader', 'sub_admin', 'admin'), async (req, res) => {
     const { officeId } = req.params;
     try {
         const { data, error } = await supabase
@@ -554,7 +555,7 @@ router.get('/pending/office/:officeId', protect, authorize('leader', 'admin'), a
     }
 });
 
-router.put('/approve/:profileId', protect, authorize('leader', 'admin'), async (req, res) => {
+router.put('/approve/:profileId', protect, authorize('leader', 'sub_admin', 'admin'), async (req, res) => {
     const { profileId } = req.params;
     try {
         const { data, error } = await supabase
@@ -571,7 +572,7 @@ router.put('/approve/:profileId', protect, authorize('leader', 'admin'), async (
     }
 });
 
-router.put('/reject/:profileId', protect, authorize('leader', 'admin'), async (req, res) => {
+router.put('/reject/:profileId', protect, authorize('leader', 'sub_admin', 'admin'), async (req, res) => {
     const { profileId } = req.params;
     try {
         const { data, error } = await supabase
@@ -591,7 +592,7 @@ router.put('/reject/:profileId', protect, authorize('leader', 'admin'), async (r
 // ===================================================
 // 9. GLOBAL METRICS FOR ADMIN COMMAND CENTER
 // ===================================================
-router.get('/metrics/global', protect, authorize('admin'), async (req, res) => {
+router.get('/metrics/global', protect, authorize('admin', 'sub_admin'), async (req, res) => {
     try {
         const { count: totalStaff, error: staffError } = await supabase
             .from('profiles')
@@ -609,7 +610,7 @@ router.get('/metrics/global', protect, authorize('admin'), async (req, res) => {
         const { count: totalLeaders, error: leaderError } = await supabase
             .from('profiles')
             .select('*', { count: 'exact', head: true })
-            .eq('role', 'leader');
+            .in('role', ['leader', 'team_leader', 'sub_admin']);
 
         if (leaderError) throw leaderError;
 
@@ -638,11 +639,11 @@ router.get('/metrics/global', protect, authorize('admin'), async (req, res) => {
 // ===================================================
 // 10. ADMIN DIRECTORY & DISCIPLINARY ACTIONS
 // ===================================================
-router.get('/users/all', protect, authorize('admin'), async (req, res) => {
+router.get('/users/all', protect, authorize('admin', 'sub_admin'), async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, email, phone_number, bio, state, sponsor_id, custom_profile_id, role, status, status_reason, membership_expires_at, has_paid_softcopy, created_at, avatar_url, office:offices(branch_name)')
+            .select('id, first_name, last_name, email, phone_number, bio, state, sponsor_id, custom_profile_id, role, status, status_reason, membership_expires_at, has_paid_softcopy, created_at, avatar_url, permissions, office:offices(branch_name)')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -656,15 +657,20 @@ router.get('/users/all', protect, authorize('admin'), async (req, res) => {
 router.patch('/users/:id/role', protect, authorize('admin'), async (req, res) => {
     try {
         const { id } = req.params;
-        const { role } = req.body;
+        const { role, permissions } = req.body;
 
-        if (!['member', 'leader'].includes(role)) {
+        if (!['member', 'leader', 'sub_admin'].includes(role)) {
             return res.status(400).json({ success: false, message: 'Invalid target role specification.' });
+        }
+
+        const updatePayload = { role };
+        if (permissions !== undefined) {
+            updatePayload.permissions = permissions;
         }
 
         const { data, error } = await supabase
             .from('profiles')
-            .update({ role })
+            .update(updatePayload)
             .eq('id', id)
             .select()
             .single();
@@ -673,7 +679,7 @@ router.patch('/users/:id/role', protect, authorize('admin'), async (req, res) =>
 
         return res.json({ 
             success: true, 
-            message: `User role successfully updated to ${role === 'leader' ? 'Team Leader' : 'Member'}.`,
+            message: `User role successfully updated to ${role.toUpperCase()}.`,
             data 
         });
     } catch (err) {
@@ -682,7 +688,7 @@ router.patch('/users/:id/role', protect, authorize('admin'), async (req, res) =>
     }
 });
 
-router.patch('/users/:id/status', protect, authorize('admin'), async (req, res) => {
+router.patch('/users/:id/status', protect, authorize('admin', 'sub_admin'), async (req, res) => {
     try {
         const { id } = req.params;
         const { status, reason } = req.body;

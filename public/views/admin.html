@@ -29,9 +29,25 @@
 
     <main class="max-w-7xl mx-auto px-6 mt-8 space-y-8 relative z-10">
 
-        <!-- Top Telemetry Metrics (Clickable Filters & Inspectors) -->
+        <!-- Command Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-100">
+            <div>
+                <h2 class="text-2xl font-black text-pnt-dark tracking-tight">Executive Command Center</h2>
+                <p class="text-slate-500 text-xs mt-0.5">Global administrative telemetry, regional branches registry, and personnel governance</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="refreshAdminConsole()" class="inline-flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-semibold px-3.5 py-2 rounded-xl text-xs transition-all cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Refresh Records
+                </button>
+                <button onclick="openModal('broadcast-modal')" class="btn-brand-gradient text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition-all cursor-pointer">
+                    + Dispatch Broadcast
+                </button>
+            </div>
+        </div>
+
+        <!-- Top Telemetry Metrics -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Filter: Members Only -->
             <div onclick="filterDirectoryByRole('member')" class="glass-card p-6 rounded-2xl cursor-pointer hover:border-pnt-purple/40 hover:shadow-md transition-all group">
                 <div class="flex justify-between items-center">
                     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-pnt-purple transition-colors">Total Members</p>
@@ -42,7 +58,6 @@
                 </div>
             </div>
 
-            <!-- Inspect: Live Branches Modal Window -->
             <div onclick="openBranchInspector()" class="glass-card p-6 rounded-2xl cursor-pointer hover:border-pnt-purple/40 hover:shadow-md transition-all group">
                 <div class="flex justify-between items-center">
                     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-pnt-purple transition-colors">Active Regional Branches</p>
@@ -53,18 +68,16 @@
                 </div>
             </div>
 
-            <!-- Filter: Team Leaders / Sub-Admins Only -->
-            <div onclick="filterDirectoryByRole('leader')" class="glass-card p-6 rounded-2xl cursor-pointer hover:border-blue-300 hover:shadow-md transition-all group">
+            <div onclick="scrollToLeaders()" class="glass-card p-6 rounded-2xl cursor-pointer hover:border-blue-300 hover:shadow-md transition-all group">
                 <div class="flex justify-between items-center">
                     <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-[#0070c0] transition-colors">Assigned Sub-Admins</p>
-                    <span class="text-[10px] text-slate-400 group-hover:text-[#0070c0] font-mono font-bold">View ➔</span>
+                    <span class="text-[10px] text-slate-400 group-hover:text-[#0070c0] font-mono font-bold">Manage ➔</span>
                 </div>
                 <div class="flex items-baseline gap-2 mt-1">
                     <h3 class="text-3xl font-bold text-pnt-dark" id="metric-total-leaders">0</h3>
                 </div>
             </div>
 
-            <!-- Jump: Incident Escalations -->
             <div onclick="scrollToEscalations()" class="glass-card p-6 rounded-2xl border-red-200 bg-red-50/40 cursor-pointer hover:border-red-400 hover:shadow-md transition-all group">
                 <div class="flex justify-between items-center">
                     <p class="text-xs font-semibold text-red-600 uppercase tracking-wider">Red-Alert Escalations</p>
@@ -76,6 +89,40 @@
             </div>
         </div>
 
+        <!-- ================= LEADER & SUB-ADMIN GOVERNANCE SECTION ================= -->
+        <div id="leader-management-section" class="glass-card p-6 rounded-2xl space-y-4 border-blue-100">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-base font-bold text-pnt-dark flex items-center gap-2">
+                        <span>Sub-Admin & Team Leader Directory</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-[#0070c0] border border-blue-200">Governance Console</span>
+                    </h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Manage team leaders, promote them to Sub-Admins, and configure their exact operational permissions</p>
+                </div>
+                <input type="text" id="leader-search-input" placeholder="Search leaders by name or ID..." class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple w-full sm:w-64">
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-slate-400 uppercase font-semibold text-[10px] tracking-wider">
+                            <th class="py-3 px-4">Leader Profile</th>
+                            <th class="py-3 px-4">Workspace ID</th>
+                            <th class="py-3 px-4">Branch Office</th>
+                            <th class="py-3 px-4">State</th>
+                            <th class="py-3 px-4">Current Role</th>
+                            <th class="py-3 px-4 text-right">Scope & Permissions Override</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leader-directory-tbody" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="6" class="text-center py-6 text-xs text-slate-400">Loading team leader records...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- User Directory & Access Control -->
         <div id="user-directory-section" class="glass-card p-6 rounded-2xl space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -84,7 +131,7 @@
                         <span>Workspace User Directory</span>
                         <span id="active-filter-badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-pnt-purple"></span>
                     </h3>
-                    <p class="text-slate-500 text-xs mt-0.5">Audit personnel records, verify sponsor IDs, monitor Nigerian states, and execute disciplinary actions</p>
+                    <p class="text-slate-500 text-xs mt-0.5">Click any user avatar to inspect full profile details, verify sponsor IDs, and execute governance actions</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <input type="text" id="user-search-input" placeholder="Search by name, ID, branch, or state..." class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple w-full sm:w-64">
@@ -217,88 +264,131 @@
         </div>
     </main>
 
-    <!-- ================= MODAL: BRANCH INSPECTOR & CREATOR WINDOW ================= -->
+    <!-- ================= MODAL: SUB-ADMIN PERMISSIONS OVERRIDE ================= -->
+    <div id="subadmin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 relative">
+            <button type="button" onclick="closeModal('subadmin-modal')" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
+            
+            <div class="border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-pnt-dark">Configure Sub-Admin Privileges</h3>
+                <p id="subadmin-target-name" class="text-xs text-slate-500 mt-0.5">Select what this leader is allowed to manage.</p>
+            </div>
+
+            <form id="subadmin-permissions-form" class="space-y-3.5">
+                <input type="hidden" id="subadmin-target-id">
+                
+                <div class="space-y-2.5 text-xs">
+                    <label class="flex items-center gap-2.5 p-2 bg-slate-50 rounded-xl cursor-pointer">
+                        <input type="checkbox" id="perm-approve-users" class="rounded text-pnt-purple focus:ring-pnt-purple w-4 h-4">
+                        <span class="font-semibold text-slate-800">Can Approve / Reject New Signups</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 p-2 bg-slate-50 rounded-xl cursor-pointer">
+                        <input type="checkbox" id="perm-verify-attendance" class="rounded text-pnt-purple focus:ring-pnt-purple w-4 h-4">
+                        <span class="font-semibold text-slate-800">Can Verify Daily Attendance Pings</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 p-2 bg-slate-50 rounded-xl cursor-pointer">
+                        <input type="checkbox" id="perm-deploy-tasks" class="rounded text-pnt-purple focus:ring-pnt-purple w-4 h-4">
+                        <span class="font-semibold text-slate-800">Can Deploy Branch Tasks & Directives</span>
+                    </label>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeModal('subadmin-modal')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer">Cancel</button>
+                    <button type="submit" class="w-1/2 py-2.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-md transition-all cursor-pointer">Save Privileges</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: USER PROFILE INSPECTOR ================= -->
+    <div id="user-profile-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 relative">
+            <button type="button" onclick="closeModal('user-profile-modal')" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
+            
+            <div class="flex items-center gap-3.5 border-b border-slate-100 pb-4">
+                <div id="inspect-avatar-container" class="w-14 h-14 rounded-full bg-pnt-purple text-white font-bold flex items-center justify-center text-base overflow-hidden shrink-0 border-2 border-purple-200 shadow-sm">
+                    --
+                </div>
+                <div class="overflow-hidden">
+                    <h3 id="inspect-fullname" class="text-base font-black text-slate-900 leading-tight">Full Name</h3>
+                    <p id="inspect-custom-id" class="text-xs font-mono text-pnt-purple font-bold mt-0.5">PNT-PENDING</p>
+                    <span id="inspect-role-badge" class="inline-block mt-1 text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-purple-50 text-pnt-purple border border-purple-200">Member</span>
+                </div>
+            </div>
+
+            <div class="space-y-2 text-xs">
+                <div class="flex justify-between py-1 border-b border-slate-50">
+                    <span class="text-slate-400 font-medium">Email Address:</span>
+                    <span id="inspect-email" class="font-mono text-slate-800 font-semibold">--</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-50">
+                    <span class="text-slate-400 font-medium">Phone Number:</span>
+                    <span id="inspect-phone" class="font-mono text-slate-800 font-semibold">--</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-50">
+                    <span class="text-slate-400 font-medium">State / Residence:</span>
+                    <span id="inspect-state" class="text-slate-800 font-semibold">--</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-50">
+                    <span class="text-slate-400 font-medium">Branch Office:</span>
+                    <span id="inspect-branch" class="text-slate-800 font-semibold">--</span>
+                </div>
+                <div class="flex justify-between py-1 border-b border-slate-50">
+                    <span class="text-slate-400 font-medium">Sponsor ID:</span>
+                    <span id="inspect-sponsor" class="font-mono text-slate-800 font-semibold">--</span>
+                </div>
+                <div class="flex justify-between py-1">
+                    <span class="text-slate-400 font-medium">Account Status:</span>
+                    <span id="inspect-status" class="uppercase font-bold text-emerald-600">--</span>
+                </div>
+            </div>
+
+            <button type="button" onclick="closeModal('user-profile-modal')" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer mt-2">
+                Close Inspector
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: BRANCH INSPECTOR ================= -->
     <div id="branch-inspector-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div id="branch-window" class="bg-white border border-slate-200 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300">
-            <!-- Window Topbar with Controls -->
             <div class="px-6 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
                 <div class="flex items-center gap-2">
                     <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
                     <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider" id="branch-modal-heading">Active Regional Branches Registry</h3>
                 </div>
-                <!-- Window Minimize & Close Buttons -->
                 <div class="flex items-center gap-1.5">
-                    <button type="button" onclick="toggleMinimizeBranchWindow()" title="Minimize / Expand Window" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center text-sm font-bold transition-all cursor-pointer">
-                        <span id="window-min-icon">_</span>
-                    </button>
-                    <button type="button" onclick="closeModal('branch-inspector-modal')" title="Close Window" class="w-7 h-7 rounded-lg hover:bg-red-100 hover:text-red-600 text-slate-400 flex items-center justify-center text-base font-bold transition-all cursor-pointer">
-                        &times;
-                    </button>
+                    <button type="button" onclick="toggleMinimizeBranchWindow()" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-500 flex items-center justify-center text-sm font-bold transition-all cursor-pointer"><span id="window-min-icon">_</span></button>
+                    <button type="button" onclick="closeModal('branch-inspector-modal')" class="w-7 h-7 rounded-lg hover:bg-red-100 hover:text-red-600 text-slate-400 flex items-center justify-center text-base font-bold transition-all cursor-pointer">&times;</button>
                 </div>
             </div>
-
-            <!-- Window Content Section -->
             <div id="branch-window-body" class="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
-                
-                <!-- VIEW 1: Branch List View -->
                 <div id="branch-list-view" class="space-y-4">
                     <div class="flex items-center justify-between">
                         <p class="text-xs text-slate-500">Currently verified operational nodes across Nigeria:</p>
-                        <button type="button" onclick="showBranchCreationForm()" class="btn-brand-gradient text-white font-bold text-xs px-3.5 py-1.5 rounded-xl shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
-                            + Add New Branch
-                        </button>
+                        <button type="button" onclick="showBranchCreationForm()" class="btn-brand-gradient text-white font-bold text-xs px-3.5 py-1.5 rounded-xl shadow-sm transition-all cursor-pointer">+ Add New Branch</button>
                     </div>
-
                     <div class="overflow-hidden border border-slate-200 rounded-xl">
                         <table class="w-full text-left text-xs">
                             <thead class="bg-slate-50 border-b border-slate-200 text-slate-400 uppercase text-[10px] font-semibold tracking-wider">
-                                <tr>
-                                    <th class="py-2.5 px-4">Branch Hub</th>
-                                    <th class="py-2.5 px-4">State</th>
-                                    <th class="py-2.5 px-4">Physical Address</th>
-                                </tr>
+                                <tr><th class="py-2.5 px-4">Branch Hub</th><th class="py-2.5 px-4">State</th><th class="py-2.5 px-4">Physical Address</th></tr>
                             </thead>
-                            <tbody id="branch-inspect-tbody" class="divide-y divide-slate-100">
-                                <tr>
-                                    <td colspan="3" class="text-center py-6 text-slate-400 text-xs">Loading operational branches...</td>
-                                </tr>
-                            </tbody>
+                            <tbody id="branch-inspect-tbody" class="divide-y divide-slate-100"><tr><td colspan="3" class="text-center py-6 text-slate-400 text-xs">Loading operational branches...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
-
-                <!-- VIEW 2: Create New Branch Form (Inside Same Modal) -->
                 <div id="branch-create-view" class="hidden space-y-4">
                     <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <div>
-                            <h4 class="text-xs font-bold text-pnt-purple uppercase tracking-wider">Register New Regional Branch</h4>
-                            <p class="text-[11px] text-slate-500">Configure an office node so members in that state can be assigned.</p>
-                        </div>
-                        <button type="button" onclick="showBranchListView()" class="text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-all cursor-pointer">
-                            ← Back to Registry
-                        </button>
+                        <h4 class="text-xs font-bold text-pnt-purple uppercase tracking-wider">Register New Regional Branch</h4>
+                        <button type="button" onclick="showBranchListView()" class="text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg cursor-pointer">← Back</button>
                     </div>
-
                     <form id="create-office-form" class="space-y-3.5">
-                        <div>
-                            <label for="modal-branch-name" class="block text-xs font-semibold text-slate-600 mb-1">Branch Hub Name</label>
-                            <input type="text" id="modal-branch-name" required placeholder="e.g., Ibadan Central Hub" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
-                        </div>
-                        <div>
-                            <label for="modal-branch-state" class="block text-xs font-semibold text-slate-600 mb-1">State / Region (Nigeria)</label>
-                            <input type="text" id="modal-branch-state" required placeholder="e.g., Oyo State" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
-                        </div>
-                        <div>
-                            <label for="modal-branch-address" class="block text-xs font-semibold text-slate-600 mb-1">Physical Location Address</label>
-                            <input type="text" id="modal-branch-address" placeholder="e.g., Suite 12, Commercial Road, Ibadan" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
-                        </div>
-                        <div class="flex gap-2 pt-2">
-                            <button type="button" onclick="showBranchListView()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer">Cancel</button>
-                            <button type="submit" id="save-office-btn" class="w-1/2 py-2.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-md transition-all cursor-pointer">Confirm & Add Branch</button>
-                        </div>
+                        <div><label class="block text-xs font-semibold text-slate-600 mb-1">Branch Hub Name</label><input type="text" id="modal-branch-name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs"></div>
+                        <div><label class="block text-xs font-semibold text-slate-600 mb-1">State / Region</label><input type="text" id="modal-branch-state" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs"></div>
+                        <div><label class="block text-xs font-semibold text-slate-600 mb-1">Address</label><input type="text" id="modal-branch-address" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs"></div>
+                        <button type="submit" id="save-office-btn" class="w-full py-2.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-md cursor-pointer">Confirm & Add Branch</button>
                     </form>
                 </div>
-
             </div>
         </div>
     </div>
@@ -306,22 +396,11 @@
     <!-- MODAL: DISCIPLINARY ACTION -->
     <div id="disciplinary-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-pnt-dark" id="modal-action-title">Confirm Disciplinary Action</h3>
-                <button onclick="closeModal('disciplinary-modal')" class="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer">&times;</button>
-            </div>
-            <p class="text-xs text-slate-500" id="modal-action-description">Specify justification. Affected user will see this notice upon logging in.</p>
+            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-pnt-dark" id="modal-action-title">Confirm Disciplinary Action</h3><button onclick="closeModal('disciplinary-modal')" class="text-slate-400 text-lg font-bold cursor-pointer">&times;</button></div>
             <form id="disciplinary-form" class="space-y-3.5">
-                <input type="hidden" id="action-target-user-id">
-                <input type="hidden" id="action-target-status">
-                <div id="reason-container">
-                    <label for="action-reason" class="block text-xs font-semibold text-slate-600 mb-1">Stated Reason / Violation Summary</label>
-                    <textarea id="action-reason" rows="3" required placeholder="Describe reason..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none"></textarea>
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="closeModal('disciplinary-modal')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer">Cancel</button>
-                    <button type="submit" id="confirm-action-btn" class="w-1/2 py-2.5 bg-red-600 hover:bg-red-700 text-xs font-bold text-white rounded-xl shadow-md transition-all cursor-pointer">Apply Action</button>
-                </div>
+                <input type="hidden" id="action-target-user-id"><input type="hidden" id="action-target-status">
+                <div id="reason-container"><label class="block text-xs font-semibold text-slate-600 mb-1">Stated Reason / Violation Summary</label><textarea id="action-reason" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs"></textarea></div>
+                <button type="submit" id="confirm-action-btn" class="w-full py-2.5 bg-red-600 text-xs font-bold text-white rounded-xl shadow-md cursor-pointer">Apply Action</button>
             </form>
         </div>
     </div>
@@ -329,37 +408,17 @@
     <!-- MODAL: BROADCAST -->
     <div id="broadcast-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-pnt-dark">Deploy Broadcast Signal</h3>
-                <button onclick="closeModal('broadcast-modal')" class="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer">&times;</button>
-            </div>
-            <p class="text-xs text-slate-500">Dispatch alerts to all workspace terminals.</p>
+            <div class="flex justify-between items-center"><h3 class="text-base font-bold text-pnt-dark">Deploy Broadcast Signal</h3><button onclick="closeModal('broadcast-modal')" class="text-slate-400 text-lg font-bold cursor-pointer">&times;</button></div>
             <form id="send-broadcast-form" class="space-y-3.5">
-                <div>
-                    <label for="modal-broadcast-title" class="block text-xs font-semibold text-slate-600 mb-1">Broadcast Title</label>
-                    <input type="text" id="modal-broadcast-title" required placeholder="Announcement headline..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
-                </div>
-                <div>
-                    <label for="modal-broadcast-priority" class="block text-xs font-semibold text-slate-600 mb-1">Urgency Priority</label>
-                    <select id="modal-broadcast-priority" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
-                        <option value="normal">Standard Notice</option>
-                        <option value="high">High Priority</option>
-                        <option value="urgent">Red Alert Emergency</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="modal-broadcast-message" class="block text-xs font-semibold text-slate-600 mb-1">Notification Message</label>
-                    <textarea id="modal-broadcast-message" rows="3" required placeholder="Type the message..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none"></textarea>
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="closeModal('broadcast-modal')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer">Cancel</button>
-                    <button type="submit" id="send-broadcast-btn" class="w-1/2 py-2.5 bg-[#9D4EDD] hover:opacity-90 text-xs font-bold text-white rounded-xl shadow-md transition-all cursor-pointer">Send Transmission</button>
-                </div>
+                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Broadcast Title</label><input type="text" id="modal-broadcast-title" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs"></div>
+                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Urgency Priority</label><select id="modal-broadcast-priority" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs"><option value="normal">Standard Notice</option><option value="urgent">Red Alert Emergency</option></select></div>
+                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Notification Message</label><textarea id="modal-broadcast-message" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs"></textarea></div>
+                <button type="submit" id="send-broadcast-btn" class="w-full py-2.5 bg-[#9D4EDD] text-xs font-bold text-white rounded-xl shadow-md cursor-pointer">Send Transmission</button>
             </form>
         </div>
     </div>
 
-    <!-- Universal Navigation -->
+    <!-- Mount Universal Collapsible Sidebar Navigation -->
     <script src="/js/nav.js"></script>
 
     <script>
@@ -394,13 +453,20 @@
                     const filtered = allUsersDirectory.filter(u => 
                         `${u.first_name} ${u.last_name}`.toLowerCase().includes(query) ||
                         (u.custom_profile_id && u.custom_profile_id.toLowerCase().includes(query)) ||
-                        (u.sponsor_id && u.sponsor_id.toLowerCase().includes(query)) ||
-                        (u.state && u.state.toLowerCase().includes(query)) ||
-                        (u.office?.branch_name && u.office.branch_name.toLowerCase().includes(query)) ||
-                        u.email.toLowerCase().includes(query) ||
-                        (u.status && u.status.toLowerCase().includes(query))
+                        u.email.toLowerCase().includes(query)
                     );
                     renderUserDirectory(filtered);
+                });
+
+                document.getElementById('leader-search-input').addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase().trim();
+                    const leaders = allUsersDirectory.filter(u => u.role === 'leader' || u.role === 'team_leader' || u.role === 'sub_admin');
+                    const filtered = leaders.filter(u => 
+                        `${u.first_name} ${u.last_name}`.toLowerCase().includes(query) ||
+                        (u.custom_profile_id && u.custom_profile_id.toLowerCase().includes(query)) ||
+                        u.email.toLowerCase().includes(query)
+                    );
+                    renderLeaderDirectory(filtered);
                 });
             } catch (err) {
                 window.location.href = '/views/onboarding.html';
@@ -418,9 +484,6 @@
             ]);
         }
 
-        // ==========================================
-        // BRANCH INSPECTION WINDOW CONTROLLER
-        // ==========================================
         async function fetchOfficesList() {
             try {
                 const res = await fetch('/api/offices');
@@ -428,28 +491,20 @@
                     verifiedOffices = await res.json();
                     renderOfficesInspector(verifiedOffices);
                 }
-            } catch (err) {
-                console.error("Offices query error:", err);
-            }
+            } catch (err) { console.error("Offices query error:", err); }
         }
 
         function renderOfficesInspector(offices) {
             const tbody = document.getElementById('branch-inspect-tbody');
             tbody.innerHTML = '';
-
             if (!offices || offices.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-slate-400 text-xs">No active branches registered yet. Add one using the button above.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-slate-400 text-xs">No active branches registered yet.</td></tr>`;
                 return;
             }
-
             offices.forEach(office => {
                 const row = document.createElement('tr');
                 row.className = "hover:bg-slate-50 transition-colors";
-                row.innerHTML = `
-                    <td class="py-2.5 px-4 font-bold text-pnt-dark">${office.branch_name}</td>
-                    <td class="py-2.5 px-4 font-medium text-slate-600">${office.state}</td>
-                    <td class="py-2.5 px-4 text-slate-500">${office.address || '<span class="text-slate-300">Central Hub</span>'}</td>
-                `;
+                row.innerHTML = `<td class="py-2.5 px-4 font-bold text-pnt-dark">${office.branch_name}</td><td class="py-2.5 px-4 font-medium text-slate-600">${office.state}</td><td class="py-2.5 px-4 text-slate-500">${office.address || 'Central Hub'}</td>`;
                 tbody.appendChild(row);
             });
         }
@@ -476,45 +531,29 @@
             const body = document.getElementById('branch-window-body');
             const icon = document.getElementById('window-min-icon');
             isWindowMinimized = !isWindowMinimized;
-
-            if (isWindowMinimized) {
-                body.classList.add('hidden');
-                icon.textContent = "□";
-            } else {
-                body.classList.remove('hidden');
-                icon.textContent = "_";
-            }
+            body.classList.toggle('hidden', isWindowMinimized);
+            icon.textContent = isWindowMinimized ? "□" : "_";
         }
 
-        // ==========================================
-        // DIRECTORY FILTERS (TELEMETRY CARDS)
-        // ==========================================
         function filterDirectoryByRole(role) {
             const badge = document.getElementById('active-filter-badge');
-            const targetRole = role === 'leader' ? ['leader', 'team_leader'] : ['member'];
-
+            const targetRole = role === 'leader' ? ['leader', 'team_leader', 'sub_admin'] : ['member'];
             const filtered = allUsersDirectory.filter(u => targetRole.includes(u.role));
             badge.textContent = role === 'leader' ? 'Filtered: Sub-Admins' : 'Filtered: Members';
             badge.classList.remove('hidden');
-
             renderUserDirectory(filtered);
             document.getElementById('user-directory-section').scrollIntoView({ behavior: 'smooth' });
         }
 
         function resetDirectoryFilter() {
-            const badge = document.getElementById('active-filter-badge');
-            badge.classList.add('hidden');
+            document.getElementById('active-filter-badge').classList.add('hidden');
             document.getElementById('user-search-input').value = '';
             fetchUserDirectory();
         }
 
-        function scrollToEscalations() {
-            document.getElementById('escalations-section').scrollIntoView({ behavior: 'smooth' });
-        }
+        function scrollToEscalations() { document.getElementById('escalations-section').scrollIntoView({ behavior: 'smooth' }); }
+        function scrollToLeaders() { document.getElementById('leader-management-section').scrollIntoView({ behavior: 'smooth' }); }
 
-        // ==========================================
-        // DIRECTORY TABLE
-        // ==========================================
         async function fetchUserDirectory() {
             try {
                 const response = await fetch('/api/auth/users/all', { credentials: 'include' });
@@ -522,11 +561,95 @@
                 if (resData.success) {
                     allUsersDirectory = resData.data;
                     renderUserDirectory(allUsersDirectory);
+                    renderLeaderDirectory(allUsersDirectory.filter(u => u.role === 'leader' || u.role === 'team_leader' || u.role === 'sub_admin'));
                 }
-            } catch (err) {
-                console.error("Directory fetch error:", err);
-            }
+            } catch (err) { console.error("Directory fetch error:", err); }
         }
+
+        function renderLeaderDirectory(leaders) {
+            const tbody = document.getElementById('leader-directory-tbody');
+            tbody.innerHTML = '';
+
+            if (!leaders || leaders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-xs text-slate-400">No team leaders or sub-admins found.</td></tr>`;
+                return;
+            }
+
+            leaders.forEach(leader => {
+                const isSubAdmin = leader.role === 'sub_admin';
+                const initials = `${leader.first_name?.[0] || ''}${leader.last_name?.[0] || ''}`.toUpperCase() || 'L';
+                const avatarMarkup = leader.avatar_url 
+                    ? `<img src="${leader.avatar_url}" class="w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0 cursor-pointer hover:scale-105 transition-transform" onclick='inspectUserProfile(${JSON.stringify(leader)})'>`
+                    : `<div class="w-8 h-8 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center font-bold text-[#0070c0] text-xs shrink-0 cursor-pointer hover:scale-105 transition-transform" onclick='inspectUserProfile(${JSON.stringify(leader)})'>${initials}</div>`;
+
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50/80 transition-colors";
+                row.innerHTML = `
+                    <td class="py-3 px-4">
+                        <div class="flex items-center gap-3">
+                            ${avatarMarkup}
+                            <div>
+                                <div class="font-bold text-pnt-dark leading-tight">${leader.first_name} ${leader.last_name}</div>
+                                <div class="text-[10px] text-slate-400 font-mono">${leader.email} • ${leader.phone_number || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 font-mono text-xs text-pnt-purple font-bold tracking-wider">${leader.custom_profile_id || 'PNT-LEADER'}</td>
+                    <td class="py-3 px-4 text-xs text-slate-600">${leader.office?.branch_name || 'Physical Branch'}</td>
+                    <td class="py-3 px-4 text-xs text-slate-600">${leader.state ? leader.state + ', Nigeria' : 'No State'}</td>
+                    <td class="py-3 px-4">
+                        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${isSubAdmin ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-blue-50 text-[#0070c0] border border-blue-200'}">
+                            ${isSubAdmin ? 'Sub-Admin' : 'Team Leader'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right space-x-2">
+                        <button onclick="openSubAdminModal('${leader.id}', '${leader.first_name} ${leader.last_name}', '${leader.role}')" class="text-[11px] font-bold text-pnt-purple hover:underline bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2.5 py-1 rounded-lg cursor-pointer">
+                            ${isSubAdmin ? 'Edit Privileges' : 'Promote to Sub-Admin'}
+                        </button>
+                        <button onclick="toggleUserRole('${leader.id}', '${leader.role}')" class="text-[11px] font-bold text-red-600 hover:underline bg-red-50 hover:bg-red-100 border border-red-200 px-2.5 py-1 rounded-lg cursor-pointer">
+                            Demote
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function openSubAdminModal(userId, name, currentRole) {
+            document.getElementById('subadmin-target-id').value = userId;
+            document.getElementById('subadmin-target-name').textContent = `Configuring permissions for: ${name}`;
+            document.getElementById('perm-approve-users').checked = true;
+            document.getElementById('perm-verify-attendance').checked = true;
+            document.getElementById('perm-deploy-tasks').checked = true;
+            openModal('subadmin-modal');
+        }
+
+        document.getElementById('subadmin-permissions-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('subadmin-target-id').value;
+            const permissions = {
+                approve_users: document.getElementById('perm-approve-users').checked,
+                verify_attendance: document.getElementById('perm-verify-attendance').checked,
+                deploy_tasks: document.getElementById('perm-deploy-tasks').checked
+            };
+
+            try {
+                const res = await fetch(`/api/auth/users/${userId}/role`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ role: 'sub_admin', permissions })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('👑 Leader promoted to Sub-Admin with custom permissions!');
+                    closeModal('subadmin-modal');
+                    refreshAdminConsole();
+                } else {
+                    alert(`Failed: ${data.message}`);
+                }
+            } catch (err) { alert('Server connection error.'); }
+        });
 
         function renderUserDirectory(users) {
             const tbody = document.getElementById('user-directory-tbody');
@@ -538,31 +661,23 @@
             }
 
             users.forEach(user => {
-                const isLeader = user.role === 'leader' || user.role === 'team_leader';
+                const isLeader = user.role === 'leader' || user.role === 'team_leader' || user.role === 'sub_admin';
                 const isAdmin = user.role === 'admin' || user.role === 'global_admin';
                 
                 let roleBadge = "bg-purple-50 text-pnt-purple border border-purple-200";
                 let roleLabel = "Member";
 
-                if (isAdmin) {
-                    roleBadge = "bg-red-50 text-red-600 border border-red-200";
-                    roleLabel = "Admin";
-                } else if (isLeader) {
-                    roleBadge = "bg-blue-50 text-[#0070c0] border border-blue-200";
-                    roleLabel = "Team Leader";
-                }
+                if (isAdmin) { roleBadge = "bg-red-50 text-red-600 border border-red-200"; roleLabel = "Admin"; }
+                else if (user.role === 'sub_admin') { roleBadge = "bg-amber-100 text-amber-800 border border-amber-300"; roleLabel = "Sub-Admin"; }
+                else if (isLeader) { roleBadge = "bg-blue-50 text-[#0070c0] border border-blue-200"; roleLabel = "Team Leader"; }
 
                 let statusBadge = "bg-emerald-50 text-emerald-700 border-emerald-200";
                 const userStatus = (user.status || 'active').toLowerCase();
 
-                if (userStatus === 'warning') statusBadge = "bg-amber-50 text-amber-700 border-amber-300";
-                else if (userStatus === 'inactive') statusBadge = "bg-slate-100 text-slate-600 border-slate-300";
-                else if (userStatus === 'suspended') statusBadge = "bg-orange-50 text-orange-700 border-orange-300 font-bold";
-                else if (userStatus === 'banned' || userStatus === 'ban') statusBadge = "bg-red-100 text-red-700 border-red-300 font-bold";
-
+                const initials = `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase() || 'U';
                 const avatarMarkup = user.avatar_url 
-                    ? `<img src="${user.avatar_url}" class="w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0">`
-                    : `<div class="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center font-bold text-slate-600 text-xs shrink-0">${(user.first_name?.[0] || 'U')}${(user.last_name?.[0] || '')}</div>`;
+                    ? `<img src="${user.avatar_url}" class="w-9 h-9 rounded-full object-cover border-2 border-slate-200 shrink-0 cursor-pointer hover:scale-105 transition-transform" onclick='inspectUserProfile(${JSON.stringify(user)})'>`
+                    : `<div class="w-9 h-9 rounded-full bg-pnt-purple/10 border-2 border-pnt-purple/30 flex items-center justify-center font-bold text-pnt-purple text-xs shrink-0 cursor-pointer hover:scale-105 transition-transform" onclick='inspectUserProfile(${JSON.stringify(user)})'>${initials}</div>`;
 
                 const row = document.createElement('tr');
                 row.className = "hover:bg-slate-50/80 transition-colors";
@@ -576,127 +691,45 @@
                             </div>
                         </div>
                     </td>
-                    <td class="py-3 px-4 font-mono text-xs text-pnt-purple font-bold tracking-wider">
-                        ${user.custom_profile_id || 'PNT-PENDING'}
-                    </td>
-                    <td class="py-3 px-4 text-xs text-slate-600">
-                        <div>${user.office?.branch_name || 'Physical Branch'}</div>
-                        <div class="text-[10px] text-slate-400 font-medium">${user.state ? user.state + ', Nigeria' : 'No State'}</div>
-                    </td>
-                    <td class="py-3 px-4 font-mono text-xs text-slate-500 font-semibold">
-                        ${user.sponsor_id || '<span class="text-slate-300 font-normal">None</span>'}
-                    </td>
-                    <td class="py-3 px-4">
-                        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${roleBadge}">
-                            ${roleLabel}
-                        </span>
-                    </td>
-                    <td class="py-3 px-4">
-                        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${statusBadge}">
-                            ${userStatus}
-                        </span>
-                    </td>
-                    <td class="py-3 px-4 text-center">
-                        ${isAdmin ? `
-                            <span class="text-[10px] font-mono text-slate-400 uppercase font-semibold">Protected</span>
-                        ` : `
-                            <button onclick="toggleUserRole('${user.id}', '${user.role}')" class="text-[11px] font-bold text-pnt-purple hover:underline bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2.5 py-1 rounded-lg transition-all cursor-pointer">
-                                Make ${isLeader ? 'Member' : 'Leader'}
-                            </button>
-                        `}
-                    </td>
-                    <td class="py-3 px-4 text-right">
-                        ${isAdmin ? `
-                            <span class="text-[10px] font-mono text-slate-400 uppercase font-semibold">---</span>
-                        ` : `
-                            <select onchange="initiateDisciplinaryAction('${user.id}', '${user.first_name} ${user.last_name}', this)" class="bg-slate-50 border border-slate-200 text-[11px] font-semibold text-slate-700 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-pnt-purple cursor-pointer">
-                                <option value="" disabled selected>Action</option>
-                                <option value="active">Set Active</option>
-                                <option value="warning">Issue Warning</option>
-                                <option value="inactive">Mark Inactive</option>
-                                <option value="suspended">Suspend Account</option>
-                                <option value="ban">Ban User</option>
-                            </select>
-                        `}
-                    </td>
+                    <td class="py-3 px-4 font-mono text-xs text-pnt-purple font-bold tracking-wider">${user.custom_profile_id || 'PNT-PENDING'}</td>
+                    <td class="py-3 px-4 text-xs text-slate-600"><div>${user.office?.branch_name || 'Physical Branch'}</div><div class="text-[10px] text-slate-400">${user.state ? user.state + ', Nigeria' : 'No State'}</div></td>
+                    <td class="py-3 px-4 font-mono text-xs text-slate-500 font-semibold">${user.sponsor_id || '<span class="text-slate-300">None</span>'}</td>
+                    <td class="py-3 px-4"><span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${roleBadge}">${roleLabel}</span></td>
+                    <td class="py-3 px-4"><span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${statusBadge}">${userStatus}</span></td>
+                    <td class="py-3 px-4 text-center">${isAdmin ? `<span class="text-[10px] font-mono text-slate-400 uppercase">Protected</span>` : `<button onclick="toggleUserRole('${user.id}', '${user.role}')" class="text-[11px] font-bold text-pnt-purple hover:underline bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-lg cursor-pointer">Make ${user.role === 'member' ? 'Leader' : 'Member'}</button>`}</td>
+                    <td class="py-3 px-4 text-right">${isAdmin ? `<span class="text-[10px] font-mono text-slate-400">---</span>` : `<select onchange="initiateDisciplinaryAction('${user.id}', '${user.first_name}${user.last_name}', this)" class="bg-slate-50 border border-slate-200 text-[11px] font-semibold text-slate-700 rounded-lg px-2 py-1 cursor-pointer"><option value="" disabled selected>Action</option><option value="active">Set Active</option><option value="warning">Issue Warning</option><option value="inactive">Mark Inactive</option><option value="suspended">Suspend</option><option value="ban">Ban</option></select>`}</td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
-        // ==========================================
-        // DISCIPLINARY ACTIONS
-        // ==========================================
-        function initiateDisciplinaryAction(userId, userName, selectEl) {
-            const targetStatus = selectEl.value;
-            selectEl.value = "";
-            if (!targetStatus) return;
+        function inspectUserProfile(user) {
+            document.getElementById('inspect-fullname').textContent = `${user.first_name} ${user.last_name}`;
+            document.getElementById('inspect-custom-id').textContent = user.custom_profile_id || 'PNT-PENDING';
+            document.getElementById('inspect-email').textContent = user.email || 'N/A';
+            document.getElementById('inspect-phone').textContent = user.phone_number || 'N/A';
+            document.getElementById('inspect-state').textContent = user.state ? `${user.state}, Nigeria` : 'Not Specified';
+            document.getElementById('inspect-branch').textContent = user.office?.branch_name || 'Central Workspace Hub';
+            document.getElementById('inspect-sponsor').textContent = user.sponsor_id || 'None';
+            document.getElementById('inspect-status').textContent = user.status || 'active';
 
-            document.getElementById('action-target-user-id').value = userId;
-            document.getElementById('action-target-status').value = targetStatus;
-            document.getElementById('action-reason').value = '';
+            const roleBadge = document.getElementById('inspect-role-badge');
+            roleBadge.textContent = user.role.replace('_', ' ').toUpperCase();
 
-            const titleEl = document.getElementById('modal-action-title');
-            const descEl = document.getElementById('modal-action-description');
-            const reasonContainer = document.getElementById('reason-container');
-            const confirmBtn = document.getElementById('confirm-action-btn');
-
-            if (targetStatus === 'active') {
-                titleEl.textContent = `Restore ${userName} to Active?`;
-                descEl.textContent = `Clears disciplinary flags and restores workspace access.`;
-                reasonContainer.classList.add('hidden');
-                document.getElementById('action-reason').required = false;
-                confirmBtn.className = "w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white rounded-xl shadow-md transition-all cursor-pointer";
-                confirmBtn.textContent = "Confirm Active";
+            const avatarContainer = document.getElementById('inspect-avatar-container');
+            const initials = `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase() || 'U';
+            if (user.avatar_url) {
+                avatarContainer.innerHTML = `<img src="${user.avatar_url}" class="w-full h-full object-cover">`;
             } else {
-                titleEl.textContent = `Apply ${targetStatus.toUpperCase()} to ${userName}`;
-                descEl.textContent = `Enter reason. This will display directly on the user terminal.`;
-                reasonContainer.classList.remove('hidden');
-                document.getElementById('action-reason').required = true;
-                confirmBtn.className = "w-1/2 py-2.5 bg-red-600 hover:bg-red-700 text-xs font-bold text-white rounded-xl shadow-md transition-all cursor-pointer";
-                confirmBtn.textContent = `Apply ${targetStatus.toUpperCase()}`;
+                avatarContainer.innerHTML = `<span class="font-bold text-base">${initials}</span>`;
             }
 
-            openModal('disciplinary-modal');
+            openModal('user-profile-modal');
         }
 
-        document.getElementById('disciplinary-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('confirm-action-btn');
-            const userId = document.getElementById('action-target-user-id').value;
-            const status = document.getElementById('action-target-status').value;
-            const reason = document.getElementById('action-reason').value;
-
-            btn.disabled = true;
-            btn.textContent = 'Saving...';
-
-            try {
-                const response = await fetch(`/api/auth/users/${userId}/status`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ status, reason })
-                });
-
-                const resData = await response.json();
-                if (resData.success) {
-                    alert(resData.message);
-                    closeModal('disciplinary-modal');
-                    fetchUserDirectory();
-                } else {
-                    alert(`Failed: ${resData.message}`);
-                }
-            } catch (err) {
-                alert("Server communication failed.");
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Apply Action';
-            }
-        });
-
         async function toggleUserRole(userId, currentRole) {
-            const nextRole = (currentRole === 'leader' || currentRole === 'team_leader') ? 'member' : 'leader';
-            if (!confirm(`Switch this user role to ${nextRole === 'leader' ? 'Team Leader' : 'Member'}?`)) return;
+            const nextRole = (currentRole === 'member') ? 'leader' : 'member';
+            if (!confirm(`Switch this user role to ${nextRole.toUpperCase()}?`)) return;
 
             try {
                 const response = await fetch(`/api/auth/users/${userId}/role`, {
@@ -709,20 +742,11 @@
                 const resData = await response.json();
                 if (resData.success) {
                     alert(resData.message);
-                    fetchUserDirectory();
-                    fetchGlobalMetrics();
-                    fetchLeadersForTaskAssignment();
-                } else {
-                    alert(`Failed: ${resData.message}`);
-                }
-            } catch (err) {
-                alert("Server connection failed.");
-            }
+                    refreshAdminConsole();
+                } else { alert(`Failed: ${resData.message}`); }
+            } catch (err) { alert("Server connection failed."); }
         }
 
-        // ==========================================
-        // METRICS
-        // ==========================================
         async function fetchGlobalMetrics() {
             try {
                 const response = await fetch('/api/auth/metrics/global', { credentials: 'include' });
@@ -733,35 +757,24 @@
                     document.getElementById('metric-total-leaders').textContent = resData.data.totalLeaders || 0;
                     document.getElementById('metric-active-escalations').textContent = resData.data.activeEscalations || 0;
                 }
-            } catch (err) {
-                console.error("Metrics failed:", err);
-            }
+            } catch (err) { console.error("Metrics failed:", err); }
         }
 
-        // ==========================================
-        // LEADER DIRECTIVES
-        // ==========================================
         async function fetchLeadersForTaskAssignment() {
             const select = document.getElementById('leader-select');
             try {
                 const response = await fetch('/api/tasks/leaders/list', { credentials: 'include' });
                 const resData = await response.json();
                 select.innerHTML = '<option value="" disabled selected>Select an active Team Leader</option>';
-
                 if (resData.success && resData.data.length > 0) {
                     resData.data.forEach(leader => {
                         const opt = document.createElement('option');
                         opt.value = leader.id;
-                        const branch = leader.office?.branch_name ? ` (${leader.office.branch_name})` : '';
-                        opt.textContent = `${leader.first_name} ${leader.last_name} - ${leader.custom_profile_id || 'LEADER'}${branch}`;
+                        opt.textContent = `${leader.first_name} ${leader.last_name} (${leader.custom_profile_id || 'LEADER'})`;
                         select.appendChild(opt);
                     });
-                } else {
-                    select.innerHTML = '<option value="" disabled>No active Team Leaders found</option>';
-                }
-            } catch (err) {
-                select.innerHTML = '<option value="" disabled>Failed to load leaders</option>';
-            }
+                } else { select.innerHTML = '<option value="" disabled>No active Team Leaders found</option>'; }
+            } catch (err) { select.innerHTML = '<option value="" disabled>Failed to load leaders</option>'; }
         }
 
         document.getElementById('leader-task-form').addEventListener('submit', async (e) => {
@@ -771,14 +784,8 @@
             const title = document.getElementById('leader-task-title').value;
             const description = document.getElementById('leader-task-desc').value;
 
-            if (!assigneeId) {
-                alert('Please select a Team Leader to receive this task.');
-                return;
-            }
-
             btn.disabled = true;
             btn.textContent = 'Deploying...';
-
             try {
                 const res = await fetch('/api/tasks', {
                     method: 'POST',
@@ -786,215 +793,103 @@
                     credentials: 'include',
                     body: JSON.stringify({ title, assigneeId, description, assigned_by: currentUser.id })
                 });
-
                 const data = await res.json();
                 if (data.success) {
-                    alert('🎯 Executive task dispatched to the Team Leader!');
+                    alert('🎯 Executive task dispatched!');
                     document.getElementById('leader-task-form').reset();
                     fetchLeadersForTaskAssignment();
-                } else {
-                    alert(`Deployment failed: ${data.message}`);
-                }
-            } catch (err) {
-                alert('Server communication error.');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Dispatch Task to Leader';
-            }
+                } else { alert(`Deployment failed: ${data.message}`); }
+            } catch (err) { alert('Server error.'); }
+            finally { btn.disabled = false; btn.textContent = 'Dispatch Task to Leader'; }
         });
 
-        // ==========================================
-        // MODALS & SUBMISSIONS
-        // ==========================================
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         document.getElementById('create-office-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('save-office-btn');
             const branch_name = document.getElementById('modal-branch-name').value;
             const state = document.getElementById('modal-branch-state').value;
             const address = document.getElementById('modal-branch-address').value;
-
-            btn.disabled = true;
-            btn.textContent = 'Registering...';
-
             try {
-                const res = await fetch('/api/offices', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ branch_name, state, address })
-                });
-
+                const res = await fetch('/api/offices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ branch_name, state, address }) });
                 const data = await res.json();
-                if (data.success) {
-                    alert(`🏢 ${branch_name} has been added to the regional registry!`);
-                    document.getElementById('create-office-form').reset();
-                    showBranchListView();
-                    await fetchOfficesList();
-                    fetchGlobalMetrics();
-                } else {
-                    alert(`Error: ${data.message}`);
-                }
-            } catch (err) {
-                alert('Failed to connect with server.');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Confirm & Add Branch';
-            }
+                if (data.success) { alert(`🏢 ${branch_name} added!`); document.getElementById('create-office-form').reset(); showBranchListView(); refreshAdminConsole(); }
+                else { alert(`Error: ${data.message}`); }
+            } catch (err) { alert('Connection failed.'); }
         });
 
         document.getElementById('send-broadcast-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('send-broadcast-btn');
             const title = document.getElementById('modal-broadcast-title').value;
             const priority = document.getElementById('modal-broadcast-priority').value;
             const message = document.getElementById('modal-broadcast-message').value;
-
-            btn.disabled = true;
-            btn.textContent = 'Transmitting...';
-
             try {
-                const res = await fetch('/api/broadcasts', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ title, priority, message })
-                });
-
+                const res = await fetch('/api/broadcasts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ title, priority, message }) });
                 const data = await res.json();
-                if (data.success) {
-                    alert('📡 Broadcast transmission dispatched across all workspace networks!');
-                    document.getElementById('send-broadcast-form').reset();
-                    closeModal('broadcast-modal');
-                } else {
-                    alert(`Broadcast failed: ${data.message}`);
-                }
-            } catch (err) {
-                alert('Failed to transmit signal.');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Send Transmission';
-            }
+                if (data.success) { alert('📡 Broadcast dispatched!'); document.getElementById('send-broadcast-form').reset(); closeModal('broadcast-modal'); }
+                else { alert(`Failed: ${data.message}`); }
+            } catch (err) { alert('Failed.'); }
         });
 
-        // ==========================================
-        // GLOBAL TASK APPROVALS
-        // ==========================================
         async function fetchAdminTasksQueue() {
             try {
                 const response = await fetch('/api/tasks/global/completed', { credentials: 'include' });
                 const resData = await response.json();
-                if (resData.success) {
-                    adminTaskQueue = resData.data;
-                    renderAdminTaskQueue();
-                }
-            } catch (err) {
-                console.error("Task collection error:", err);
-            }
+                if (resData.success) { adminTaskQueue = resData.data; renderAdminTaskQueue(); }
+            } catch (err) { console.error("Tasks error:", err); }
         }
 
         function renderAdminTaskQueue() {
-            const queueContainer = document.getElementById('admin-tasks-queue');
-            queueContainer.innerHTML = '';
-
+            const container = document.getElementById('admin-tasks-queue');
+            container.innerHTML = '';
             if (!adminTaskQueue || adminTaskQueue.length === 0) {
-                queueContainer.innerHTML = `<div class="text-center py-6"><p class="text-xs text-slate-400">All task submissions cleared. There are no completed tasks pending review.</p></div>`;
+                container.innerHTML = `<div class="text-center py-6"><p class="text-xs text-slate-400">All task submissions cleared.</p></div>`;
                 return;
             }
-
             adminTaskQueue.forEach(task => {
                 const card = document.createElement('div');
-                card.className = "bg-slate-50/70 border border-slate-200 p-4 rounded-xl space-y-3";
+                card.className = "bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3";
                 card.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-slate-500 font-mono">
-                            Assigned To: ${task.profiles?.first_name || ''} ${task.profiles?.last_name || ''} (${task.profiles?.custom_profile_id || 'N/A'})
-                        </span>
-                        <span class="bg-purple-50 text-pnt-purple border border-purple-200 text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded animate-pulse">Awaiting Approval</span>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-pnt-dark">${task.title}</h4>
-                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">${task.description || 'No description provided.'}</p>
-                    </div>
-                    <div class="pt-2 border-t border-slate-200 flex gap-2">
-                        <button onclick="auditTask('${task.id}', 'rejected')" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-semibold py-1.5 rounded-lg transition-all cursor-pointer">
-                            Reject & Redo
-                        </button>
-                        <button onclick="auditTask('${task.id}', 'approved')" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 text-xs font-semibold py-1.5 rounded-lg transition-all cursor-pointer">
-                            Approve Task
-                        </button>
-                    </div>
+                    <div class="flex items-center justify-between"><span class="text-[10px] font-bold text-slate-500 font-mono">Assigned: ${task.profiles?.first_name || ''} ${task.profiles?.last_name || ''}</span><span class="bg-purple-50 text-pnt-purple text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded">Awaiting Approval</span></div>
+                    <div><h4 class="text-sm font-bold text-pnt-dark">${task.title}</h4><p class="text-xs text-slate-500 mt-1">${task.description || ''}</p></div>
+                    <div class="pt-2 border-t border-slate-200 flex gap-2"><button onclick="auditTask('${task.id}', 'rejected')" class="flex-1 bg-red-50 text-red-600 border border-red-200 text-xs py-1.5 rounded-lg cursor-pointer">Reject</button><button onclick="auditTask('${task.id}', 'approved')" class="flex-1 bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs py-1.5 rounded-lg cursor-pointer">Approve</button></div>
                 `;
-                queueContainer.appendChild(card);
+                container.appendChild(card);
             });
         }
 
         async function auditTask(taskId, targetStatus) {
             try {
-                const response = await fetch(`/api/tasks/${taskId}/status`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ status: targetStatus })
-                });
-
+                const response = await fetch(`/api/tasks/${taskId}/status`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ status: targetStatus }) });
                 const resData = await response.json();
-                if (resData.success) {
-                    alert(`✅ Task marked ${targetStatus === 'approved' ? 'Approved' : 'Rejected'}!`);
-                    fetchAdminTasksQueue();
-                } else {
-                    alert(`Audit failed: ${resData.message}`);
-                }
-            } catch (err) {
-                console.error("Audit error:", err);
-            }
+                if (resData.success) { alert(`✅ Task marked ${targetStatus}!`); fetchAdminTasksQueue(); }
+                else { alert(`Failed: ${resData.message}`); }
+            } catch (err) { console.error("Audit error:", err); }
         }
 
-        // ==========================================
-        // INCIDENT LOGGER
-        // ==========================================
         async function fetchIncidentReports() {
             try {
                 const response = await fetch('/api/community/incidents', { credentials: 'include' });
                 const resData = await response.json();
-                if (resData.success) {
-                    incidentReports = resData.data;
-                    renderIncidentLogs();
-                }
-            } catch (err) {
-                console.error("Incident query error:", err);
-            }
+                if (resData.success) { incidentReports = resData.data; renderIncidentLogs(); }
+            } catch (err) { console.error("Incident error:", err); }
         }
 
         function renderIncidentLogs() {
             const container = document.getElementById('incident-logs-container');
             container.innerHTML = '';
-
             if (!incidentReports || incidentReports.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 py-2">No active incident escalations reported from branches.</p>`;
-                document.getElementById('escalation-alert').classList.remove('animate-pulse');
+                container.innerHTML = `<p class="text-xs text-slate-400 py-2">No active incident escalations.</p>`;
                 return;
             }
-
             incidentReports.forEach(report => {
                 const card = document.createElement('div');
-                card.className = "bg-slate-50/70 border border-slate-200 p-4 rounded-xl space-y-3";
+                card.className = "bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-3";
                 card.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-bold text-slate-500 font-mono">ESC-${report.id.substring(0,6).toUpperCase()}</span>
-                        <span class="bg-amber-50 text-amber-700 border border-amber-200 text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded">Unresolved</span>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-pnt-dark">${report.subject}</h4>
-                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">${report.details}</p>
-                    </div>
-                    <div class="pt-2 border-t border-slate-200 flex gap-2">
-                        <button onclick="resolveReport('${report.id}')" class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-200 text-[10px] font-bold py-1.5 rounded transition-all cursor-pointer">
-                            Mark Resolved
-                        </button>
-                    </div>
+                    <div class="flex items-center justify-between"><span class="text-[10px] font-bold text-slate-500 font-mono">ESC-${report.id.substring(0,6).toUpperCase()}</span><span class="bg-amber-50 text-amber-700 text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded">Unresolved</span></div>
+                    <div><h4 class="text-sm font-bold text-pnt-dark">${report.subject}</h4><p class="text-xs text-slate-500 mt-1">${report.details}</p></div>
+                    <button onclick="resolveReport('${report.id}')" class="w-full bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-bold py-1.5 rounded cursor-pointer">Mark Resolved</button>
                 `;
                 container.appendChild(card);
             });
@@ -1002,20 +897,11 @@
 
         async function resolveReport(reportId) {
             try {
-                const response = await fetch(`/api/community/incidents/${reportId}/resolve`, {
-                    method: 'PATCH',
-                    credentials: 'include'
-                });
+                const response = await fetch(`/api/community/incidents/${reportId}/resolve`, { method: 'PATCH', credentials: 'include' });
                 const resData = await response.json();
-                if (resData.success) {
-                    alert("Ticket resolved successfully!");
-                    refreshAdminConsole();
-                } else {
-                    alert(`Failed: ${resData.message}`);
-                }
-            } catch (err) {
-                console.error("Resolution error:", err);
-            }
+                if (resData.success) { alert("Ticket resolved successfully!"); refreshAdminConsole(); }
+                else { alert(`Failed: ${resData.message}`); }
+            } catch (err) { console.error("Resolution error:", err); }
         }
     </script>
 </body>
