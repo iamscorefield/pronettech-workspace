@@ -819,22 +819,45 @@
             } catch (err) { alert('Connection failed.'); }
         });
 
+        // WIRING BROADCAST MODAL DIRECTLY TO ANNOUNCEMENTS STREAM
         document.getElementById('send-broadcast-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const title = document.getElementById('modal-broadcast-title').value;
-            const priority = document.getElementById('modal-broadcast-priority').value;
-            const message = document.getElementById('modal-broadcast-message').value;
+            const title = document.getElementById('modal-broadcast-title').value.trim();
+            const message = document.getElementById('modal-broadcast-message').value.trim();
+            const btn = document.getElementById('send-broadcast-btn');
+
+            if (!title || !message) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Transmitting Broadcast...';
+
             try {
-                const res = await fetch('/api/broadcasts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ title, priority, message }) });
+                const res = await fetch('/api/auth/announcements', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    credentials: 'include', 
+                    body: JSON.stringify({ title, content: message }) 
+                });
                 const data = await res.json();
-                if (data.success) { alert('📡 Broadcast dispatched!'); document.getElementById('send-broadcast-form').reset(); closeModal('broadcast-modal'); }
-                else { alert(`Failed: ${data.message}`); }
-            } catch (err) { alert('Failed.'); }
+                
+                if (data.success) {
+                    alert('📡 Broadcast successfully published to the Announcements stream!');
+                    document.getElementById('send-broadcast-form').reset();
+                    closeModal('broadcast-modal');
+                } else {
+                    alert(`Failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Server connection error while dispatching broadcast.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Send Transmission';
+            }
         });
 
         async function fetchAdminTasksQueue() {
             try {
-                const response = await fetch('/api/tasks/global/completed', { credentials: 'include' });
+                const response = await fetch('/api/auth/tasks/global/completed', { credentials: 'include' });
                 const resData = await response.json();
                 if (resData.success) { adminTaskQueue = resData.data; renderAdminTaskQueue(); }
             } catch (err) { console.error("Tasks error:", err); }

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronettech Workspace | Corporate Announcements</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pnt: {
+                            dark: '#0D122B',
+                            purple: '#6A1BBF',
+                            'purple-light': '#9D4EDD',
+                            orange: '#FF7A00',
+                            gold: '#FFC107'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-full bg-slate-50 text-pnt-dark font-sans flex">
+
+    <!-- SIDEBAR NAVIGATION CONTAINER -->
+    <div id="sidebar-container"></div>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="flex-1 flex flex-col min-w-0">
+        <!-- HEADER CONTAINER -->
+        <div id="header-container"></div>
+
+        <main class="flex-1 p-6 sm:p-10 max-w-5xl mx-auto w-full">
+            <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
+                <div>
+                    <h1 class="text-2xl font-extrabold text-pnt-dark">Workspace Announcements</h1>
+                    <p class="text-xs text-slate-500 mt-1">Official memos, bulletins, and network-wide updates from administration.</p>
+                </div>
+            </div>
+
+            <!-- ADMIN BROADCAST SECTION (Hidden unless Admin) -->
+            <div id="admin-broadcast-section" class="hidden mb-8 bg-purple-50/70 border border-purple-200 rounded-2xl p-6 shadow-md">
+                <h2 class="text-sm font-bold text-pnt-purple uppercase tracking-wider mb-2">Broadcast New Announcement</h2>
+                <p class="text-xs text-slate-600 mb-4">Publish a memo directly to all members and regional hubs workspace-wide.</p>
+                
+                <form id="broadcast-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Headline / Title</label>
+                        <input type="text" id="announcement-title" required placeholder="e.g. Q2 Compliance Guidelines" class="w-full bg-white border border-purple-200 rounded-xl px-4 py-2.5 text-xs text-pnt-dark focus:outline-none focus:ring-2 focus:ring-pnt-purple">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Announcement Body</label>
+                        <textarea id="announcement-content" required rows="3" placeholder="Write full announcement details here..." class="w-full bg-white border border-purple-200 rounded-xl px-4 py-2.5 text-xs text-pnt-dark focus:outline-none focus:ring-2 focus:ring-pnt-purple"></textarea>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" id="broadcast-btn" class="bg-gradient-to-r from-pnt-purple to-pnt-orange text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md cursor-pointer hover:opacity-90 transition-all">
+                            Publish Broadcast
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ANNOUNCEMENTS STREAM -->
+            <div id="announcements-container" class="space-y-4">
+                <div class="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-400 text-xs">Loading official communications...</div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/nav.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const container = document.getElementById('announcements-container');
+            const adminSection = document.getElementById('admin-broadcast-section');
+            const broadcastForm = document.getElementById('broadcast-form');
+
+            try {
+                const meRes = await fetch('/api/auth/me', { credentials: 'include' });
+                const meData = await meRes.json();
+                if (meData.success && meData.user) {
+                    if (['admin', 'global_admin', 'sub_admin'].includes(meData.user.role)) {
+                        adminSection.classList.remove('hidden');
+                    }
+                }
+            } catch (e) {
+                console.warn('Role verification note:', e);
+            }
+
+            async function loadAnnouncements() {
+                try {
+                    const res = await fetch('/api/auth/announcements', { credentials: 'include' });
+                    const result = await res.json();
+
+                    if (result.success && Array.isArray(result.data) && result.data.length > 0) {
+                        container.innerHTML = '';
+                        result.data.forEach(item => {
+                            const dateStr = new Date(item.created_at).toLocaleDateString('en-US', {
+                                month: 'short', day: 'numeric', year: 'numeric'
+                            });
+                            const card = document.createElement('div');
+                            card.className = "bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-2";
+                            card.innerHTML = `
+                                <div class="flex items-center justify-between">
+                                    <h3 class="font-bold text-sm text-pnt-dark">${item.title}</h3>
+                                    <span class="text-[10px] font-mono text-slate-400">${dateStr}</span>
+                                </div>
+                                <p class="text-xs text-slate-600 leading-relaxed whitespace-pre-line">${item.content}</p>
+                                <div class="pt-2 text-[10px] text-pnt-purple font-semibold">Author: ${item.author_name || 'System Administration'}</div>
+                            `;
+                            container.appendChild(card);
+                        });
+                    } else {
+                        container.innerHTML = `
+                            <div class="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-400 text-xs">
+                                No official announcements posted at this time. Check back later for updates.
+                            </div>
+                        `;
+                    }
+                } catch (err) {
+                    container.innerHTML = `
+                        <div class="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-400 text-xs">
+                            No official announcements posted at this time. Check back later for updates.
+                        </div>
+                    `;
+                }
+            }
+
+            loadAnnouncements();
+
+            if (broadcastForm) {
+                broadcastForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const title = document.getElementById('announcement-title').value.trim();
+                    const content = document.getElementById('announcement-content').value.trim();
+                    const btn = document.getElementById('broadcast-btn');
+
+                    if (!title || !content) return;
+
+                    btn.disabled = true;
+                    btn.textContent = 'Publishing...';
+
+                    try {
+                        const res = await fetch('/api/auth/announcements', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ title, content })
+                        });
+                        const data = await res.json();
+
+                        if (data.success) {
+                            alert('Announcement published successfully workspace-wide!');
+                            document.getElementById('announcement-title').value = '';
+                            document.getElementById('announcement-content').value = '';
+                            loadAnnouncements();
+                        } else {
+                            alert(`Failed to publish: ${data.message}`);
+                        }
+                    } catch (err) {
+                        alert('Server connection error broadcasting announcement.');
+                    } finally {
+                        btn.disabled = false;
+                        btn.textContent = 'Publish Broadcast';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
