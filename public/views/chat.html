@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronettech Workspace | Direct Messaging</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pnt: {
+                            dark: '#0D122B',
+                            purple: '#6A1BBF',
+                            'purple-light': '#9D4EDD',
+                            orange: '#FF7A00',
+                            gold: '#FFC107'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-full pb-12 relative overflow-x-hidden bg-slate-50 text-pnt-dark">
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-6">
+        
+        <!-- Header -->
+        <div class="mb-6">
+            <h2 class="text-xl font-extrabold text-pnt-dark tracking-tight">Direct Messaging Terminal</h2>
+            <p class="text-xs text-slate-500 mt-1">Communicate securely 1-on-1 with your assigned sponsors, team leaders, or global administrators.</p>
+        </div>
+
+        <!-- Chat Layout Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden h-[75vh]">
+            
+            <!-- Left Sidebar: Contacts List -->
+            <div class="border-r border-slate-200 flex flex-col h-full bg-slate-50/50">
+                <div class="p-4 border-b border-slate-200 bg-white">
+                    <input type="text" id="contact-search" placeholder="Search contacts..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+                </div>
+                <div id="contacts-list" class="overflow-y-auto flex-1 divide-y divide-slate-100">
+                    <div class="p-4 text-xs text-slate-400 text-center">Loading contacts...</div>
+                </div>
+            </div>
+
+            <!-- Right Main Window: Active Chat -->
+            <div class="md:col-span-2 flex flex-col h-full bg-white">
+                <!-- Chat Header -->
+                <div id="active-chat-header" class="p-4 border-b border-slate-200 flex items-center gap-3 bg-white">
+                    <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 text-xs">?</div>
+                    <div>
+                        <h3 id="active-contact-name" class="font-bold text-sm text-slate-800">Select a Contact</h3>
+                        <p id="active-contact-role" class="text-[10px] text-slate-400 uppercase font-mono">Workspace Directory</p>
+                    </div>
+                </div>
+
+                <!-- Messages Stream -->
+                <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/30 flex flex-col justify-end">
+                    <div class="text-center text-xs text-slate-400 my-auto">Choose a contact from the left sidebar to start messaging.</div>
+                </div>
+
+                <!-- Message Input Footer -->
+                <form id="chat-input-form" class="p-4 border-t border-slate-200 bg-white flex items-center gap-2 hidden">
+                    <input type="text" id="chat-message-input" placeholder="Type your secure message..." required class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+                    <button type="submit" class="btn-brand-gradient text-white font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer">
+                        Send
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Mount Universal Responsive Navigation -->
+    <script src="/js/nav.js"></script>
+
+    <script>
+        let currentUser = null;
+        let activeRecipientId = null;
+        let contactsList = [];
+        let pollingInterval = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const authRes = await fetch('/api/auth/me', { credentials: 'include' });
+                const authData = await authRes.json();
+                if (!authData.success) { window.location.href = '/views/onboarding.html'; return; }
+                currentUser = authData.user;
+
+                await loadContacts();
+            } catch (err) {
+                console.error("Auth session error:", err);
+            }
+        });
+
+        async function loadContacts() {
+            try {
+                const res = await fetch('/api/chat/contacts', { credentials: 'include' });
+                const data = await res.json();
+                if (data.success) {
+                    contactsList = data.contacts || [];
+                    renderContacts(contactsList);
+                }
+            } catch (err) {
+                document.getElementById('contacts-list').innerHTML = `<div class="p-4 text-xs text-red-400 text-center">Failed to load contacts.</div>`;
+            }
+        }
+
+        function renderContacts(contacts) {
+            const container = document.getElementById('contacts-list');
+            container.innerHTML = '';
+            if (contacts.length === 0) {
+                container.innerHTML = `<div class="p-4 text-xs text-slate-400 text-center">No other contacts found.</div>`;
+                return;
+            }
+
+            contacts.forEach(contact => {
+                const initials = `${contact.first_name?.[0] || ''}${contact.last_name?.[0] || ''}`.toUpperCase() || 'U';
+                const roleBadge = contact.role ? contact.role.replace('_', ' ').toUpperCase() : 'MEMBER';
+                
+                const item = document.createElement('div');
+                item.className = `p-3 flex items-center gap-3 cursor-pointer transition-all hover:bg-purple-50/50 ${activeRecipientId === contact.id ? 'bg-purple-50 border-l-4 border-pnt-purple' : ''}`;
+                item.onclick = () => selectContact(contact);
+                
+                item.innerHTML = `
+                    <div class="w-10 h-10 rounded-full bg-purple-100 text-pnt-purple font-bold flex items-center justify-center text-xs shrink-0 overflow-hidden">
+                        ${contact.avatar_url ? `<img src="${contact.avatar_url}" class="w-full h-full object-cover">` : initials}
+                    </div>
+                    <div class="overflow-hidden flex-1">
+                        <h4 class="font-bold text-xs text-slate-900 truncate">${contact.first_name} ${contact.last_name}</h4>
+                        <p class="text-[9px] font-mono text-pnt-purple uppercase">${roleBadge} • ${contact.custom_profile_id || 'PNT'}</p>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        async function selectContact(contact) {
+            activeRecipientId = contact.id;
+            renderContacts(contactsList); // highlight selected
+
+            document.getElementById('active-contact-name').textContent = `${contact.first_name} ${contact.last_name}`;
+            document.getElementById('active-contact-role').textContent = `${contact.role?.replace('_', ' ').toUpperCase()} • ${contact.custom_profile_id}`;
+            
+            const headerAvatar = document.querySelector('#active-chat-header div');
+            const initials = `${contact.first_name?.[0] || ''}${contact.last_name?.[0] || ''}`.toUpperCase() || 'U';
+            headerAvatar.innerHTML = contact.avatar_url ? `<img src="${contact.avatar_url}" class="w-full h-full object-cover rounded-full">` : initials;
+
+            document.getElementById('chat-input-form').classList.remove('hidden');
+
+            await fetchMessages();
+            if (pollingInterval) clearInterval(pollingInterval);
+            pollingInterval = setInterval(fetchMessages, 3000); // Poll for live updates every 3 seconds
+        }
+
+        async function fetchMessages() {
+            if (!activeRecipientId) return;
+            try {
+                const res = await fetch(`/api/chat/messages/${activeRecipientId}`, { credentials: 'include' });
+                const data = await res.json();
+                if (data.success) {
+                    renderMessages(data.messages || []);
+                }
+            } catch (err) {}
+        }
+
+        function renderMessages(messages) {
+            const container = document.getElementById('chat-messages-container');
+            container.innerHTML = '';
+            if (messages.length === 0) {
+                container.innerHTML = `<div class="text-center text-xs text-slate-400 my-auto">No direct messages yet. Say hello!</div>`;
+                return;
+            }
+
+            messages.forEach(msg => {
+                const isMe = msg.sender_id === currentUser.id;
+                const bubble = document.createElement('div');
+                bubble.className = `max-w-[75%] p-3 rounded-2xl text-xs ${isMe ? 'bg-pnt-purple text-white self-end rounded-br-xs' : 'bg-slate-100 text-slate-800 self-start rounded-bl-xs'}`;
+                bubble.innerHTML = `
+                    <p class="break-words">${msg.message}</p>
+                    <span class="text-[8px] opacity-70 block text-right mt-1 font-mono">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                `;
+                container.appendChild(bubble);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        document.getElementById('chat-input-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chat-message-input');
+            const message = input.value.trim();
+            if (!message || !activeRecipientId) return;
+
+            input.value = '';
+            try {
+                const res = await fetch('/api/chat/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ recipient_id: activeRecipientId, message })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    await fetchMessages();
+                }
+            } catch (err) {
+                alert('Failed to transmit message.');
+            }
+        });
+
+        document.getElementById('contact-search').addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase().trim();
+            const filtered = contactsList.filter(c => `${c.first_name} ${c.last_name}`.toLowerCase().includes(q) || (c.custom_profile_id && c.custom_profile_id.toLowerCase().includes(q)));
+            renderContacts(filtered);
+        });
+    </script>
+</body>
+</html>

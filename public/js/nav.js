@@ -5,6 +5,9 @@
 
 (function () {
     let activeUser = null;
+    let activeRecipientId = null;
+    let contactsList = [];
+    let chatPollingInterval = null;
 
     const sidebarTemplate = `
     <!-- Mobile Top Header Bar -->
@@ -17,11 +20,16 @@
             </div>
         </a>
 
-        <button id="pnt-sidebar-open-btn" type="button" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all cursor-pointer focus:outline-none" aria-label="Open Navigation">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-        </button>
+        <div class="flex items-center gap-1">
+            <button id="pnt-mobile-chat-toggle" type="button" class="p-2 text-pnt-purple hover:bg-purple-50 rounded-xl transition-all cursor-pointer" aria-label="Open Direct Messages">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            </button>
+            <button id="pnt-sidebar-open-btn" type="button" class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all cursor-pointer focus:outline-none" aria-label="Open Navigation">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
     </header>
 
     <!-- Mobile Dimmed Backdrop Overlay -->
@@ -83,6 +91,53 @@
             </button>
         </div>
     </aside>
+
+    <!-- FLOATING CHAT SLIDE-OVER DRAWER -->
+    <div id="pnt-chat-drawer" class="fixed inset-0 z-50 hidden flex justify-end bg-slate-900/40 backdrop-blur-xs transition-opacity">
+        <div class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col border-l border-slate-200 transform transition-transform duration-300">
+            <!-- Drawer Header -->
+            <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-purple-100 text-pnt-purple flex items-center justify-center font-bold text-xs">💬</div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Direct Messages</h3>
+                        <p class="text-[10px] text-slate-500">Secure 1-on-1 Workspace Chat</p>
+                    </div>
+                </div>
+                <button type="button" id="pnt-chat-close-btn" class="w-7 h-7 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-700 font-bold flex items-center justify-center cursor-pointer">&times;</button>
+            </div>
+
+            <!-- Drawer Body -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <!-- Contacts List View -->
+                <div id="chat-contacts-view" class="flex-1 flex flex-col h-full">
+                    <div class="p-3 border-b border-slate-100 bg-white">
+                        <input type="text" id="drawer-contact-search" placeholder="Search contacts..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+                    </div>
+                    <div id="drawer-contacts-list" class="overflow-y-auto flex-1 divide-y divide-slate-100">
+                        <div class="p-6 text-center text-xs text-slate-400">Loading contacts...</div>
+                    </div>
+                </div>
+
+                <!-- Active Chat Conversation View (Initially Hidden) -->
+                <div id="chat-conversation-view" class="flex-1 flex flex-col h-full hidden">
+                    <div class="p-3 border-b border-slate-200 bg-white flex items-center gap-3">
+                        <button type="button" id="back-to-contacts-btn" class="text-xs font-bold text-pnt-purple hover:underline flex items-center gap-1 cursor-pointer">← Back</button>
+                        <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 text-xs overflow-hidden shrink-0" id="drawer-active-avatar">?</div>
+                        <div class="overflow-hidden">
+                            <h4 id="drawer-active-name" class="font-bold text-xs text-slate-900 truncate">Contact Name</h4>
+                            <p id="drawer-active-role" class="text-[9px] text-slate-400 uppercase font-mono">Role</p>
+                        </div>
+                    </div>
+                    <div id="drawer-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/50 flex flex-col justify-end"></div>
+                    <form id="drawer-chat-form" class="p-3 border-t border-slate-200 bg-white flex items-center gap-2">
+                        <input type="text" id="drawer-msg-input" placeholder="Type a message..." required class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+                        <button type="submit" class="btn-brand-gradient text-white font-bold px-4 py-2 rounded-xl text-xs shadow-sm cursor-pointer">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- POPUP MODAL: PROFILE & PASSWORD SETTINGS -->
     <div id="pnt-settings-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
@@ -201,6 +256,36 @@
         closeBtn?.addEventListener('click', closeSidebar);
         backdrop?.addEventListener('click', closeSidebar);
 
+        // Chat Drawer Toggle Events
+        const chatDrawer = document.getElementById('pnt-chat-drawer');
+        const chatCloseBtn = document.getElementById('pnt-chat-close-btn');
+        const mobileChatToggle = document.getElementById('pnt-mobile-chat-toggle');
+
+        const openChatDrawer = () => {
+            closeSidebar();
+            chatDrawer?.classList.remove('hidden');
+            loadDrawerContacts();
+        };
+
+        const closeChatDrawer = () => {
+            chatDrawer?.classList.add('hidden');
+            if (chatPollingInterval) clearInterval(chatPollingInterval);
+        };
+
+        mobileChatToggle?.addEventListener('click', openChatDrawer);
+
+        chatCloseBtn?.addEventListener('click', closeChatDrawer);
+        chatDrawer?.addEventListener('click', (e) => {
+            if (e.target === chatDrawer) closeChatDrawer();
+        });
+
+        document.getElementById('back-to-contacts-btn')?.addEventListener('click', () => {
+            document.getElementById('chat-conversation-view').classList.add('hidden');
+            document.getElementById('chat-contacts-view').classList.remove('hidden');
+            activeRecipientId = null;
+            if (chatPollingInterval) clearInterval(chatPollingInterval);
+        });
+
         const settingsModal = document.getElementById('pnt-settings-modal');
         const openSettingsBtn = document.getElementById('btn-sidebar-open-settings');
         const closeSettingsBtn = document.getElementById('pnt-settings-close');
@@ -227,6 +312,35 @@
         };
 
         document.getElementById('btn-sidebar-signout')?.addEventListener('click', handleSignOut);
+
+        document.getElementById('drawer-chat-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('drawer-msg-input');
+            const message = input.value.trim();
+            if (!message || !activeRecipientId) return;
+
+            input.value = '';
+            try {
+                const res = await fetch('/api/chat/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ recipient_id: activeRecipientId, message })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    fetchDrawerMessages();
+                }
+            } catch (err) {
+                alert('Failed to send message.');
+            }
+        });
+
+        document.getElementById('drawer-contact-search')?.addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase().trim();
+            const filtered = contactsList.filter(c => `${c.first_name} ${c.last_name}`.toLowerCase().includes(q) || (c.custom_profile_id && c.custom_profile_id.toLowerCase().includes(q)));
+            renderDrawerContacts(filtered);
+        });
 
         document.getElementById('pnt-profile-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -296,6 +410,99 @@
                 btn.textContent = 'Update Password';
             }
         });
+    }
+
+    async function loadDrawerContacts() {
+        try {
+            const res = await fetch('/api/chat/contacts', { credentials: 'include' });
+            const data = await res.json();
+            if (data.success) {
+                contactsList = data.contacts || [];
+                renderDrawerContacts(contactsList);
+            }
+        } catch (err) {
+            document.getElementById('drawer-contacts-list').innerHTML = `<div class="p-4 text-xs text-red-400 text-center">Failed to load contacts.</div>`;
+        }
+    }
+
+    function renderDrawerContacts(contacts) {
+        const container = document.getElementById('drawer-contacts-list');
+        if (!container) return;
+        container.innerHTML = '';
+        if (contacts.length === 0) {
+            container.innerHTML = `<div class="p-4 text-xs text-slate-400 text-center">No other contacts found.</div>`;
+            return;
+        }
+
+        contacts.forEach(contact => {
+            const initials = `${contact.first_name?.[0] || ''}${contact.last_name?.[0] || ''}`.toUpperCase() || 'U';
+            const roleBadge = contact.role ? contact.role.replace('_', ' ').toUpperCase() : 'MEMBER';
+            
+            const item = document.createElement('div');
+            item.className = "p-3 flex items-center gap-3 cursor-pointer transition-all hover:bg-purple-50/50";
+            item.onclick = () => selectDrawerContact(contact);
+            
+            item.innerHTML = `
+                <div class="w-10 h-10 rounded-full bg-purple-100 text-pnt-purple font-bold flex items-center justify-center text-xs shrink-0 overflow-hidden">
+                    ${contact.avatar_url ? `<img src="${contact.avatar_url}" class="w-full h-full object-cover">` : initials}
+                </div>
+                <div class="overflow-hidden flex-1">
+                    <h4 class="font-bold text-xs text-slate-900 truncate">${contact.first_name} ${contact.last_name}</h4>
+                    <p class="text-[9px] font-mono text-pnt-purple uppercase">${roleBadge} • ${contact.custom_profile_id || 'PNT'}</p>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    async function selectDrawerContact(contact) {
+        activeRecipientId = contact.id;
+        document.getElementById('drawer-active-name').textContent = `${contact.first_name} ${contact.last_name}`;
+        document.getElementById('drawer-active-role').textContent = `${contact.role?.replace('_', ' ').toUpperCase()} • ${contact.custom_profile_id}`;
+        
+        const avatarBox = document.getElementById('drawer-active-avatar');
+        const initials = `${contact.first_name?.[0] || ''}${contact.last_name?.[0] || ''}`.toUpperCase() || 'U';
+        avatarBox.innerHTML = contact.avatar_url ? `<img src="${contact.avatar_url}" class="w-full h-full object-cover rounded-full">` : initials;
+
+        document.getElementById('chat-contacts-view').classList.add('hidden');
+        document.getElementById('chat-conversation-view').classList.remove('hidden');
+
+        await fetchDrawerMessages();
+        if (chatPollingInterval) clearInterval(chatPollingInterval);
+        chatPollingInterval = setInterval(fetchDrawerMessages, 3000);
+    }
+
+    async function fetchDrawerMessages() {
+        if (!activeRecipientId) return;
+        try {
+            const res = await fetch(`/api/chat/messages/${activeRecipientId}`, { credentials: 'include' });
+            const data = await res.json();
+            if (data.success) {
+                renderDrawerMessages(data.messages || []);
+            }
+        } catch (err) {}
+    }
+
+    function renderDrawerMessages(messages) {
+        const container = document.getElementById('drawer-messages-container');
+        if (!container || !activeUser) return;
+        container.innerHTML = '';
+        if (messages.length === 0) {
+            container.innerHTML = `<div class="text-center text-xs text-slate-400 my-auto">No direct messages yet. Say hello!</div>`;
+            return;
+        }
+
+        messages.forEach(msg => {
+            const isMe = msg.sender_id === activeUser.id;
+            const bubble = document.createElement('div');
+            bubble.className = `max-w-[80%] p-3 rounded-2xl text-xs ${isMe ? 'bg-pnt-purple text-white self-end rounded-br-xs' : 'bg-slate-100 text-slate-800 self-start rounded-bl-xs'}`;
+            bubble.innerHTML = `
+                <p class="break-words">${msg.message}</p>
+                <span class="text-[8px] opacity-70 block text-right mt-1 font-mono">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            `;
+            container.appendChild(bubble);
+        });
+        container.scrollTop = container.scrollHeight;
     }
 
     async function fetchSessionAndPopulate() {
@@ -402,6 +609,11 @@
                 icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>`
             });
             links.push({
+                label: 'Team Finance Ledger',
+                href: '/views/leader-finance.html',
+                icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`
+            });
+            links.push({
                 label: 'Announcements',
                 href: '/views/announcements.html',
                 icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>`
@@ -432,7 +644,29 @@
                 href: '/views/announcements.html',
                 icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>`
             });
+            links.push({
+                label: 'My Finance & Dues',
+                href: '/views/member-finance.html',
+                icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`
+            });
         }
+
+        // Direct Messages Toggle Link Button in Sidebar
+        const chatToggleBtn = document.createElement('button');
+        chatToggleBtn.type = 'button';
+        chatToggleBtn.className = "w-full text-left flex items-center gap-3 px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:text-pnt-purple hover:bg-purple-50/60 rounded-xl transition-all cursor-pointer mt-2 border border-slate-100";
+        chatToggleBtn.innerHTML = `
+            <span class="text-pnt-purple">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            </span>
+            <span class="truncate">Direct Messages (Chat)</span>
+        `;
+        chatToggleBtn.addEventListener('click', () => {
+            const drawer = document.getElementById('pnt-chat-drawer');
+            drawer?.classList.remove('hidden');
+            loadDrawerContacts();
+        });
+        container.appendChild(chatToggleBtn);
 
         const currentPath = window.location.pathname;
 

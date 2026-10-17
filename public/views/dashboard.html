@@ -36,34 +36,22 @@
         }
     </script>
     <style>
-        .id-card-container {
-            perspective: 1200px;
-        }
-        .id-card-inner {
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-style: preserve-3d;
-        }
-        .id-card-inner.is-flipped {
-            transform: rotateY(180deg);
-        }
-        .id-card-face {
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
-        .id-card-back {
-            transform: rotateY(180deg);
-        }
+        .id-card-container { perspective: 1200px; }
+        .id-card-inner { transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+        .id-card-inner.is-flipped { transform: rotateY(180deg); }
+        .id-card-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .id-card-back { transform: rotateY(180deg); }
     </style>
 </head>
 <body class="min-h-full pb-12 relative overflow-x-hidden bg-white text-pnt-dark">
 
-    <!-- Top Account Inactive / Expired Banner Alert -->
-    <div id="unpaid-warning-strip" class="hidden bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 text-white px-6 py-3 shadow-md relative z-20">
+    <!-- Top Account Inactive / Trial / Expired Banner Alert -->
+    <div id="unpaid-warning-strip" class="bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 text-white px-6 py-3 shadow-md relative z-20">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
             <div class="flex items-center gap-2">
-                <span class="text-base">⚠️</span>
-                <span class="font-bold uppercase tracking-wider">Account Access Limited:</span>
-                <span id="unpaid-warning-text">Your annual membership validity is inactive. Pay registration to unlock attendance and actions.</span>
+                <span class="text-base" id="banner-icon">🎁</span>
+                <span class="font-bold uppercase tracking-wider" id="banner-title">✨ 1-MONTH FREE TRIAL ACTIVE:</span>
+                <span id="unpaid-warning-text">You are enjoying your complimentary onboarding trial period. Full terminal access is unlocked.</span>
             </div>
             <button id="strip-reactivate-btn" class="bg-white text-slate-900 font-bold px-4 py-1.5 rounded-lg text-[11px] shadow hover:bg-slate-100 transition-all uppercase tracking-wider cursor-pointer">
                 Activate Membership Now
@@ -319,7 +307,7 @@
                     </div>
 
                     <div class="mt-3 text-center border-t border-white/10 pt-2 text-[10px] text-purple-200 flex items-center justify-between px-1">
-                        <span class="text-[9px] uppercase tracking-wider text-purple-300">Valid Until:</span>
+                        <span class="text-[9px] uppercase tracking-wider text-purple-300" id="timer-status-label">Valid Until:</span>
                         <span id="timer-date-readout" class="font-mono font-bold text-white">Pending Activation</span>
                     </div>
                 </div>
@@ -329,25 +317,73 @@
 
     </main>
 
+    <!-- MODAL: MEMBERSHIP CONSENT & PARTNERSHIP TERMS -->
+    <div id="consent-modal" class="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-purple-50/50">
+                <div>
+                    <span class="bg-purple-100 text-pnt-purple text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Legal & Compliance</span>
+                    <h3 class="text-base font-black text-pnt-dark mt-1">Pronet-Tech Global Limited Partnership & Operations Agreement</h3>
+                </div>
+                <button type="button" onclick="closeConsentModal()" class="text-slate-400 hover:text-slate-700 text-2xl font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-6 text-xs text-slate-600 leading-relaxed">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide">About Pronet-Tech Global Limited</h4>
+                    <p>Pronet-Tech Global Limited is an organization dedicated to empowering individuals through practical education and digital skills development, as well as an online and network marketing business combining freelancing and network marketing.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">1. Organization Rules & Confidentiality</h4>
+                    <p>All business plans, strategies, and related information must be treated as confidential. Members must not disclose proprietary information to unauthorized third parties. Violation of the Operations Manual may result in permanent termination of membership, deactivation of account, loss of access to team support, wallet funds, and training benefits.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">2. Payment and Funds Regulation Rules</h4>
+                    <p>A 10% monthly charge shall be paid by each member separately in addition to monthly membership fees toward team development and office maintenance. Full disclosure of financial info is required to sponsors and leaders.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">3. Account Creation & Prospecting Rules</h4>
+                    <p>Members must complete required training before account creation. Strict prohibition against using another person's image or creating fake/unauthorized accounts.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">4. Team Leadership & Responsibility Rules</h4>
+                    <p>Team leaders must complete training programs and possess necessary support tools. Members earning through Fiverr or approved platforms contribute 10% of earnings for office maintenance.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">5. 3-Year Partnership & Exclusivity Agreement</h4>
+                    <p>By proceeding, you agree to fully partner with ProNet-Tech Global Limited for at least three years, dedicating time and resources exclusively. If terminating partnership early, you agree to surrender all tools and resources acquired.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">6. Fiverr Account Operating Rules & Asset Declaration</h4>
+                    <p>Profile display names must match your actual name. Accounts must be Nigerian. Maintain professionalism and do not sell illegal services. All assets/tools acquired using PNT funds remain property of Pronet-Tech Global Limited subject to recovery.</p>
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-slate-100 bg-slate-50 space-y-4">
+                <label class="flex items-start gap-3 cursor-pointer select-none">
+                    <input type="checkbox" id="consent-checkbox" onchange="toggleConsentProceedBtn()" class="mt-0.5 w-4 h-4 text-pnt-purple rounded border-slate-300 focus:ring-pnt-purple cursor-pointer">
+                    <span class="text-xs text-slate-700 font-medium">
+                        I have carefully read, understood, and voluntarily agree to abide by all the Operation Rules, Payment Regulations, Account Policies, 3-Year Partnership Terms, and Fiverr Operating Guidelines of Pronet-Tech Global Limited.
+                    </span>
+                </label>
+
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeConsentModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition-all cursor-pointer">Cancel</button>
+                    <button type="button" id="proceed-payment-btn" onclick="executePendingPayment()" disabled class="px-6 py-2.5 bg-pnt-purple text-white font-bold rounded-xl text-xs shadow-md opacity-50 cursor-not-allowed transition-all">Proceed to Payment ➔</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: TRANSACTION CELEBRATION POPUP -->
     <div id="payment-success-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4 text-center relative">
             <button type="button" onclick="closeSuccessModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer transition-colors">&times;</button>
-            
-            <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-emerald-100">
-                ✓
-            </div>
-            
+            <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-emerald-100">✓</div>
             <h3 class="text-lg font-extrabold text-pnt-dark" id="modal-success-title">Payment Confirmed!</h3>
-            
-            <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 border border-slate-100 p-4 rounded-xl text-center" id="modal-success-msg">
-                Your transaction was processed successfully.
-            </p>
-            
+            <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 border border-slate-100 p-4 rounded-xl text-center" id="modal-success-msg">Your transaction was processed successfully.</p>
             <div id="modal-action-slot" class="pt-2">
-                <button type="button" onclick="closeSuccessModal()" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">
-                    Continue to Terminal
-                </button>
+                <button type="button" onclick="closeSuccessModal()" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">Continue to Terminal</button>
             </div>
         </div>
     </div>
@@ -355,40 +391,30 @@
     <!-- MODAL: DISCIPLINARY ALERT -->
     <div id="disciplinary-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-red-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4 text-center">
-            <div class="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
-                ⚠️
-            </div>
+            <div class="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">⚠️</div>
             <h3 class="text-base font-bold text-red-600 uppercase tracking-wider" id="disciplinary-title">Compliance Alert</h3>
-            <p class="text-xs text-slate-600 leading-relaxed bg-red-50/60 border border-red-100 p-4 rounded-xl text-left font-mono" id="disciplinary-reason">
-                Loading compliance notice details...
-            </p>
-            <button type="button" onclick="document.getElementById('disciplinary-modal').classList.add('hidden')" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">
-                Acknowledge Notice
-            </button>
+            <p class="text-xs text-slate-600 leading-relaxed bg-red-50/60 border border-red-100 p-4 rounded-xl text-left font-mono" id="disciplinary-reason">Loading compliance notice details...</p>
+            <button type="button" onclick="document.getElementById('disciplinary-modal').classList.add('hidden')" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">Acknowledge Notice</button>
         </div>
     </div>
 
-    <!-- Mount Universal Responsive Navigation -->
     <script src="/js/nav.js"></script>
 
     <script>
         const PAYSTACK_PUBLIC_KEY = 'pk_live_ccd08c29cebcb52ee9c5a97b44df82d3413351ec';
 
         let currentUser = null;
-        let userEntitlements = { hasPaidSoftcopy: false, isMembershipActive: false };
+        let userEntitlements = { hasPaidSoftcopy: false, isMembershipActive: true }; // Force active by default for trial
         let liveTasks = [];
         let countdownTimerInterval = null;
+        let pendingPaymentPurpose = null;
+        let pendingPaymentAmount = 0;
 
         const flipBtn = document.getElementById('flip-card-btn');
         const cardFlipper = document.getElementById('id-card-flipper');
         
-        flipBtn.addEventListener('click', () => {
-            cardFlipper.classList.toggle('is-flipped');
-        });
-
-        document.getElementById('strip-reactivate-btn').addEventListener('click', () => {
-            document.getElementById('reactivate-membership-btn').click();
-        });
+        flipBtn.addEventListener('click', () => { cardFlipper.classList.toggle('is-flipped'); });
+        document.getElementById('strip-reactivate-btn').addEventListener('click', () => { document.getElementById('reactivate-membership-btn').click(); });
 
         function showSuccessModal(type) {
             const modal = document.getElementById('payment-success-modal');
@@ -399,43 +425,27 @@
             if (type === 'softcopy') {
                 title.textContent = "🎉 Congratulations!";
                 msg.innerHTML = "Your official digital softcopy ID card is paid for and ready to download. You can now save or print your high-resolution badge anytime.";
-                actionSlot.innerHTML = `
-                    <button type="button" onclick="window.print(); closeSuccessModal();" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer flex items-center justify-center gap-2">
-                        Download & Print ID Card ➔
-                    </button>
-                `;
+                actionSlot.innerHTML = `<button type="button" onclick="window.print(); closeSuccessModal();" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer flex items-center justify-center gap-2">Download & Print ID Card ➔</button>`;
             } else if (type === 'renewal') {
                 title.textContent = "🎉 Congratulations!";
                 msg.innerHTML = "You have successfully activated your annual membership! Keep enjoying all features of your ProNet-Tech workspace membership.";
-                actionSlot.innerHTML = `
-                    <button type="button" onclick="closeSuccessModal(); window.location.reload();" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">
-                        Enjoy Your Membership ➔
-                    </button>
-                `;
+                actionSlot.innerHTML = `<button type="button" onclick="closeSuccessModal(); window.location.reload();" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">Enjoy Your Membership ➔</button>`;
             }
-
             modal.classList.remove('hidden');
         }
 
-        function closeSuccessModal() {
-            document.getElementById('payment-success-modal').classList.add('hidden');
-        }
+        function closeSuccessModal() { document.getElementById('payment-success-modal').classList.add('hidden'); }
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const authCheck = await fetch('/api/auth/me', { credentials: 'include' });
                 const authData = await authCheck.json();
-
-                if (!authData.success) {
-                    window.location.href = '/views/onboarding.html';
-                    return;
-                }
+                if (!authData.success) { window.location.href = '/views/onboarding.html'; return; }
 
                 currentUser = authData.user;
                 localStorage.setItem('pnt_user', JSON.stringify(currentUser));
 
                 document.getElementById('card-fullname').textContent = (currentUser.name || 'Workspace Member').toUpperCase();
-                
                 const userRole = currentUser.role ? currentUser.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Member';
                 document.getElementById('card-role').textContent = userRole;
                 document.getElementById('card-back-role').textContent = userRole.toUpperCase();
@@ -454,8 +464,8 @@
                 const verificationUrl = `${window.location.origin}/verify.html?id=${encodeURIComponent(userCode)}`;
                 document.getElementById('card-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}&color=0D122B&bgcolor=FFFFFF`;
 
-                initCountdownEngine(currentUser.membership_expires_at);
                 await syncEntitlementUI();
+                initCountdownEngine(currentUser.membership_expires_at, currentUser.created_at);
                 checkDisciplinaryStatus(currentUser);
 
                 fetchTasks();
@@ -466,21 +476,15 @@
             }
         });
 
-        // ==========================================
-        // DYNAMIC BUTTON STATE CONTROLLER
-        // ==========================================
         async function syncEntitlementUI() {
             try {
                 const res = await fetch('/api/marketplace/my-entitlements', { credentials: 'include' });
                 const data = await res.json();
-
                 if (data.success && data.entitlements) {
                     userEntitlements = data.entitlements;
-
                     const softcopyBtn = document.getElementById('download-soft-copy-btn');
                     const softcopyText = document.getElementById('softcopy-btn-text');
                     const softcopyBadge = document.getElementById('softcopy-btn-badge');
-
                     const renewalBtn = document.getElementById('reactivate-membership-btn');
                     const renewalText = document.getElementById('renewal-btn-text');
                     const renewalBadge = document.getElementById('renewal-btn-badge');
@@ -490,7 +494,6 @@
                         softcopyText.textContent = "✓ Download Official Digital ID";
                         softcopyBadge.className = "bg-white/20 text-white px-2 py-0.5 rounded-md font-mono text-[10px] uppercase";
                         softcopyBadge.textContent = "Paid";
-                        softcopyBtn.classList.remove('animate-attention-pulse');
                     } else {
                         softcopyBtn.className = "w-full bg-purple-50 hover:bg-purple-100 border-2 border-pnt-purple text-pnt-purple font-bold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer animate-attention-pulse";
                         softcopyText.textContent = "Pay & Unlock Digital Softcopy";
@@ -503,79 +506,75 @@
                         renewalText.textContent = "✓ Membership Active & Verified";
                         renewalBadge.className = "bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-md font-mono text-[10px] uppercase";
                         renewalBadge.textContent = "Valid";
-                        renewalBtn.classList.remove('animate-attention-pulse');
                     } else {
                         renewalBtn.className = "w-full btn-brand-gradient text-white font-bold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-xl flex items-center justify-center gap-2 cursor-pointer animate-attention-pulse";
                         renewalText.textContent = "Activate Annual Membership";
                         renewalBadge.className = "bg-white/25 px-2 py-0.5 rounded-md font-mono text-[11px] font-bold";
                         renewalBadge.textContent = "₦3,000";
                     }
-
-                    applyLockoutEnforcement(userEntitlements.isMembershipActive);
                 }
-            } catch (err) {
-                console.error("Could not sync entitlements:", err);
-            }
+            } catch (err) { console.error("Could not sync entitlements:", err); }
         }
 
         function applyLockoutEnforcement(isActive) {
             const attBtn = document.getElementById('mark-attendance-btn');
             const attDesc = document.getElementById('attendance-desc-text');
-
-            if (!isActive) {
-                attBtn.disabled = true;
-                attBtn.className = "bg-slate-200 text-slate-400 border border-slate-300 font-bold px-8 py-4 rounded-2xl shadow-none cursor-not-allowed inline-flex items-center gap-2";
-                attBtn.innerHTML = `🔒 Membership Inactive (View Only Mode)`;
-                attDesc.textContent = "Attendance marking and task submission are locked. Please activate your annual membership to unlock daily terminal functions.";
-            } else {
-                attBtn.disabled = false;
-                attBtn.className = "btn-brand-gradient inline-flex items-center gap-3 font-bold px-8 py-4 rounded-2xl shadow-xl shadow-pnt-purple/20 transform hover:-translate-y-0.5 transition-all duration-300 cursor-pointer";
-                attBtn.innerHTML = `<svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Mark Today's Attendance`;
-                attDesc.textContent = "Tap the button below to register your local coordinates and dispatch an instant verification ping to your Team Leader.";
-            }
+            // Force fully unlocked during 1-month free trial
+            attBtn.disabled = false;
+            attBtn.className = "btn-brand-gradient inline-flex items-center gap-3 font-bold px-8 py-4 rounded-2xl shadow-xl shadow-pnt-purple/20 transform hover:-translate-y-0.5 transition-all duration-300 cursor-pointer";
+            attBtn.innerHTML = `<svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> Mark Today's Attendance`;
+            attDesc.textContent = "Tap the button below to register your local coordinates and dispatch an instant verification ping to your Team Leader.";
         }
 
-        function initCountdownEngine(expiresAtString) {
+        function initCountdownEngine(expiresAtString, createdAtString) {
             const warningStrip = document.getElementById('unpaid-warning-strip');
             const dateReadout = document.getElementById('timer-date-readout');
+            const bannerTitle = document.getElementById('banner-title');
+            const bannerText = document.getElementById('unpaid-warning-text');
+            const bannerIcon = document.getElementById('banner-icon');
+            const timerLabel = document.getElementById('timer-status-label');
 
-            if (!expiresAtString) {
-                setClockExpired();
-                warningStrip.classList.remove('hidden');
-                dateReadout.textContent = "Unpaid (Activation Required)";
-                applyLockoutEnforcement(false);
-                return;
+            let targetDate = null;
+            if (expiresAtString) {
+                targetDate = new Date(expiresAtString).getTime();
+            } else if (createdAtString) {
+                const createdTime = new Date(createdAtString).getTime();
+                targetDate = createdTime + (30 * 24 * 60 * 60 * 1000); // 30-day free trial
+            } else {
+                targetDate = new Date().getTime() + (30 * 24 * 60 * 60 * 1000);
             }
 
-            const targetDate = new Date(expiresAtString).getTime();
+            warningStrip.className = "bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 text-white px-6 py-3 shadow-md relative z-20";
+            bannerTitle.textContent = "✨ 1-MONTH FREE TRIAL ACTIVE:";
+            bannerText.textContent = `You are enjoying your complimentary onboarding trial period. Full terminal access is unlocked.`;
+            bannerIcon.textContent = "🎁";
+            timerLabel.textContent = "Trial Expires:";
+            applyLockoutEnforcement(true);
 
             function tick() {
-                const now = new Date().getTime();
-                const diff = targetDate - now;
+                const currentNow = new Date().getTime();
+                const currentDiff = targetDate - currentNow;
 
-                if (diff <= 0) {
-                    clearInterval(countdownTimerInterval);
-                    setClockExpired();
-                    warningStrip.classList.remove('hidden');
-                    dateReadout.textContent = "Expired (Renewal Required)";
-                    applyLockoutEnforcement(false);
+                if (currentDiff <= 0 && !userEntitlements.isMembershipActive) {
+                    warningStrip.className = "bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 text-white px-6 py-3 shadow-md relative z-20";
+                    bannerTitle.textContent = "ACCOUNT ACCESS LIMITED:";
+                    bannerText.textContent = "Your 1-month free trial validity has expired. Pay registration to unlock attendance and actions.";
+                    bannerIcon.textContent = "⚠️";
+                    timerLabel.textContent = "Expired On:";
+                    dateReadout.textContent = new Date(targetDate).toLocaleDateString();
                     return;
                 }
 
-                warningStrip.classList.add('hidden');
+                const days = Math.floor(currentDiff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((currentDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((currentDiff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((currentDiff % (1000 * 60)) / 1000);
 
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const secs = Math.floor((diff % (1000 * 60)) / 1000);
-
-                document.getElementById('timer-days').textContent = String(days).padStart(2, '0');
-                document.getElementById('timer-hours').textContent = String(hours).padStart(2, '0');
-                document.getElementById('timer-mins').textContent = String(mins).padStart(2, '0');
-                document.getElementById('timer-secs').textContent = String(secs).padStart(2, '0');
-
-                const d = new Date(expiresAtString);
-                dateReadout.textContent = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                document.getElementById('timer-days').textContent = String(days > 0 ? days : 0).padStart(2, '0');
+                document.getElementById('timer-hours').textContent = String(hours > 0 ? hours : 0).padStart(2, '0');
+                document.getElementById('timer-mins').textContent = String(mins > 0 ? mins : 0).padStart(2, '0');
+                document.getElementById('timer-secs').textContent = String(secs > 0 ? secs : 0).padStart(2, '0');
+                dateReadout.textContent = new Date(targetDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
             }
 
             tick();
@@ -593,108 +592,91 @@
             const status = (user.status || 'active').toLowerCase();
             if (['warning', 'inactive', 'suspended', 'ban', 'banned'].includes(status)) {
                 const modal = document.getElementById('disciplinary-modal');
-                const title = document.getElementById('disciplinary-title');
-                const reason = document.getElementById('disciplinary-reason');
-
-                title.textContent = `Official Notice: Status ${status.toUpperCase()}`;
-                reason.textContent = user.status_reason 
-                    ? `Reason Given: "${user.status_reason}"`
-                    : "Your account is currently flagged under administrative review.";
-
+                document.getElementById('disciplinary-title').textContent = `Official Notice: Status ${status.toUpperCase()}`;
+                document.getElementById('disciplinary-reason').textContent = user.status_reason ? `Reason Given: "${user.status_reason}"` : "Your account is currently flagged under administrative review.";
                 modal.classList.remove('hidden');
             }
         }
 
+        // --- CONSENT & PAYMENT FLOW TRIGGER ---
         document.getElementById('download-soft-copy-btn').addEventListener('click', () => {
-            if (userEntitlements.hasPaidSoftcopy) {
-                window.print();
-                return;
-            }
+            if (userEntitlements.hasPaidSoftcopy) { window.print(); return; }
+            openConsentModalForPayment(2000, 'softcopy');
+        });
 
-            initiatePaystack(2000, 'softcopy', async (response) => {
+        document.getElementById('reactivate-membership-btn').addEventListener('click', () => {
+            if (userEntitlements.isMembershipActive) { alert("✅ Your annual membership is already active and valid."); return; }
+            openConsentModalForPayment(3000, 'renewal');
+        });
+
+        function openConsentModalForPayment(amount, purpose) {
+            pendingPaymentAmount = amount;
+            pendingPaymentPurpose = purpose;
+            document.getElementById('consent-checkbox').checked = false;
+            toggleConsentProceedBtn();
+            document.getElementById('consent-modal').classList.remove('hidden');
+        }
+
+        function closeConsentModal() {
+            document.getElementById('consent-modal').classList.add('hidden');
+        }
+
+        function toggleConsentProceedBtn() {
+            const checkbox = document.getElementById('consent-checkbox');
+            const btn = document.getElementById('proceed-payment-btn');
+            if (checkbox.checked) {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.classList.add('hover:opacity-90', 'cursor-pointer');
+            } else {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                btn.classList.remove('hover:opacity-90', 'cursor-pointer');
+            }
+        }
+
+        function executePendingPayment() {
+            closeConsentModal();
+            initiatePaystack(pendingPaymentAmount, pendingPaymentPurpose, async (response) => {
                 try {
                     const res = await fetch('/api/marketplace/verify-payment', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
-                        body: JSON.stringify({ reference: response.reference, purpose: 'softcopy' })
+                        body: JSON.stringify({ reference: response.reference, purpose: pendingPaymentPurpose })
                     });
                     const result = await res.json();
                     if (result.success) {
                         await syncEntitlementUI();
-                        showSuccessModal('softcopy');
+                        showSuccessModal(pendingPaymentPurpose);
                     } else {
                         alert(`Verification note: ${result.message}`);
                     }
-                } catch (err) {
-                    alert('Could not contact verification server.');
-                }
+                } catch (err) { alert('Could not contact verification server.'); }
             });
-        });
-
-        document.getElementById('reactivate-membership-btn').addEventListener('click', () => {
-            if (userEntitlements.isMembershipActive) {
-                alert("✅ Your annual membership is already active and valid.");
-                return;
-            }
-
-            initiatePaystack(3000, 'renewal', async (response) => {
-                try {
-                    const res = await fetch('/api/marketplace/verify-payment', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({ reference: response.reference, purpose: 'renewal' })
-                    });
-                    const result = await res.json();
-                    if (result.success) {
-                        showSuccessModal('renewal');
-                    } else {
-                        alert(`Verification note: ${result.message}`);
-                    }
-                } catch (err) {
-                    alert('Could not contact verification server.');
-                }
-            });
-        });
+        }
 
         function initiatePaystack(amountInNaira, purpose, onSuccess) {
-            if (typeof PaystackPop === 'undefined') {
-                alert("Payment gateway unreachable. Please check your internet connection.");
-                return;
-            }
-
+            if (typeof PaystackPop === 'undefined') { alert("Payment gateway unreachable."); return; }
             const handler = PaystackPop.setup({
                 key: PAYSTACK_PUBLIC_KEY,
                 email: currentUser.email || 'member@pronettech.net',
                 amount: amountInNaira * 100,
                 currency: 'NGN',
                 ref: 'PNT-' + purpose.toUpperCase() + '-' + Date.now(),
-                callback: function(response) {
-                    if (onSuccess) onSuccess(response);
-                },
-                onClose: function() {
-                    console.log('Payment modal closed.');
-                }
+                callback: function(response) { if (onSuccess) onSuccess(response); },
+                onClose: function() { console.log('Payment modal closed.'); }
             });
-
             handler.openIframe();
         }
 
         async function uploadAvatar(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const formData = new FormData();
             formData.append('avatar', file);
-
             try {
-                const res = await fetch('/api/auth/profile/avatar', {
-                    method: 'PUT',
-                    credentials: 'include',
-                    body: formData
-                });
-
+                const res = await fetch('/api/auth/profile/avatar', { method: 'PUT', credentials: 'include', body: formData });
                 const data = await res.json();
                 if (data.success) {
                     const avatarImg = document.getElementById('card-avatar-img');
@@ -702,105 +684,49 @@
                     avatarImg.src = data.avatar_url;
                     avatarImg.classList.remove('hidden');
                     placeholder.classList.add('hidden');
-
                     currentUser.avatar_url = data.avatar_url;
                     localStorage.setItem('pnt_user', JSON.stringify(currentUser));
                     alert('ID Photo updated successfully!');
-                } else {
-                    alert(`Upload failed: ${data.message}`);
-                }
-            } catch (err) {
-                console.error('Error uploading photo:', err);
-                alert('Server communication failed.');
-            }
+                } else { alert(`Upload failed: ${data.message}`); }
+            } catch (err) { alert('Server communication failed.'); }
         }
 
         document.getElementById('mark-attendance-btn').addEventListener('click', async () => {
-            if (!userEntitlements.isMembershipActive) {
-                alert('🔒 Action Blocked: You must activate your annual membership first.');
-                return;
-            }
-
             try {
-                const response = await fetch('/api/attendance/checkin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include'
-                });
-
+                const response = await fetch('/api/attendance/checkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
                 const data = await response.json();
-
-                if (response.status === 401) {
-                    alert('Session expired. Please sign in again.');
-                    window.location.href = '/views/onboarding.html';
-                    return;
-                }
-
-                if (data.success) {
-                    alert(`📡 Check-in Successful!\n\n${data.message}`);
-                    fetchWeeklyAttendance();
-                } else {
-                    alert(`Check-in Blocked: ${data.message}`);
-                }
-            } catch (err) {
-                console.error('Error logging attendance:', err);
-                alert('Connection with server lost.');
-            }
+                if (data.success) { alert(`📡 Check-in Successful!\n\n${data.message}`); fetchWeeklyAttendance(); }
+                else { alert(`Check-in Blocked: ${data.message}`); }
+            } catch (err) { alert('Connection with server lost.'); }
         });
 
         async function fetchWeeklyAttendance() {
             try {
                 const response = await fetch('/api/attendance/weekly', { credentials: 'include' });
                 const resData = await response.json();
-
-                if (resData.success) {
-                    renderWeeklyStrip(resData.data);
-                }
-            } catch (err) {
-                console.error("Failed to fetch weekly attendance logs:", err);
-            }
+                if (resData.success) { renderWeeklyStrip(resData.data); }
+            } catch (err) {}
         }
 
         function renderWeeklyStrip(logs) {
             const daysMap = { 1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri', 6: 'Sat', 0: 'Sun' };
             const daysOrder = [1, 2, 3, 4, 5, 6, 0];
-            
             const historyContainer = document.getElementById('weekly-strip-container');
             if (!historyContainer) return;
             historyContainer.innerHTML = '';
-
             const weeklyLogMap = {};
-            (logs || []).forEach(log => {
-                const logDay = new Date(log.marked_time).getDay();
-                weeklyLogMap[logDay] = log.status;
-            });
-
+            (logs || []).forEach(log => { weeklyLogMap[new Date(log.marked_time).getDay()] = log.status; });
             daysOrder.forEach(dayIndex => {
                 const dayName = daysMap[dayIndex];
                 const status = weeklyLogMap[dayIndex];
-
                 let visualChar = "-";
                 let bgStyle = "bg-slate-50 border-slate-200 text-slate-400";
-
-                if (status === 'confirmed') {
-                    visualChar = "✓";
-                    bgStyle = "bg-emerald-50 border-emerald-300 text-emerald-600";
-                } else if (status === 'rejected') {
-                    visualChar = "✗";
-                    bgStyle = "bg-red-50 border-red-300 text-red-600";
-                } else if (status === 'pending') {
-                    visualChar = "•";
-                    bgStyle = "bg-amber-50 border-amber-300 text-amber-600 animate-pulse";
-                }
-
+                if (status === 'confirmed') { visualChar = "✓"; bgStyle = "bg-emerald-50 border-emerald-300 text-emerald-600"; }
+                else if (status === 'rejected') { visualChar = "✗"; bgStyle = "bg-red-50 border-red-300 text-red-600"; }
+                else if (status === 'pending') { visualChar = "•"; bgStyle = "bg-amber-50 border-amber-300 text-amber-600 animate-pulse"; }
                 const dayBox = document.createElement('div');
                 dayBox.className = "space-y-2";
-                dayBox.innerHTML = `
-                    <span class="text-xs text-slate-500 font-medium">${dayName}</span>
-                    <div class="h-10 ${bgStyle} border rounded-xl flex items-center justify-center font-bold text-lg" title="Status: ${status || 'No log'}">
-                        ${visualChar}
-                    </div>
-                `;
+                dayBox.innerHTML = `<span class="text-xs text-slate-500 font-medium">${dayName}</span><div class="h-10 ${bgStyle} border rounded-xl flex items-center justify-center font-bold text-lg">${visualChar}</div>`;
                 historyContainer.appendChild(dayBox);
             });
         }
@@ -810,93 +736,50 @@
                 if (!currentUser || !currentUser.id) return;
                 const response = await fetch(`/api/tasks/user/${currentUser.id}`, { credentials: 'include' });
                 const resData = await response.json();
-                
                 liveTasks = resData.success ? resData.data : [];
                 renderTasks();
-            } catch (err) {
-                console.error("Failed to query database tasks:", err);
-                renderTasks();
-            }
+            } catch (err) { renderTasks(); }
         }
 
         function renderTasks() {
             const listContainer = document.getElementById('tasks-list');
             listContainer.innerHTML = '';
-
             if (!liveTasks || liveTasks.length === 0) {
                 listContainer.innerHTML = `<p class="text-xs text-slate-400 py-2">No tasks assigned yet. You're completely up to date!</p>`;
                 return;
             }
-
             liveTasks.forEach(task => {
                 let badgeClass = "bg-slate-100 border-slate-200 text-slate-600";
                 let actionButton = "";
-
-                if (!userEntitlements.isMembershipActive) {
-                    actionButton = `<span class="text-[11px] text-slate-400 font-semibold italic">🔒 Pay to unlock</span>`;
-                } else {
-                    if (task.status === 'assigned') {
-                        badgeClass = "bg-purple-50 border-purple-200 text-pnt-purple";
-                        actionButton = `<button onclick="updateTaskStatus('${task.id}', 'in_progress')" class="bg-pnt-purple hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer">Start Work</button>`;
-                    } else if (task.status === 'in_progress') {
-                        badgeClass = "bg-amber-50 border-amber-200 text-amber-700";
-                        actionButton = `<button onclick="updateTaskStatus('${task.id}', 'completed')" class="bg-pnt-orange hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer">Mark Complete</button>`;
-                    } else if (task.status === 'completed') {
-                        badgeClass = "bg-purple-50 border-purple-200 text-pnt-purple animate-pulse";
-                        actionButton = `<span class="text-[11px] text-slate-400 font-semibold italic">Awaiting verification...</span>`;
-                    } else if (task.status === 'approved') {
-                        badgeClass = "bg-emerald-50 border-emerald-200 text-emerald-700";
-                        actionButton = `<span class="text-[11px] text-emerald-600 font-bold">✓ Approved</span>`;
-                    } else if (task.status === 'rejected') {
-                        badgeClass = "bg-red-50 border-red-200 text-red-700";
-                        actionButton = `<button onclick="updateTaskStatus('${task.id}', 'in_progress')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer">Retry Task</button>`;
-                    }
+                
+                if (task.status === 'assigned') {
+                    badgeClass = "bg-purple-50 border-purple-200 text-pnt-purple";
+                    actionButton = `<button onclick="updateTaskStatus('${task.id}', 'in_progress')" class="bg-pnt-purple hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer">Start Work</button>`;
+                } else if (task.status === 'in_progress') {
+                    badgeClass = "bg-amber-50 border-amber-200 text-amber-700";
+                    actionButton = `<button onclick="updateTaskStatus('${task.id}', 'completed')" class="bg-pnt-orange hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer">Mark Complete</button>`;
+                } else if (task.status === 'completed') {
+                    badgeClass = "bg-purple-50 border-purple-200 text-pnt-purple animate-pulse";
+                    actionButton = `<span class="text-[11px] text-slate-400 font-semibold italic">Awaiting verification...</span>`;
+                } else if (task.status === 'approved') {
+                    badgeClass = "bg-emerald-50 border-emerald-200 text-emerald-700";
+                    actionButton = `<span class="text-[11px] text-emerald-600 font-bold">✓ Approved</span>`;
                 }
 
                 const taskElement = document.createElement('div');
                 taskElement.className = "bg-slate-50/60 border border-slate-200 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all hover:border-slate-300";
-                taskElement.innerHTML = `
-                    <div class="space-y-1">
-                        <div class="flex items-center gap-2">
-                            <h4 class="font-bold text-sm text-pnt-dark">${task.title}</h4>
-                            <span class="text-[9px] uppercase border font-semibold px-2 py-0.5 rounded ${badgeClass}">${task.status.replace('_', ' ')}</span>
-                        </div>
-                        <p class="text-xs text-slate-500 max-w-md">${task.description || 'No description provided.'}</p>
-                    </div>
-                    <div class="w-full sm:w-auto flex justify-end">
-                        ${actionButton}
-                    </div>
-                `;
+                taskElement.innerHTML = `<div class="space-y-1"><div class="flex items-center gap-2"><h4 class="font-bold text-sm text-pnt-dark">${task.title}</h4><span class="text-[9px] uppercase border font-semibold px-2 py-0.5 rounded ${badgeClass}">${task.status.replace('_', ' ')}</span></div><p class="text-xs text-slate-500 max-w-md">${task.description || 'No description provided.'}</p></div><div class="w-full sm:w-auto flex justify-end">${actionButton}</div>`;
                 listContainer.appendChild(taskElement);
             });
         }
 
         async function updateTaskStatus(taskId, nextStatus) {
-            if (!userEntitlements.isMembershipActive) {
-                alert('🔒 Action Blocked: You must activate your annual membership first.');
-                return;
-            }
-
             try {
-                const response = await fetch(`/api/tasks/${taskId}/status`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ status: nextStatus })
-                });
-
+                const response = await fetch(`/api/tasks/${taskId}/status`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ status: nextStatus }) });
                 const resData = await response.json();
-
-                if (resData.success) {
-                    alert(nextStatus === 'completed' ? '🎉 Task marked complete! Sent to reviewer.' : `Task updated to ${nextStatus}.`);
-                    fetchTasks();
-                } else {
-                    alert(`Failed to update task: ${resData.message}`);
-                }
-            } catch (err) {
-                console.error("Error patching task status:", err);
-                alert("Server connection lost.");
-            }
+                if (resData.success) { alert(nextStatus === 'completed' ? '🎉 Task marked complete!' : `Task updated.`); fetchTasks(); }
+                else { alert(`Failed: ${resData.message}`); }
+            } catch (err) { alert("Server connection lost."); }
         }
     </script>
 </body>

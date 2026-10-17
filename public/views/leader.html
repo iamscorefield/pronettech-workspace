@@ -36,34 +36,22 @@
         }
     </script>
     <style>
-        .id-card-container {
-            perspective: 1200px;
-        }
-        .id-card-inner {
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-style: preserve-3d;
-        }
-        .id-card-inner.is-flipped {
-            transform: rotateY(180deg);
-        }
-        .id-card-face {
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
-        .id-card-back {
-            transform: rotateY(180deg);
-        }
+        .id-card-container { perspective: 1200px; }
+        .id-card-inner { transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+        .id-card-inner.is-flipped { transform: rotateY(180deg); }
+        .id-card-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .id-card-back { transform: rotateY(180deg); }
     </style>
 </head>
 <body class="min-h-full pb-12 relative overflow-x-hidden bg-white text-pnt-dark">
 
-    <!-- Top Account Inactive / Expired Warning Strip -->
-    <div id="unpaid-warning-strip" class="hidden bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 text-white px-6 py-3 shadow-md relative z-20">
+    <!-- Top Account Inactive / Trial / Expired Warning Strip -->
+    <div id="unpaid-warning-strip" class="bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 text-white px-6 py-3 shadow-md relative z-20">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
             <div class="flex items-center gap-2">
-                <span class="text-base">⚠️</span>
-                <span class="font-bold uppercase tracking-wider">Membership Inactive:</span>
-                <span id="unpaid-warning-text">Your annual membership credentials are expired or inactive. Activate now to deploy tasks and manage branch operations.</span>
+                <span class="text-base" id="banner-icon">🎁</span>
+                <span class="font-bold uppercase tracking-wider" id="banner-title">✨ 1-MONTH FREE TRIAL ACTIVE:</span>
+                <span id="unpaid-warning-text">You are enjoying your complimentary onboarding trial period. Full leader operations unlocked.</span>
             </div>
             <button id="strip-reactivate-btn" class="bg-white text-slate-900 font-bold px-4 py-1.5 rounded-lg text-[11px] shadow hover:bg-slate-100 transition-all uppercase tracking-wider cursor-pointer">
                 Activate Membership Now
@@ -315,13 +303,14 @@
                                 <div class="relative z-10 mb-1 px-4">
                                     <svg class="w-full h-7" viewBox="0 0 200 30" preserveAspectRatio="none">
                                         <rect x="0" y="0" width="3" height="30" fill="#0D122B"/><rect x="5" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="9" y="0" width="4" height="30" fill="#0D122B"/><rect x="15" y="0" width="2" height="30" fill="#0D122B"/><rect x="20" y="0" width="1" height="30" fill="#0D122B"/><rect x="23" y="0" width="3" height="30" fill="#0D122B"/><rect x="28" y="0" width="5" height="30" fill="#0D122B"/><rect x="35" y="0" width="2" height="30" fill="#0D122B"/><rect x="39" y="0" width="1" height="30" fill="#0D122B"/><rect x="42" y="0" width="4" height="30" fill="#0D122B"/><rect x="48" y="0" width="2.5" height="30" fill="#0D122B"/><rect x="53" y="0" width="1" height="30" fill="#0D122B"/><rect x="56" y="0" width="3.5" height="30" fill="#0D122B"/><rect x="62" y="0" width="2" height="30" fill="#0D122B"/><rect x="66" y="0" width="4" height="30" fill="#0D122B"/><rect x="72" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="76" y="0" width="3" height="30" fill="#0D122B"/><rect x="81" y="0" width="1" height="30" fill="#0D122B"/><rect x="84" y="0" width="4.5" height="30" fill="#0D122B"/><rect x="91" y="0" width="2" height="30" fill="#0D122B"/><rect x="95" y="0" width="1" height="30" fill="#0D122B"/><rect x="98" y="0" width="3" height="30" fill="#0D122B"/><rect x="103" y="0" width="4" height="30" fill="#0D122B"/><rect x="109" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="113" y="0" width="2.5" height="30" fill="#0D122B"/><rect x="118" y="0" width="4" height="30" fill="#0D122B"/><rect x="124" y="0" width="1" height="30" fill="#0D122B"/><rect x="127" y="0" width="3" height="30" fill="#0D122B"/><rect x="132" y="0" width="2" height="30" fill="#0D122B"/><rect x="136" y="0" width="4" height="30" fill="#0D122B"/><rect x="142" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="146" y="0" width="3" height="30" fill="#0D122B"/><rect x="151" y="0" width="1" height="30" fill="#0D122B"/><rect x="154" y="0" width="4" height="30" fill="#0D122B"/><rect x="160" y="0" width="2" height="30" fill="#0D122B"/><rect x="164" y="0" width="3.5" height="30" fill="#0D122B"/><rect x="170" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="174" y="0" width="3" height="30" fill="#0D122B"/><rect x="179" y="0" width="1" height="30" fill="#0D122B"/><rect x="182" y="0" width="4" height="30" fill="#0D122B"/><rect x="188" y="0" width="2" height="30" fill="#0D122B"/><rect x="192" y="0" width="3" height="30" fill="#0D122B"/><rect x="197" y="0" width="3" height="30" fill="#0D122B"/>
-                                </svg>
+                                    </svg>
+                                </div>
+
+                                <div class="absolute left-0 top-1/3 bottom-0 w-2 bg-[#ff7a00]"></div>
+                                <div class="absolute right-0 top-1/3 bottom-0 w-2 bg-[#ff7a00]"></div>
                             </div>
 
-                            <div class="absolute left-0 top-1/3 bottom-0 w-2 bg-[#ff7a00]"></div>
-                            <div class="absolute right-0 top-1/3 bottom-0 w-2 bg-[#ff7a00]"></div>
                         </div>
-
                     </div>
                 </div>
 
@@ -368,7 +357,7 @@
                     </div>
 
                     <div class="mt-3 text-center border-t border-white/10 pt-2 text-[10px] text-purple-200 flex items-center justify-between px-1">
-                        <span class="text-[9px] uppercase tracking-wider text-purple-300">Valid Until:</span>
+                        <span class="text-[9px] uppercase tracking-wider text-purple-300" id="timer-status-label">Valid Until:</span>
                         <span id="timer-date-readout" class="font-mono font-bold text-white">Pending Activation</span>
                     </div>
                 </div>
@@ -422,25 +411,73 @@
 
     </main>
 
+    <!-- MODAL: MEMBERSHIP CONSENT & PARTNERSHIP TERMS -->
+    <div id="consent-modal" class="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-purple-50/50">
+                <div>
+                    <span class="bg-purple-100 text-pnt-purple text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Legal & Compliance</span>
+                    <h3 class="text-base font-black text-pnt-dark mt-1">Pronet-Tech Global Limited Partnership & Operations Agreement</h3>
+                </div>
+                <button type="button" onclick="closeConsentModal()" class="text-slate-400 hover:text-slate-700 text-2xl font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-6 text-xs text-slate-600 leading-relaxed">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide">About Pronet-Tech Global Limited</h4>
+                    <p>Pronet-Tech Global Limited is an organization dedicated to empowering individuals through practical education and digital skills development, as well as an online and network marketing business combining freelancing and network marketing.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">1. Organization Rules & Confidentiality</h4>
+                    <p>All business plans, strategies, and related information must be treated as confidential. Members must not disclose proprietary information to unauthorized third parties. Violation of the Operations Manual may result in permanent termination of membership, deactivation of account, loss of access to team support, wallet funds, and training benefits.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">2. Payment and Funds Regulation Rules</h4>
+                    <p>A 10% monthly charge shall be paid by each member separately in addition to monthly membership fees toward team development and office maintenance. Full disclosure of financial info is required to sponsors and leaders.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">3. Account Creation & Prospecting Rules</h4>
+                    <p>Members must complete required training before account creation. Strict prohibition against using another person's image or creating fake/unauthorized accounts.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">4. Team Leadership & Responsibility Rules</h4>
+                    <p>Team leaders must complete training programs and possess necessary support tools. Members earning through Fiverr or approved platforms contribute 10% of earnings for office maintenance.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">5. 3-Year Partnership & Exclusivity Agreement</h4>
+                    <p>By proceeding, you agree to fully partner with ProNet-Tech Global Limited for at least three years, dedicating time and resources exclusively. If terminating partnership early, you agree to surrender all tools and resources acquired.</p>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">6. Fiverr Account Operating Rules & Asset Declaration</h4>
+                    <p>Profile display names must match your actual name. Accounts must be Nigerian. Maintain professionalism and do not sell illegal services. All assets/tools acquired using PNT funds remain property of Pronet-Tech Global Limited subject to recovery.</p>
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-slate-100 bg-slate-50 space-y-4">
+                <label class="flex items-start gap-3 cursor-pointer select-none">
+                    <input type="checkbox" id="consent-checkbox" onchange="toggleConsentProceedBtn()" class="mt-0.5 w-4 h-4 text-pnt-purple rounded border-slate-300 focus:ring-pnt-purple cursor-pointer">
+                    <span class="text-xs text-slate-700 font-medium">
+                        I have carefully read, understood, and voluntarily agree to abide by all the Operation Rules, Payment Regulations, Account Policies, 3-Year Partnership Terms, and Fiverr Operating Guidelines of Pronet-Tech Global Limited.
+                    </span>
+                </label>
+
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeConsentModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition-all cursor-pointer">Cancel</button>
+                    <button type="button" id="proceed-payment-btn" onclick="executePendingPayment()" disabled class="px-6 py-2.5 bg-pnt-purple text-white font-bold rounded-xl text-xs shadow-md opacity-50 cursor-not-allowed transition-all">Proceed to Payment ➔</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: TRANSACTION CELEBRATION POPUP -->
     <div id="payment-success-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4 text-center relative">
             <button type="button" onclick="closeSuccessModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer transition-colors">&times;</button>
-            
-            <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-emerald-100">
-                ✓
-            </div>
-            
+            <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold border border-emerald-100">✓</div>
             <h3 class="text-lg font-extrabold text-pnt-dark" id="modal-success-title">Payment Confirmed!</h3>
-            
-            <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 border border-slate-100 p-4 rounded-xl text-center" id="modal-success-msg">
-                Your transaction was processed successfully.
-            </p>
-            
+            <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 border border-slate-100 p-4 rounded-xl text-center" id="modal-success-msg">Your transaction was processed successfully.</p>
             <div id="modal-action-slot" class="pt-2">
-                <button type="button" onclick="closeSuccessModal()" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">
-                    Continue to Terminal
-                </button>
+                <button type="button" onclick="closeSuccessModal()" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">Continue to Terminal</button>
             </div>
         </div>
     </div>
@@ -448,16 +485,10 @@
     <!-- DISCIPLINARY POPUP MODAL -->
     <div id="disciplinary-alert-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-red-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4 text-center">
-            <div class="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
-                ⚠️
-            </div>
+            <div class="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">⚠️</div>
             <h3 class="text-base font-bold text-red-600 uppercase tracking-wider" id="leader-alert-title">Administrative Notice</h3>
-            <p class="text-xs text-slate-600 leading-relaxed bg-red-50/60 border border-red-100 p-4 rounded-xl text-left font-mono" id="leader-alert-reason">
-                Loading compliance notice details...
-            </p>
-            <button type="button" onclick="document.getElementById('disciplinary-alert-modal').classList.add('hidden')" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">
-                Acknowledge & Dismiss
-            </button>
+            <p class="text-xs text-slate-600 leading-relaxed bg-red-50/60 border border-red-100 p-4 rounded-xl text-left font-mono" id="leader-alert-reason">Loading compliance notice details...</p>
+            <button type="button" onclick="document.getElementById('disciplinary-alert-modal').classList.add('hidden')" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">Acknowledge & Dismiss</button>
         </div>
     </div>
 
@@ -468,23 +499,20 @@
         const PAYSTACK_PUBLIC_KEY = 'pk_live_ccd08c29cebcb52ee9c5a97b44df82d3413351ec';
 
         let currentUser = null;
-        let userEntitlements = { hasPaidSoftcopy: false, isMembershipActive: false };
+        let userEntitlements = { hasPaidSoftcopy: false, isMembershipActive: true };
         let pendingUsers = [];
         let pendingLogs = [];
         let activeTasks = [];
         let myAssignedTasks = [];
         let countdownTimerInterval = null;
+        let pendingPaymentPurpose = null;
+        let pendingPaymentAmount = 0;
 
         const flipBtn = document.getElementById('flip-card-btn');
         const cardFlipper = document.getElementById('id-card-flipper');
         
-        flipBtn.addEventListener('click', () => {
-            cardFlipper.classList.toggle('is-flipped');
-        });
-
-        document.getElementById('strip-reactivate-btn').addEventListener('click', () => {
-            document.getElementById('reactivate-membership-btn').click();
-        });
+        flipBtn.addEventListener('click', () => { cardFlipper.classList.toggle('is-flipped'); });
+        document.getElementById('strip-reactivate-btn').addEventListener('click', () => { document.getElementById('reactivate-membership-btn').click(); });
 
         function showSuccessModal(type) {
             const modal = document.getElementById('payment-success-modal');
@@ -495,40 +523,26 @@
             if (type === 'softcopy') {
                 title.textContent = "🎉 Congratulations!";
                 msg.innerHTML = "Your official digital softcopy ID card is paid for and ready to download. You can now save or print your high-resolution badge anytime.";
-                actionSlot.innerHTML = `
-                    <button type="button" onclick="window.print(); closeSuccessModal();" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer flex items-center justify-center gap-2">
-                        Download & Print ID Card ➔
-                    </button>
-                `;
+                actionSlot.innerHTML = `<button type="button" onclick="window.print(); closeSuccessModal();" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer flex items-center justify-center gap-2">Download & Print ID Card ➔</button>`;
             } else if (type === 'renewal') {
                 title.textContent = "🎉 Congratulations!";
                 msg.innerHTML = "You have successfully activated your annual leadership status! Keep managing tasks, attendance, and branch operations seamlessly.";
-                actionSlot.innerHTML = `
-                    <button type="button" onclick="closeSuccessModal(); window.location.reload();" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">
-                        Enjoy Your Leadership Status ➔
-                    </button>
-                `;
+                actionSlot.innerHTML = `<button type="button" onclick="closeSuccessModal(); window.location.reload();" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer">Enjoy Your Leadership Status ➔</button>`;
             }
-
             modal.classList.remove('hidden');
         }
 
-        function closeSuccessModal() {
-            document.getElementById('payment-success-modal').classList.add('hidden');
-        }
+        function closeSuccessModal() { document.getElementById('payment-success-modal').classList.add('hidden'); }
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const authCheck = await fetch('/api/auth/me', { credentials: 'include' });
                 const authData = await authCheck.json();
 
-                if (!authData.success) {
-                    window.location.href = '/views/onboarding.html';
-                    return;
-                }
+                if (!authData.success) { window.location.href = '/views/onboarding.html'; return; }
 
                 currentUser = authData.user;
-                if (currentUser.role !== 'leader' && currentUser.role !== 'team_leader' && currentUser.role !== 'admin') {
+                if (!['leader', 'team_leader', 'admin', 'global_admin'].includes(currentUser.role)) {
                     alert('Access Forbidden: Security tier parameter mismatch.');
                     window.location.href = '/views/dashboard.html';
                     return;
@@ -555,8 +569,8 @@
                 const verificationUrl = `${window.location.origin}/verify.html?id=${encodeURIComponent(userCode)}`;
                 document.getElementById('card-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}&color=0D122B&bgcolor=FFFFFF`;
 
-                initCountdownEngine(currentUser.membership_expires_at);
                 await syncEntitlementUI();
+                initCountdownEngine(currentUser.membership_expires_at, currentUser.created_at);
                 checkDisciplinaryStatus(currentUser);
 
                 refreshLeaderData();
@@ -566,9 +580,6 @@
             }
         });
 
-        // ==========================================
-        // DYNAMIC BUTTON STATE CONTROLLER
-        // ==========================================
         async function syncEntitlementUI() {
             try {
                 const res = await fetch('/api/marketplace/my-entitlements', { credentials: 'include' });
@@ -576,11 +587,9 @@
 
                 if (data.success && data.entitlements) {
                     userEntitlements = data.entitlements;
-
                     const softcopyBtn = document.getElementById('download-soft-copy-btn');
                     const softcopyText = document.getElementById('softcopy-btn-text');
                     const softcopyBadge = document.getElementById('softcopy-btn-badge');
-
                     const renewalBtn = document.getElementById('reactivate-membership-btn');
                     const renewalText = document.getElementById('renewal-btn-text');
                     const renewalBadge = document.getElementById('renewal-btn-badge');
@@ -590,7 +599,6 @@
                         softcopyText.textContent = "✓ Download Official Digital ID";
                         softcopyBadge.className = "bg-white/20 text-white px-2 py-0.5 rounded-md font-mono text-[10px] uppercase";
                         softcopyBadge.textContent = "Paid";
-                        softcopyBtn.classList.remove('animate-attention-pulse');
                     } else {
                         softcopyBtn.className = "w-full bg-purple-50 hover:bg-purple-100 border-2 border-pnt-purple text-pnt-purple font-bold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer animate-attention-pulse";
                         softcopyText.textContent = "Pay & Unlock Digital Softcopy";
@@ -603,98 +611,64 @@
                         renewalText.textContent = "✓ Membership Active & Verified";
                         renewalBadge.className = "bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-md font-mono text-[10px] uppercase";
                         renewalBadge.textContent = "Active";
-                        renewalBtn.classList.remove('animate-attention-pulse');
                     } else {
                         renewalBtn.className = "w-full btn-brand-gradient text-white font-bold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-xl flex items-center justify-center gap-2 cursor-pointer animate-attention-pulse";
                         renewalText.textContent = "Activate Membership Status";
                         renewalBadge.className = "bg-white/25 px-2 py-0.5 rounded-md font-mono text-[11px] font-bold";
                         renewalBadge.textContent = "₦3,000";
                     }
-
-                    applyLeaderLockoutEnforcement(userEntitlements.isMembershipActive);
                 }
-            } catch (err) {
-                console.error("Could not sync entitlements:", err);
-            }
+            } catch (err) { console.error("Could not sync entitlements:", err); }
         }
 
-        function applyLeaderLockoutEnforcement(isActive) {
-            const deployBtn = document.getElementById('deploy-task-btn');
-            const escalateBtn = document.getElementById('escalate-btn');
-            const taskDesc = document.getElementById('task-deploy-desc');
-
-            if (!isActive) {
-                if (deployBtn) {
-                    deployBtn.disabled = true;
-                    deployBtn.className = "w-full bg-slate-200 text-slate-400 border border-slate-300 font-bold py-2.5 rounded-xl text-xs shadow-none cursor-not-allowed";
-                    deployBtn.textContent = "🔒 Membership Inactive (Locked)";
-                }
-                if (escalateBtn) {
-                    escalateBtn.disabled = true;
-                    escalateBtn.className = "w-full bg-slate-200 text-slate-400 border border-slate-300 font-bold py-2.5 rounded-xl text-xs shadow-none cursor-not-allowed";
-                    escalateBtn.textContent = "🔒 Escalation Channel Locked";
-                }
-                if (taskDesc) {
-                    taskDesc.textContent = "Task deployment and executive actions are locked. Please activate membership status above.";
-                }
-            } else {
-                if (deployBtn) {
-                    deployBtn.disabled = false;
-                    deployBtn.className = "w-full btn-brand-gradient font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-md text-white cursor-pointer";
-                    deployBtn.textContent = "Deploy Live Task";
-                }
-                if (escalateBtn) {
-                    escalateBtn.disabled = false;
-                    escalateBtn.className = "w-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-pnt-dark font-semibold py-2.5 rounded-xl text-xs transition-all duration-300 shadow-sm cursor-pointer";
-                    escalateBtn.textContent = "Dispatch Incident Log";
-                }
-                if (taskDesc) {
-                    taskDesc.textContent = "Deploy action items directly to member terminal dashboards.";
-                }
-            }
-        }
-
-        function initCountdownEngine(expiresAtString) {
+        function initCountdownEngine(expiresAtString, createdAtString) {
             const warningStrip = document.getElementById('unpaid-warning-strip');
             const dateReadout = document.getElementById('timer-date-readout');
+            const bannerTitle = document.getElementById('banner-title');
+            const bannerText = document.getElementById('unpaid-warning-text');
+            const bannerIcon = document.getElementById('banner-icon');
+            const timerLabel = document.getElementById('timer-status-label');
 
-            if (!expiresAtString) {
-                setClockExpired();
-                warningStrip.classList.remove('hidden');
-                dateReadout.textContent = "Unpaid (Activation Required)";
-                applyLeaderLockoutEnforcement(false);
-                return;
+            let targetDate = null;
+            if (expiresAtString) {
+                targetDate = new Date(expiresAtString).getTime();
+            } else if (createdAtString) {
+                const createdTime = new Date(createdAtString).getTime();
+                targetDate = createdTime + (30 * 24 * 60 * 60 * 1000); // 30-day free trial
+            } else {
+                targetDate = new Date().getTime() + (30 * 24 * 60 * 60 * 1000);
             }
 
-            const targetDate = new Date(expiresAtString).getTime();
+            warningStrip.className = "bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 text-white px-6 py-3 shadow-md relative z-20";
+            bannerTitle.textContent = "✨ 1-MONTH FREE TRIAL ACTIVE:";
+            bannerText.textContent = `You are enjoying your complimentary onboarding trial period. Full leader operations unlocked.`;
+            bannerIcon.textContent = "🎁";
+            timerLabel.textContent = "Trial Expires:";
 
             function tick() {
-                const now = new Date().getTime();
-                const diff = targetDate - now;
+                const currentNow = new Date().getTime();
+                const currentDiff = targetDate - currentNow;
 
-                if (diff <= 0) {
-                    clearInterval(countdownTimerInterval);
-                    setClockExpired();
-                    warningStrip.classList.remove('hidden');
-                    dateReadout.textContent = "Expired (Renewal Required)";
-                    applyLeaderLockoutEnforcement(false);
+                if (currentDiff <= 0 && !userEntitlements.isMembershipActive) {
+                    warningStrip.className = "bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 text-white px-6 py-3 shadow-md relative z-20";
+                    bannerTitle.textContent = "ACCOUNT ACCESS LIMITED:";
+                    bannerText.textContent = "Your 1-month free trial validity has expired. Pay registration to unlock leadership actions.";
+                    bannerIcon.textContent = "⚠️";
+                    timerLabel.textContent = "Expired On:";
+                    dateReadout.textContent = new Date(targetDate).toLocaleDateString();
                     return;
                 }
 
-                warningStrip.classList.add('hidden');
+                const days = Math.floor(currentDiff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((currentDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((currentDiff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((currentDiff % (1000 * 60)) / 1000);
 
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const secs = Math.floor((diff % (1000 * 60)) / 1000);
-
-                document.getElementById('timer-days').textContent = String(days).padStart(2, '0');
-                document.getElementById('timer-hours').textContent = String(hours).padStart(2, '0');
-                document.getElementById('timer-mins').textContent = String(mins).padStart(2, '0');
-                document.getElementById('timer-secs').textContent = String(secs).padStart(2, '0');
-
-                const d = new Date(expiresAtString);
-                dateReadout.textContent = d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                document.getElementById('timer-days').textContent = String(days > 0 ? days : 0).padStart(2, '0');
+                document.getElementById('timer-hours').textContent = String(hours > 0 ? hours : 0).padStart(2, '0');
+                document.getElementById('timer-mins').textContent = String(mins > 0 ? mins : 0).padStart(2, '0');
+                document.getElementById('timer-secs').textContent = String(secs > 0 ? secs : 0).padStart(2, '0');
+                dateReadout.textContent = new Date(targetDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
             }
 
             tick();
@@ -712,108 +686,91 @@
             const status = (user.status || 'active').toLowerCase();
             if (['warning', 'inactive', 'suspended', 'ban', 'banned'].includes(status)) {
                 const modal = document.getElementById('disciplinary-alert-modal');
-                const title = document.getElementById('leader-alert-title');
-                const reason = document.getElementById('leader-alert-reason');
-
-                title.textContent = `Official Status: ${status.toUpperCase()}`;
-                reason.textContent = user.status_reason 
-                    ? `Administrative Reason: "${user.status_reason}"`
-                    : "An administrative policy update has been recorded on your account.";
-
+                document.getElementById('leader-alert-title').textContent = `Official Status: ${status.toUpperCase()}`;
+                document.getElementById('leader-alert-reason').textContent = user.status_reason ? `Administrative Reason: "${user.status_reason}"` : "An administrative policy update has been recorded on your account.";
                 modal.classList.remove('hidden');
             }
         }
 
+        // --- CONSENT & PAYMENT FLOW TRIGGER ---
         document.getElementById('download-soft-copy-btn').addEventListener('click', () => {
-            if (userEntitlements.hasPaidSoftcopy) {
-                window.print();
-                return;
-            }
+            if (userEntitlements.hasPaidSoftcopy) { window.print(); return; }
+            openConsentModalForPayment(2000, 'softcopy');
+        });
 
-            initiatePaystack(2000, 'softcopy', async (response) => {
+        document.getElementById('reactivate-membership-btn').addEventListener('click', () => {
+            if (userEntitlements.isMembershipActive) { alert("✅ Your leadership status is already active and valid."); return; }
+            openConsentModalForPayment(3000, 'renewal');
+        });
+
+        function openConsentModalForPayment(amount, purpose) {
+            pendingPaymentAmount = amount;
+            pendingPaymentPurpose = purpose;
+            document.getElementById('consent-checkbox').checked = false;
+            toggleConsentProceedBtn();
+            document.getElementById('consent-modal').classList.remove('hidden');
+        }
+
+        function closeConsentModal() {
+            document.getElementById('consent-modal').classList.add('hidden');
+        }
+
+        function toggleConsentProceedBtn() {
+            const checkbox = document.getElementById('consent-checkbox');
+            const btn = document.getElementById('proceed-payment-btn');
+            if (checkbox.checked) {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btn.classList.add('hover:opacity-90', 'cursor-pointer');
+            } else {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+                btn.classList.remove('hover:opacity-90', 'cursor-pointer');
+            }
+        }
+
+        function executePendingPayment() {
+            closeConsentModal();
+            initiatePaystack(pendingPaymentAmount, pendingPaymentPurpose, async (response) => {
                 try {
                     const res = await fetch('/api/marketplace/verify-payment', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
-                        body: JSON.stringify({ reference: response.reference, purpose: 'softcopy' })
+                        body: JSON.stringify({ reference: response.reference, purpose: pendingPaymentPurpose })
                     });
                     const result = await res.json();
                     if (result.success) {
                         await syncEntitlementUI();
-                        showSuccessModal('softcopy');
+                        showSuccessModal(pendingPaymentPurpose);
                     } else {
                         alert(`Verification note: ${result.message}`);
                     }
-                } catch (err) {
-                    alert('Could not contact verification server.');
-                }
+                } catch (err) { alert('Could not contact verification server.'); }
             });
-        });
-
-        document.getElementById('reactivate-membership-btn').addEventListener('click', () => {
-            if (userEntitlements.isMembershipActive) {
-                alert("✅ Your leadership status is already active and valid.");
-                return;
-            }
-
-            initiatePaystack(3000, 'renewal', async (response) => {
-                try {
-                    const res = await fetch('/api/marketplace/verify-payment', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({ reference: response.reference, purpose: 'renewal' })
-                    });
-                    const result = await res.json();
-                    if (result.success) {
-                        showSuccessModal('renewal');
-                    } else {
-                        alert(`Verification note: ${result.message}`);
-                    }
-                } catch (err) {
-                    alert('Could not contact verification server.');
-                }
-            });
-        });
+        }
 
         function initiatePaystack(amountInNaira, purpose, onSuccess) {
-            if (typeof PaystackPop === 'undefined') {
-                alert("Payment gateway unreachable. Please check your internet connection.");
-                return;
-            }
-
+            if (typeof PaystackPop === 'undefined') { alert("Payment gateway unreachable."); return; }
             const handler = PaystackPop.setup({
                 key: PAYSTACK_PUBLIC_KEY,
                 email: currentUser.email || 'leader@pronettech.net',
                 amount: amountInNaira * 100,
                 currency: 'NGN',
                 ref: 'PNT-LDR-' + purpose.toUpperCase() + '-' + Date.now(),
-                callback: function(response) {
-                    if (onSuccess) onSuccess(response);
-                },
-                onClose: function() {
-                    console.log('Payment modal closed.');
-                }
+                callback: function(response) { if (onSuccess) onSuccess(response); },
+                onClose: function() { console.log('Payment modal closed.'); }
             });
-
             handler.openIframe();
         }
 
         async function uploadAvatar(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const formData = new FormData();
             formData.append('avatar', file);
-
             try {
-                const res = await fetch('/api/auth/profile/avatar', {
-                    method: 'PUT',
-                    credentials: 'include',
-                    body: formData
-                });
-
+                const res = await fetch('/api/auth/profile/avatar', { method: 'PUT', credentials: 'include', body: formData });
                 const data = await res.json();
                 if (data.success) {
                     const avatarImg = document.getElementById('card-avatar-img');
@@ -821,17 +778,11 @@
                     avatarImg.src = data.avatar_url;
                     avatarImg.classList.remove('hidden');
                     placeholder.classList.add('hidden');
-
                     currentUser.avatar_url = data.avatar_url;
                     localStorage.setItem('pnt_user', JSON.stringify(currentUser));
                     alert('ID Photo updated successfully!');
-                } else {
-                    alert(`Upload failed: ${data.message}`);
-                }
-            } catch (err) {
-                console.error('Error uploading photo:', err);
-                alert('Server communication failed.');
-            }
+                } else { alert(`Upload failed: ${data.message}`); }
+            } catch (err) { alert('Server communication failed.'); }
         }
 
         async function refreshLeaderData() {
@@ -850,32 +801,25 @@
             try {
                 const response = await fetch(`/api/tasks/user/${currentUser.id}`, { credentials: 'include' });
                 const resData = await response.json();
-
                 if (resData.success) {
                     myAssignedTasks = resData.data;
                     renderLeaderDirectives();
                 } else {
                     container.innerHTML = `<p class="text-xs text-slate-400 py-2">Could not retrieve management directives.</p>`;
                 }
-            } catch (err) {
-                console.error("Failed to load leader directives:", err);
-                container.innerHTML = `<p class="text-xs text-slate-400 py-2">Connection failed.</p>`;
-            }
+            } catch (err) { container.innerHTML = `<p class="text-xs text-slate-400 py-2">Connection failed.</p>`; }
         }
 
         function renderLeaderDirectives() {
             const container = document.getElementById('leader-assigned-tasks-list');
             container.innerHTML = '';
-
             if (myAssignedTasks.length === 0) {
                 container.innerHTML = `<p class="text-xs text-slate-400 py-2">No pending directives assigned to you by Global Management.</p>`;
                 return;
             }
-
             myAssignedTasks.forEach(task => {
                 let badgeClass = "bg-slate-100 border-slate-200 text-slate-600";
                 let actionBtn = "";
-
                 if (task.status === 'assigned') {
                     badgeClass = "bg-blue-50 border-blue-200 text-blue-700";
                     actionBtn = `<button onclick="updateLeaderTaskStatus('${task.id}', 'in_progress')" class="bg-pnt-purple hover:opacity-90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all cursor-pointer">Start Directive</button>`;
@@ -895,262 +839,130 @@
 
                 const card = document.createElement('div');
                 card.className = "bg-white border border-slate-200 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all hover:border-purple-300";
-                card.innerHTML = `
-                    <div class="space-y-1">
-                        <div class="flex items-center gap-2">
-                            <h4 class="font-bold text-sm text-pnt-dark">${task.title}</h4>
-                            <span class="text-[9px] uppercase border font-semibold px-2 py-0.5 rounded ${badgeClass}">${task.status.replace('_', ' ')}</span>
-                        </div>
-                        <p class="text-xs text-slate-500 max-w-md">${task.description || 'No instructions provided.'}</p>
-                    </div>
-                    <div class="w-full sm:w-auto flex justify-end">
-                        ${actionBtn}
-                    </div>
-                `;
+                card.innerHTML = `<div class="space-y-1"><div class="flex items-center gap-2"><h4 class="font-bold text-sm text-pnt-dark">${task.title}</h4><span class="text-[9px] uppercase border font-semibold px-2 py-0.5 rounded ${badgeClass}">${task.status.replace('_', ' ')}</span></div><p class="text-xs text-slate-500 max-w-md">${task.description || 'No instructions provided.'}</p></div><div class="w-full sm:w-auto flex justify-end">${actionBtn}</div>`;
                 container.appendChild(card);
             });
         }
 
         async function updateLeaderTaskStatus(taskId, status) {
             try {
-                const response = await fetch(`/api/tasks/${taskId}/status`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ status })
-                });
-
+                const response = await fetch(`/api/tasks/${taskId}/status`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ status }) });
                 const resData = await response.json();
-
-                if (resData.success) {
-                    alert(`Directive state updated to: ${status.replace('_', ' ')}`);
-                    fetchLeaderAssignedDirectives();
-                } else {
-                    alert(`Update failed: ${resData.message}`);
-                }
-            } catch (err) {
-                console.error("Error updating directive:", err);
-                alert("Express server communication lost.");
-            }
+                if (resData.success) { alert(`Directive state updated to: ${status.replace('_', ' ')}`); fetchLeaderAssignedDirectives(); }
+                else { alert(`Update failed: ${resData.message}`); }
+            } catch (err) { alert("Express server communication lost."); }
         }
 
         async function fetchRegionalMetrics() {
             try {
                 const response = await fetch(`/api/attendance/metrics/office/${currentUser.office_id}`, { credentials: 'include' });
                 const resData = await response.json();
-
                 if (resData.success) {
                     document.getElementById('stat-team-size').textContent = resData.data.totalStaff || 0;
                     document.getElementById('stat-present-count').textContent = resData.data.presentToday || 0;
                     document.getElementById('stat-pending-count').textContent = resData.data.pendingCount || 0;
-                    
-                    if (resData.data.pendingCount > 0) {
-                        document.getElementById('stat-pending-count').classList.add('animate-pulse');
-                    } else {
-                        document.getElementById('stat-pending-count').classList.remove('animate-pulse');
-                    }
+                    if (resData.data.pendingCount > 0) { document.getElementById('stat-pending-count').classList.add('animate-pulse'); }
+                    else { document.getElementById('stat-pending-count').classList.remove('animate-pulse'); }
                 }
-            } catch (err) {
-                console.error("Failed to load metrics from server:", err);
-            }
+            } catch (err) {}
         }
 
         async function fetchPendingRegistrations() {
             try {
                 const response = await fetch(`/api/auth/pending/office/${currentUser.office_id}`, { credentials: 'include' });
                 const resData = await response.json();
-
-                if (resData.success) {
-                    pendingUsers = resData.data;
-                    renderPendingRegistrations();
-                }
-            } catch (err) {
-                console.error("Failed to fetch pending user accounts:", err);
-            }
+                if (resData.success) { pendingUsers = resData.data; renderPendingRegistrations(); }
+            } catch (err) {}
         }
 
         function renderPendingRegistrations() {
             const container = document.getElementById('pending-registrations-queue');
             container.innerHTML = '';
-
             if (pendingUsers.length === 0) {
                 container.innerHTML = `<p class="text-xs text-slate-400 py-2">All registration requests approved. No pending signups.</p>`;
                 return;
             }
-
             pendingUsers.forEach(user => {
                 const initials = `${user.first_name[0] || ''}${user.last_name[0] || ''}`.toUpperCase();
                 const fullName = `${user.first_name} ${user.last_name}`;
-
                 const card = document.createElement('div');
                 card.className = "bg-slate-50/70 border border-slate-200 hover:border-slate-300 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all duration-300";
-                card.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-purple-50 border border-purple-200 flex items-center justify-center font-bold text-pnt-purple overflow-hidden">
-                            ${user.avatar_url ? `<img src="${user.avatar_url}" class="w-full h-full object-cover">` : initials}
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-sm text-pnt-dark">${fullName}</h4>
-                            <p class="text-xs text-slate-500 font-mono mt-0.5">${user.email} • ${user.phone_number}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2.5 w-full sm:w-auto">
-                        <button onclick="rejectRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 cursor-pointer">
-                            Reject
-                        </button>
-                        <button onclick="approveRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-pnt-purple hover:opacity-90 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 shadow-sm cursor-pointer">
-                            Approve Account
-                        </button>
-                    </div>
-                `;
+                card.innerHTML = `<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-purple-50 border border-purple-200 flex items-center justify-center font-bold text-pnt-purple overflow-hidden">${user.avatar_url ? `<img src="${user.avatar_url}" class="w-full h-full object-cover">` : initials}</div><div><h4 class="font-bold text-sm text-pnt-dark">${fullName}</h4><p class="text-xs text-slate-500 font-mono mt-0.5">${user.email} • ${user.phone_number}</p></div></div><div class="flex items-center gap-2.5 w-full sm:w-auto"><button onclick="rejectRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 cursor-pointer">Reject</button><button onclick="approveRegistration('${user.id}', '${fullName}')" class="flex-1 sm:flex-none bg-pnt-purple hover:opacity-90 text-white font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 shadow-sm cursor-pointer">Approve Account</button></div>`;
                 container.appendChild(card);
             });
         }
 
         async function approveRegistration(profileId, name) {
             try {
-                const response = await fetch(`/api/auth/approve/${profileId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include'
-                });
-
+                const response = await fetch(`/api/auth/approve/${profileId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
                 const resData = await response.json();
-
-                if (resData.success) {
-                    alert(`✅ Successfully activated ${name}'s workspace credentials!`);
-                    refreshLeaderData();
-                } else {
-                    alert(`Activation failed: ${resData.message}`);
-                }
-            } catch (err) {
-                console.error("Error approving registration:", err);
-            }
+                if (resData.success) { alert(`✅ Successfully activated ${name}'s workspace credentials!`); refreshLeaderData(); }
+                else { alert(`Activation failed: ${resData.message}`); }
+            } catch (err) {}
         }
 
         async function rejectRegistration(profileId, name) {
             if (!confirm(`Are you sure you want to reject registration request from ${name}?`)) return;
             try {
-                const response = await fetch(`/api/auth/reject/${profileId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include'
-                });
-
+                const response = await fetch(`/api/auth/reject/${profileId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
                 const resData = await response.json();
-
-                if (resData.success) {
-                    alert(`❌ Registration request from ${name} has been rejected.`);
-                    refreshLeaderData();
-                } else {
-                    alert(`Rejection task failed: ${resData.message}`);
-                }
-            } catch (err) {
-                console.error("Error rejecting registration:", err);
-            }
+                if (resData.success) { alert(`❌ Registration request from ${name} has been rejected.`); refreshLeaderData(); }
+                else { alert(`Rejection failed: ${resData.message}`); }
+            } catch (err) {}
         }
 
         async function fetchPendingAttendance() {
             try {
                 const response = await fetch(`/api/attendance/pending/office/${currentUser.office_id}`, { credentials: 'include' });
                 const resData = await response.json();
-
-                if (resData.success) {
-                    pendingLogs = resData.data;
-                    renderPendingQueue();
-                }
-            } catch (err) {
-                console.error("Failed to fetch pending logs:", err);
-            }
+                if (resData.success) { pendingLogs = resData.data; renderPendingQueue(); }
+            } catch (err) {}
         }
 
         function renderPendingQueue() {
             const container = document.getElementById('pending-queue');
             container.innerHTML = '';
-
             if (pendingLogs.length === 0) {
                 container.innerHTML = `<p class="text-xs text-slate-400 py-2">No pending verification pings in the queue right now.</p>`;
                 return;
             }
-
             pendingLogs.forEach(log => {
                 const initials = `${log.profiles?.first_name?.[0] || ''}${log.profiles?.last_name?.[0] || ''}`.toUpperCase();
                 const fullName = `${log.profiles?.first_name || ''} ${log.profiles?.last_name || ''}`;
                 const timestamp = new Date(log.marked_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
                 const card = document.createElement('div');
                 card.className = "bg-slate-50/70 border border-slate-200 hover:border-slate-300 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all duration-300";
-                card.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-pnt-dark">
-                            ${initials || 'U'}
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-sm text-pnt-dark">${fullName}</h4>
-                            <p class="text-xs text-slate-500 font-mono mt-0.5">${log.profiles?.custom_profile_id || 'PNT-MEMBER'} • marked at ${timestamp}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2.5 w-full sm:w-auto">
-                        <button onclick="verifyAttendance('${log.id}', 'rejected')" class="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 cursor-pointer">
-                            Reject
-                        </button>
-                        <button onclick="verifyAttendance('${log.id}', 'confirmed')" class="flex-1 sm:flex-none bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 cursor-pointer">
-                            Approve
-                        </button>
-                    </div>
-                `;
+                card.innerHTML = `<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-pnt-dark">${initials || 'U'}</div><div><h4 class="font-bold text-sm text-pnt-dark">${fullName}</h4><p class="text-xs text-slate-500 font-mono mt-0.5">${log.profiles?.custom_profile_id || 'PNT-MEMBER'} • marked at ${timestamp}</p></div></div><div class="flex items-center gap-2.5 w-full sm:w-auto"><button onclick="verifyAttendance('${log.id}', 'rejected')" class="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 cursor-pointer">Reject</button><button onclick="verifyAttendance('${log.id}', 'confirmed')" class="flex-1 sm:flex-none bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-600 font-semibold px-4 py-2 rounded-lg text-xs transition-all duration-300 cursor-pointer">Approve</button></div>`;
                 container.appendChild(card);
             });
         }
 
         async function verifyAttendance(logId, status) {
             try {
-                const response = await fetch(`/api/attendance/verify/${logId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ status, notes: `Processed by regional leader: ${currentUser.name}` })
-                });
-
+                const response = await fetch(`/api/attendance/verify/${logId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ status, notes: `Processed by regional leader: ${currentUser.name}` }) });
                 const resData = await response.json();
-
-                if (resData.success) {
-                    alert(`Action completed successfully! Status set to ${status}.`);
-                    refreshLeaderData();
-                } else {
-                    alert(`Verification update failed: ${resData.message}`);
-                }
-            } catch (err) {
-                console.error("Error executing attendance verify action:", err);
-            }
+                if (resData.success) { alert(`Action completed! Status set to ${status}.`); refreshLeaderData(); }
+                else { alert(`Verification update failed: ${resData.message}`); }
+            } catch (err) {}
         }
 
         async function fetchAllTasks() {
             try {
                 const response = await fetch(`/api/tasks/office/${currentUser.office_id}`, { credentials: 'include' });
                 const resData = await response.json();
-
-                if (resData.success) {
-                    activeTasks = resData.data;
-                    renderTasksMonitor();
-                }
-            } catch (err) {
-                console.error("Failed to query task database:", err);
-            }
+                if (resData.success) { activeTasks = resData.data; renderTasksMonitor(); }
+            } catch (err) {}
         }
 
         function renderTasksMonitor() {
             const container = document.getElementById('tasks-monitor-list');
             container.innerHTML = '';
-
             if (activeTasks.length === 0) {
                 container.innerHTML = `<p class="text-xs text-slate-400 py-2">No tasks deployed yet. Deploy your first task using the sidebar form!</p>`;
                 return;
             }
-
             activeTasks.forEach(task => {
                 let badgeClass = "bg-slate-100 border-slate-200 text-slate-600";
-                
                 if (task.status === 'assigned') badgeClass = "bg-blue-50 border-blue-200 text-blue-700";
                 else if (task.status === 'in_progress') badgeClass = "bg-amber-50 border-amber-200 text-amber-700";
                 else if (task.status === 'completed') badgeClass = "bg-purple-50 border-purple-200 text-pnt-purple animate-pulse";
@@ -1159,124 +971,53 @@
 
                 const element = document.createElement('div');
                 element.className = "bg-slate-50/70 border border-slate-200 p-4 rounded-xl flex items-center justify-between gap-4 transition-all hover:border-slate-300";
-                element.innerHTML = `
-                    <div>
-                        <h4 class="font-bold text-sm text-pnt-dark">${task.title}</h4>
-                        <p class="text-xs text-slate-500 font-mono mt-1">Assigned to: ${task.profiles?.first_name || ''} ${task.profiles?.last_name || ''} (${task.profiles?.custom_profile_id || 'N/A'})</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-[9px] uppercase font-bold px-2 py-1 border rounded ${badgeClass}">
-                            ${task.status.replace('_', ' ')}
-                        </span>
-                        ${task.status === 'completed' ? `
-                            <button onclick="evaluateTask('${task.id}', 'approved')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded transition-all cursor-pointer">Approve</button>
-                            <button onclick="evaluateTask('${task.id}', 'rejected')" class="bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded transition-all cursor-pointer">Reject</button>
-                        ` : ''}
-                    </div>
-                `;
+                element.innerHTML = `<div><h4 class="font-bold text-sm text-pnt-dark">${task.title}</h4><p class="text-xs text-slate-500 font-mono mt-1">Assigned to: ${task.profiles?.first_name || ''} ${task.profiles?.last_name || ''} (${task.profiles?.custom_profile_id || 'N/A'})</p></div><div class="flex items-center gap-3"><span class="text-[9px] uppercase font-bold px-2 py-1 border rounded ${badgeClass}">${task.status.replace('_', ' ')}</span>${task.status === 'completed' ? `<button onclick="evaluateTask('${task.id}', 'approved')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded transition-all cursor-pointer">Approve</button><button onclick="evaluateTask('${task.id}', 'rejected')" class="bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded transition-all cursor-pointer">Reject</button>` : ''}</div>`;
                 container.appendChild(element);
             });
         }
 
         document.getElementById('task-deployer-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            if (!userEntitlements.isMembershipActive) {
-                alert('🔒 Action Blocked: You must activate your annual leadership status first.');
-                return;
-            }
-
             const title = document.getElementById('task-title').value;
             const assigneeCustomId = document.getElementById('task-member-id').value;
             const description = document.getElementById('task-description').value;
 
             try {
-                const response = await fetch('/api/tasks', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        title,
-                        assigneeCustomId,
-                        description,
-                        assigned_by: currentUser.id
-                    })
-                });
-
+                const response = await fetch('/api/tasks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ title, assigneeCustomId, description, assigned_by: currentUser.id }) });
                 const resData = await response.json();
-
                 if (resData.success) {
                     alert(`📡 Live Task successfully deployed and assigned to ${assigneeCustomId}!`);
                     document.getElementById('task-title').value = '';
                     document.getElementById('task-member-id').value = '';
                     document.getElementById('task-description').value = '';
                     refreshLeaderData();
-                } else {
-                    alert(`Task deployment blocked: ${resData.message}`);
-                }
-            } catch (err) {
-                console.error("Failed to deploy task:", err);
-            }
+                } else { alert(`Task deployment blocked: ${resData.message}`); }
+            } catch (err) {}
         });
 
         async function evaluateTask(taskId, decision) {
             try {
-                const response = await fetch(`/api/tasks/${taskId}/status`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ status: decision })
-                });
-
+                const response = await fetch(`/api/tasks/${taskId}/status`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ status: decision }) });
                 const resData = await response.json();
-
-                if (resData.success) {
-                    alert(`Task marked as ${decision}!`);
-                    refreshLeaderData();
-                } else {
-                    alert(`Failed to evaluate task: ${resData.message}`);
-                }
-            } catch (err) {
-                console.error("Error patching task resolution:", err);
-            }
+                if (resData.success) { alert(`Task marked as ${decision}!`); refreshLeaderData(); }
+                else { alert(`Failed to evaluate task: ${resData.message}`); }
+            } catch (err) {}
         }
 
         document.getElementById('escalation-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            if (!userEntitlements.isMembershipActive) {
-                alert('🔒 Action Blocked: You must activate your annual leadership status first.');
-                return;
-            }
-
             const subject = document.getElementById('report-subject').value;
             const details = document.getElementById('report-details').value;
 
             try {
-                const response = await fetch('/api/community/escalate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        subject,
-                        details,
-                        office_id: currentUser.office_id,
-                        escalated_by: currentUser.id
-                    })
-                });
-
+                const response = await fetch('/api/community/escalate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ subject, details, office_id: currentUser.office_id, escalated_by: currentUser.id }) });
                 const resData = await response.json();
-
                 if (resData.success) {
                     alert("🔒 Secure report transmitted safely to Owner Admin dashboard.");
                     document.getElementById('report-subject').value = '';
                     document.getElementById('report-details').value = '';
-                } else {
-                    alert(`Failed to transmit report: ${resData.message}`);
-                }
-            } catch (err) {
-                console.error("Escalation transmission error:", err);
-            }
+                } else { alert(`Failed to transmit report: ${resData.message}`); }
+            } catch (err) {}
         });
     </script>
 </body>

@@ -31,13 +31,9 @@ const protect = async (req, res, next) => {
             return res.status(401).json({ success: false, message: 'User profile tracking entry not found.' });
         }
 
-        // Enforce strict security status gates
+        // Enforce strict security status gates (Only block banned accounts)
         if (userProfile.status === 'banned') {
             return res.status(403).json({ success: false, message: 'Access Denied: This account has been suspended.' });
-        }
-
-        if (userProfile.status === 'pending') {
-            return res.status(403).json({ success: false, message: 'Access Denied: Your account registration is still pending branch approval.' });
         }
 
         // Attach verified user metadata details seamlessly to the request object

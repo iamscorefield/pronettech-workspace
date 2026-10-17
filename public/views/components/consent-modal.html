@@ -1,0 +1,106 @@
+<!-- Modal: Membership Consent & Terms Agreement -->
+<div id="consent-modal" class="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        
+        <!-- Modal Header -->
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-purple-50/50">
+            <div>
+                <span class="bg-purple-100 text-pnt-purple text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Legal & Compliance</span>
+                <h3 class="text-base font-black text-pnt-dark mt-1">Pronet-Tech Global Limited Partnership & Operations Agreement</h3>
+            </div>
+            <button type="button" onclick="closeConsentModal()" class="text-slate-400 hover:text-slate-700 text-2xl font-bold cursor-pointer">&times;</button>
+        </div>
+
+        <!-- Scrollable Terms Content -->
+        <div class="p-6 overflow-y-auto space-y-6 text-xs text-slate-600 leading-relaxed">
+            
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                <h4 class="font-bold text-slate-900 uppercase tracking-wide">About Pronet-Tech Global Limited</h4>
+                <p>Pronet-Tech Global Limited is an organization dedicated to empowering individuals through practical education and digital skills development, as well as an online and network marketing business (2-in-1 business combining freelancing and network marketing)[cite: 6].</p>
+            </div>
+
+            <!-- Section 1 -->
+            <div class="space-y-2">
+                <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">1. Organization Rules & Confidentiality</h4>
+                <p>All business plans, strategies, and related information must be treated as confidential. Members must not disclose proprietary information to unauthorized third parties[cite: 7]. Violation of the Operations Manual may result in permanent termination of membership, deactivation of account, loss of access to team support, wallet funds, and training benefits[cite: 7, 8]. Existing members are automatically leaders to new members based on seniority joining date[cite: 8].</p>
+            </div>
+
+            <!-- Section 2 -->
+            <div class="space-y-2">
+                <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">2. Payment and Funds Regulation Rules</h4>
+                <p>A 10% monthly charge shall be paid by each member separately in addition to monthly membership fees toward team development and office maintenance[cite: 9]. Full disclosure of financial info is required to sponsors and leaders[cite: 9].</p>
+            </div>
+
+            <!-- Section 3 -->
+            <div class="space-y-2">
+                <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">3. Account Creation & Prospecting Rules</h4>
+                <p>Members must complete required training (Email marketing, Beta Reading, Video editing, Website design, or AI automation) before account creation[cite: 10]. Strict prohibition against using another person's image or creating fake/unauthorized accounts; each member is permitted only one account[cite: 10].</p>
+            </div>
+
+            <!-- Section 4 -->
+            <div class="space-y-2">
+                <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">4. Team Leadership & Responsibility Rules</h4>
+                <p>Team leaders must complete training programs and possess necessary support tools[cite: 11]. Members earning through Fiverr or approved platforms contribute 10% of earnings for office maintenance[cite: 12]. Members choosing to leave must settle applicable fees ($52/month) before retaining tools or resources acquired through PNT[cite: 12].</p>
+            </div>
+
+            <!-- Section 5 -->
+            <div class="space-y-2">
+                <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">5. 3-Year Partnership & Exclusivity Agreement</h4>
+                <p>By proceeding, you agree to fully partner with ProNet-Tech Global Limited for at least three (3) years, dedicating time and resources exclusively[cite: 13]. If terminating partnership early, you agree to surrender all tools and resources (mobiles, laptops, etc.) acquired through the business opportunity[cite: 13]. You operate as an independent contractor[cite: 13].</p>
+            </div>
+
+            <!-- Section 6 -->
+            <div class="space-y-2">
+                <h4 class="font-bold text-slate-900 uppercase tracking-wide text-pnt-purple">6. Fiverr Account Operating Rules & Asset Declaration</h4>
+                <p>Profile display names must match your actual name. Accounts must be Nigerian. Do not use another person's image. Maintain professionalism and do not sell illegal services (spells, drugs, fraud, etc.). All assets/tools acquired using PNT funds remain property of Pronet-Tech Global Limited subject to recovery upon departure[cite: 14].</p>
+            </div>
+
+        </div>
+
+        <!-- Footer / Agreement Checkbox & Proceed Button -->
+        <div class="p-6 border-t border-slate-100 bg-slate-50 space-y-4">
+            <label class="flex items-start gap-3 cursor-pointer select-none">
+                <input type="checkbox" id="consent-checkbox" onchange="toggleConsentProceedBtn()" class="mt-0.5 w-4 h-4 text-pnt-purple rounded border-slate-300 focus:ring-pnt-purple cursor-pointer">
+                <span class="text-xs text-slate-700 font-medium">
+                    I have carefully read, understood, and voluntarily agree to abide by all the Operation Rules, Payment Regulations, Account Policies, 3-Year Partnership Terms, and Fiverr Operating Guidelines of Pronet-Tech Global Limited.
+                </span>
+            </label>
+
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="closeConsentModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition-all cursor-pointer">Cancel</button>
+                <button type="button" id="proceed-payment-btn" onclick="proceedToMembershipPayment()" disabled class="px-6 py-2.5 bg-pnt-purple text-white font-bold rounded-xl text-xs shadow-md opacity-50 cursor-not-allowed transition-all">Proceed to Payment ➔</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function toggleConsentProceedBtn() {
+        const checkbox = document.getElementById('consent-checkbox');
+        const btn = document.getElementById('proceed-payment-btn');
+        if (checkbox.checked) {
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.classList.add('hover:opacity-90', 'cursor-pointer');
+        } else {
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btn.classList.remove('hover:opacity-90', 'cursor-pointer');
+        }
+    }
+
+    function closeConsentModal() {
+        document.getElementById('consent-modal').classList.add('hidden');
+    }
+
+    function openConsentModal() {
+        document.getElementById('consent-modal').classList.remove('hidden');
+    }
+
+    function proceedToMembershipPayment() {
+        alert('Consent verified and accepted! Redirecting to secure payment gateway...');
+        // Plug your payment gateway logic or redirection here
+        closeConsentModal();
+    }
+</script>

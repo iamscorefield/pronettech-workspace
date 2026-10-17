@@ -538,7 +538,7 @@ router.post('/login', async (req, res) => {
 // ===================================================
 // 8. LEADER REGISTRATION CONTROLS
 // ===================================================
-router.get('/pending/office/:officeId', protect, authorize('leader', 'sub_admin', 'admin'), async (req, res) => {
+router.get('/pending/office/:officeId', protect, authorize('leader', 'team_leader', 'sub_admin', 'admin'), async (req, res) => {
     const { officeId } = req.params;
     try {
         const { data, error } = await supabase
@@ -557,7 +557,7 @@ router.get('/pending/office/:officeId', protect, authorize('leader', 'sub_admin'
     }
 });
 
-router.put('/approve/:profileId', protect, authorize('leader', 'sub_admin', 'admin'), async (req, res) => {
+router.put('/approve/:profileId', protect, authorize('leader', 'team_leader', 'sub_admin', 'admin'), async (req, res) => {
     const { profileId } = req.params;
     try {
         const { data, error } = await supabase
@@ -574,7 +574,7 @@ router.put('/approve/:profileId', protect, authorize('leader', 'sub_admin', 'adm
     }
 });
 
-router.put('/reject/:profileId', protect, authorize('leader', 'sub_admin', 'admin'), async (req, res) => {
+router.put('/reject/:profileId', protect, authorize('leader', 'team_leader', 'sub_admin', 'admin'), async (req, res) => {
     const { profileId } = req.params;
     try {
         const { data, error } = await supabase
@@ -612,7 +612,7 @@ router.get('/metrics/global', protect, authorize('admin', 'sub_admin'), async (r
         const { count: totalLeaders, error: leaderError } = await supabase
             .from('profiles')
             .select('*', { count: 'exact', head: true })
-            .in('role', ['leader', 'sub_admin']);
+            .in('role', ['leader', 'team_leader', 'sub_admin']);
 
         if (leaderError) console.warn('Leader metrics note:', leaderError.message);
 
@@ -658,12 +658,30 @@ router.get('/users/all', protect, authorize('admin', 'sub_admin'), async (req, r
     }
 });
 
+// NEW ENDPOINT: Fetch office team members for leaders & admins
+router.get('/users/office/:officeId', protect, authorize('leader', 'team_leader', 'sub_admin', 'admin'), async (req, res) => {
+    try {
+        const { officeId } = req.params;
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, first_name, last_name, email, phone_number, state, sponsor_id, custom_profile_id, role, status, created_at, avatar_url, office_id')
+            .eq('office_id', officeId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return res.status(200).json({ success: true, data: data || [] });
+    } catch (err) {
+        console.error('Error fetching office team:', err.message);
+        return res.status(500).json({ success: false, message: 'Could not fetch office members.' });
+    }
+});
+
 router.patch('/users/:id/role', protect, authorize('admin'), async (req, res) => {
     try {
         const { id } = req.params;
         const { role } = req.body;
 
-        if (!['member', 'leader', 'sub_admin'].includes(role)) {
+        if (!['member', 'leader', 'team_leader', 'sub_admin'].includes(role)) {
             return res.status(400).json({ success: false, message: 'Invalid target role specification.' });
         }
 
@@ -747,7 +765,7 @@ router.get('/ledger/all', protect, authorize('admin', 'sub_admin'), async (req, 
     }
 });
 
-router.get('/attendance/all', protect, authorize('admin', 'sub_admin', 'leader'), async (req, res) => {
+router.get('/attendance/all', protect, authorize('admin', 'sub_admin', 'leader', 'team_leader'), async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('attendance')
@@ -764,7 +782,7 @@ router.get('/attendance/all', protect, authorize('admin', 'sub_admin', 'leader')
 });
 
 // ===================================================
-// 12. CORPORATE ANNOUNCEMENTS ENDPOINTS (EXACT SUPABASE SCHEMA)
+// 12. CORPORATE ANNOUNCEMENTS ENDPOINTS
 // ===================================================
 router.get('/announcements', protect, async (req, res) => {
     try {
@@ -810,6 +828,56 @@ router.post('/announcements', protect, authorize('admin', 'sub_admin', 'global_a
     } catch (err) {
         console.error('Announcement creation error:', err.message);
         return res.status(500).json({ success: false, message: `Failed to publish announcement: ${err.message}` });
+    }
+});
+
+// ===================================================
+// 13. USER PROFILE TELEMETRY ENDPOINT (DOSSIER DATA)
+// ===================================================
+router.get('/profile/telemetry/:userId', protect, async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // 1. Fetch total confirmed attendance logs for this user
+        const { data: attendanceLogs, error: attError } = await supabase
+            .from('attendance')
+            .select('marked_time, status')
+            .eq('user_id', userId)
+            .eq('status', 'confirmed');
+
+        if (attError) throw attError;
+        const attendanceCount = attendanceLogs ? attendanceLogs.length : 0;
+
+        // 2. Fetch financial transaction records or ledger items for this user
+        let transactions = [];
+        const { data: ledgerData, error: ledgerError } = await supabase
+            .from('ledger')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+
+        if (!ledgerError && ledgerData) {
+            transactions = ledgerData;
+        } else {
+            // Fallback check if user_id column is named differently or query marketplace payments table if applicable
+            const { data: payData } = await supabase
+                .from('payments')
+                .select('*')
+                .eq('user_id', userId)
+                .order('created_at', { ascending: false });
+            if (payData) transactions = payData;
+        }
+
+        return res.status(200).json({
+            success: true,
+            telemetry: {
+                attendanceCount,
+                transactions
+            }
+        });
+    } catch (err) {
+        console.error('Error fetching profile telemetry:', err.message);
+        return res.status(500).json({ success: false, message: 'Could not fetch telemetry records.' });
     }
 });
 

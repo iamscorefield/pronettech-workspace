@@ -10,6 +10,9 @@ const communityRoutes = require('./routes/community');
 const marketplaceRoutes = require('./routes/marketplace');
 const taskRoutes = require('./routes/tasks');
 const downlineRoutes = require('./routes/downline');
+const financeRoutes = require('./routes/finance');
+const channelRoutes = require('./routes/channels'); // Newly added channels route
+const chatRoutes = require('./routes/chat');         // Newly added chat route
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -125,6 +128,9 @@ app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/downline', downlineRoutes);
 app.use('/api/downlines', downlineRoutes);
+app.use('/api/finance', financeRoutes);
+app.use('/api/channels', channelRoutes); // Mounted channels router
+app.use('/api/chat', chatRoutes);         // Mounted chat router
 
 // Frontend Page Routing
 app.get('/', (req, res) => {

@@ -131,7 +131,7 @@
                         <span>Workspace User Directory</span>
                         <span id="active-filter-badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-pnt-purple"></span>
                     </h3>
-                    <p class="text-slate-500 text-xs mt-0.5">Click any user avatar to inspect full profile details, verify sponsor IDs, and execute governance actions</p>
+                    <p class="text-slate-500 text-xs mt-0.5">Click any user avatar or name to inspect full profile details, verify sponsor IDs, and execute governance actions</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <input type="text" id="user-search-input" placeholder="Search by name, ID, branch, or state..." class="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs text-pnt-dark placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple w-full sm:w-64">
@@ -264,6 +264,90 @@
         </div>
     </main>
 
+    <!-- ================= MODAL: EXECUTIVE DOSSIER INSPECTOR ================= -->
+    <div id="user-profile-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            
+            <!-- Modal Header -->
+            <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-purple-50/40">
+                <div class="flex items-center gap-3">
+                    <div id="inspect-avatar-container" class="w-12 h-12 rounded-full bg-pnt-purple text-white font-bold flex items-center justify-center text-sm overflow-hidden shrink-0 border-2 border-purple-200 shadow-sm">
+                        --
+                    </div>
+                    <div>
+                        <h3 id="inspect-fullname" class="text-sm font-black text-slate-900 leading-tight">Full Name</h3>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span id="inspect-custom-id" class="text-[11px] font-mono text-pnt-purple font-bold">PNT-PENDING</span>
+                            <span id="inspect-role-badge" class="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-purple-100 text-pnt-purple">Member</span>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModal('user-profile-modal')" class="text-slate-400 hover:text-slate-700 text-xl font-bold cursor-pointer">&times;</button>
+            </div>
+
+            <!-- Scrollable Dossier Content -->
+            <div class="p-6 overflow-y-auto space-y-5 text-xs text-slate-600 leading-relaxed">
+                
+                <!-- Core Telemetry Info -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-[10px] text-pnt-purple">Contact & Assignment Telemetry</h4>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div><span class="text-slate-400 font-medium block">Email:</span> <span id="inspect-email" class="font-mono text-slate-800 font-semibold truncate block">--</span></div>
+                        <div><span class="text-slate-400 font-medium block">Phone:</span> <span id="inspect-phone" class="font-mono text-slate-800 font-semibold block">--</span></div>
+                        <div><span class="text-slate-400 font-medium block">Branch Office:</span> <span id="inspect-branch" class="text-slate-800 font-semibold block">--</span></div>
+                        <div><span class="text-slate-400 font-medium block">State / Residence:</span> <span id="inspect-state" class="text-slate-800 font-semibold block">--</span></div>
+                        <div><span class="text-slate-400 font-medium block">Sponsor ID:</span> <span id="inspect-sponsor" class="font-mono text-slate-800 font-semibold block">--</span></div>
+                        <div><span class="text-slate-400 font-medium block">Account Status:</span> <span id="inspect-status" class="uppercase font-bold text-emerald-600 block">--</span></div>
+                    </div>
+                </div>
+
+                <!-- Account Lifecycle & Attendance Summary -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-purple-50/50 p-4 rounded-xl border border-purple-100 space-y-1">
+                        <span class="text-[10px] font-bold text-pnt-purple uppercase tracking-wider block">Original Sign-Up Date</span>
+                        <span id="inspect-signup-date" class="text-xs font-mono font-extrabold text-slate-900">Loading...</span>
+                    </div>
+
+                    <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 space-y-1">
+                        <span class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Attendance History (365-Day Span)</span>
+                        <span id="inspect-attendance-ratio" class="text-xs font-mono font-extrabold text-slate-900">Calculating logs...</span>
+                    </div>
+                </div>
+
+                <!-- Transaction & Earnings Ledger Section -->
+                <div class="space-y-2">
+                    <h4 class="font-bold text-slate-900 uppercase tracking-wide text-[10px] text-pnt-purple">Full Transaction & Earnings Ledger</h4>
+                    <div class="border border-slate-200 rounded-xl overflow-hidden max-h-40 overflow-y-auto">
+                        <table class="w-full text-left text-[11px]">
+                            <thead class="bg-slate-100 text-slate-500 font-bold uppercase text-[9px]">
+                                <tr>
+                                    <th class="py-2 px-3">Date</th>
+                                    <th class="py-2 px-3">Purpose / Ref</th>
+                                    <th class="py-2 px-3">Amount</th>
+                                    <th class="py-2 px-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inspect-ledger-tbody" class="divide-y divide-slate-100">
+                                <tr>
+                                    <td colspan="4" class="text-center py-3 text-slate-400">Querying financial records...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+                <button type="button" onclick="closeModal('user-profile-modal')" class="px-6 py-2.5 bg-pnt-purple text-white font-bold rounded-xl text-xs shadow-md cursor-pointer hover:opacity-90 transition-all">
+                    Close Dossier
+                </button>
+            </div>
+
+        </div>
+    </div>
+
     <!-- ================= MODAL: SUB-ADMIN PERMISSIONS OVERRIDE ================= -->
     <div id="subadmin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 relative">
@@ -297,55 +381,6 @@
                     <button type="submit" class="w-1/2 py-2.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-md transition-all cursor-pointer">Save Privileges</button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <!-- ================= MODAL: USER PROFILE INSPECTOR ================= -->
-    <div id="user-profile-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 relative">
-            <button type="button" onclick="closeModal('user-profile-modal')" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
-            
-            <div class="flex items-center gap-3.5 border-b border-slate-100 pb-4">
-                <div id="inspect-avatar-container" class="w-14 h-14 rounded-full bg-pnt-purple text-white font-bold flex items-center justify-center text-base overflow-hidden shrink-0 border-2 border-purple-200 shadow-sm">
-                    --
-                </div>
-                <div class="overflow-hidden">
-                    <h3 id="inspect-fullname" class="text-base font-black text-slate-900 leading-tight">Full Name</h3>
-                    <p id="inspect-custom-id" class="text-xs font-mono text-pnt-purple font-bold mt-0.5">PNT-PENDING</p>
-                    <span id="inspect-role-badge" class="inline-block mt-1 text-[9px] uppercase font-bold px-2 py-0.5 rounded-full bg-purple-50 text-pnt-purple border border-purple-200">Member</span>
-                </div>
-            </div>
-
-            <div class="space-y-2 text-xs">
-                <div class="flex justify-between py-1 border-b border-slate-50">
-                    <span class="text-slate-400 font-medium">Email Address:</span>
-                    <span id="inspect-email" class="font-mono text-slate-800 font-semibold">--</span>
-                </div>
-                <div class="flex justify-between py-1 border-b border-slate-50">
-                    <span class="text-slate-400 font-medium">Phone Number:</span>
-                    <span id="inspect-phone" class="font-mono text-slate-800 font-semibold">--</span>
-                </div>
-                <div class="flex justify-between py-1 border-b border-slate-50">
-                    <span class="text-slate-400 font-medium">State / Residence:</span>
-                    <span id="inspect-state" class="text-slate-800 font-semibold">--</span>
-                </div>
-                <div class="flex justify-between py-1 border-b border-slate-50">
-                    <span class="text-slate-400 font-medium">Branch Office:</span>
-                    <span id="inspect-branch" class="text-slate-800 font-semibold">--</span>
-                </div>
-                <div class="flex justify-between py-1 border-b border-slate-50">
-                    <span class="text-slate-400 font-medium">Sponsor ID:</span>
-                    <span id="inspect-sponsor" class="font-mono text-slate-800 font-semibold">--</span>
-                </div>
-                <div class="flex justify-between py-1">
-                    <span class="text-slate-400 font-medium">Account Status:</span>
-                    <span id="inspect-status" class="uppercase font-bold text-emerald-600">--</span>
-                </div>
-            </div>
-
-            <button type="button" onclick="closeModal('user-profile-modal')" class="w-full btn-brand-gradient text-white font-bold py-2.5 rounded-xl text-xs shadow-md cursor-pointer mt-2">
-                Close Inspector
-            </button>
         </div>
     </div>
 
@@ -589,7 +624,7 @@
                         <div class="flex items-center gap-3">
                             ${avatarMarkup}
                             <div>
-                                <div class="font-bold text-pnt-dark leading-tight">${leader.first_name} ${leader.last_name}</div>
+                                <div class="font-bold text-pnt-dark leading-tight cursor-pointer hover:text-pnt-purple transition-colors" onclick='inspectUserProfile(${JSON.stringify(leader)})'>${leader.first_name} ${leader.last_name}</div>
                                 <div class="text-[10px] text-slate-400 font-mono">${leader.email} • ${leader.phone_number || 'N/A'}</div>
                             </div>
                         </div>
@@ -686,7 +721,7 @@
                         <div class="flex items-center gap-3">
                             ${avatarMarkup}
                             <div>
-                                <div class="font-bold text-pnt-dark leading-tight">${user.first_name} ${user.last_name}</div>
+                                <div class="font-bold text-pnt-dark leading-tight cursor-pointer hover:text-pnt-purple transition-colors" onclick='inspectUserProfile(${JSON.stringify(user)})'>${user.first_name} ${user.last_name}</div>
                                 <div class="text-[10px] text-slate-400 font-mono">${user.email} • ${user.phone_number || 'N/A'}</div>
                             </div>
                         </div>
@@ -703,18 +738,20 @@
             });
         }
 
-        function inspectUserProfile(user) {
+        async function inspectUserProfile(user) {
             document.getElementById('inspect-fullname').textContent = `${user.first_name} ${user.last_name}`;
             document.getElementById('inspect-custom-id').textContent = user.custom_profile_id || 'PNT-PENDING';
             document.getElementById('inspect-email').textContent = user.email || 'N/A';
             document.getElementById('inspect-phone').textContent = user.phone_number || 'N/A';
             document.getElementById('inspect-state').textContent = user.state ? `${user.state}, Nigeria` : 'Not Specified';
-            document.getElementById('inspect-branch').textContent = user.office?.branch_name || 'Central Workspace Hub';
+            document.getElementById('inspect-branch').textContent = user.office?.branch_name || user.office_name || 'Central Workspace Hub';
             document.getElementById('inspect-sponsor').textContent = user.sponsor_id || 'None';
             document.getElementById('inspect-status').textContent = user.status || 'active';
 
             const roleBadge = document.getElementById('inspect-role-badge');
-            roleBadge.textContent = user.role.replace('_', ' ').toUpperCase();
+            const isAdmin = user.role === 'admin' || user.role === 'global_admin';
+            const isLeader = user.role === 'leader' || user.role === 'team_leader' || user.role === 'sub_admin';
+            roleBadge.textContent = isAdmin ? 'Admin' : (isLeader ? 'Team Leader' : 'Member');
 
             const avatarContainer = document.getElementById('inspect-avatar-container');
             const initials = `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase() || 'U';
@@ -724,7 +761,53 @@
                 avatarContainer.innerHTML = `<span class="font-bold text-base">${initials}</span>`;
             }
 
+            // Format Sign-Up Date
+            const signupDate = user.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown';
+            document.getElementById('inspect-signup-date').textContent = signupDate;
+
+            // Default temporary values while fetching telemetry
+            document.getElementById('inspect-attendance-ratio').textContent = "Fetching telemetry...";
+            document.getElementById('inspect-ledger-tbody').innerHTML = `<tr><td colspan="4" class="text-center py-3 text-slate-400">Loading ledger...</td></tr>`;
+
             openModal('user-profile-modal');
+
+            // Fetch extended telemetry (attendance counts & transaction ledger)
+            try {
+                const res = await fetch(`/api/auth/profile/telemetry/${user.id}`, { credentials: 'include' });
+                const data = await res.json();
+
+                if (data.success) {
+                    const telemetry = data.telemetry;
+                    const attendanceCount = telemetry.attendanceCount || 0;
+                    document.getElementById('inspect-attendance-ratio').textContent = `${attendanceCount} days of active attendance out of 365`;
+
+                    const ledgerTbody = document.getElementById('inspect-ledger-tbody');
+                    ledgerTbody.innerHTML = '';
+
+                    if (!telemetry.transactions || telemetry.transactions.length === 0) {
+                        ledgerTbody.innerHTML = `<tr><td colspan="4" class="text-center py-3 text-slate-400">No transaction records found.</td></tr>`;
+                    } else {
+                        telemetry.transactions.forEach(tx => {
+                            const txDate = new Date(tx.created_at || tx.date).toLocaleDateString();
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td class="py-2 px-3 font-mono text-slate-600">${txDate}</td>
+                                <td class="py-2 px-3 font-semibold text-slate-800">${tx.purpose || tx.reference || 'Workspace Fee'}</td>
+                                <td class="py-2 px-3 font-mono font-bold text-pnt-purple">₦${Number(tx.amount || 0).toLocaleString()}</td>
+                                <td class="py-2 px-3"><span class="px-1.5 py-0.5 rounded text-[9px] uppercase font-bold bg-emerald-50 text-emerald-700">${tx.status || 'Success'}</span></td>
+                            `;
+                            ledgerTbody.appendChild(tr);
+                        });
+                    }
+                } else {
+                    document.getElementById('inspect-attendance-ratio').textContent = "0 days of active attendance out of 365";
+                    document.getElementById('inspect-ledger-tbody').innerHTML = `<tr><td colspan="4" class="text-center py-3 text-slate-400">No transactions recorded.</td></tr>`;
+                }
+            } catch (err) {
+                console.error("Telemetry fetch error:", err);
+                document.getElementById('inspect-attendance-ratio').textContent = "Telemetry unavailable";
+                document.getElementById('inspect-ledger-tbody').innerHTML = `<tr><td colspan="4" class="text-center py-3 text-red-400">Failed to load financial ledger.</td></tr>`;
+            }
         }
 
         async function toggleUserRole(userId, currentRole) {
@@ -819,7 +902,6 @@
             } catch (err) { alert('Connection failed.'); }
         });
 
-        // WIRING BROADCAST MODAL DIRECTLY TO ANNOUNCEMENTS STREAM
         document.getElementById('send-broadcast-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const title = document.getElementById('modal-broadcast-title').value.trim();

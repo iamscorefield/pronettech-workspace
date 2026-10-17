@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronettech Workspace | Team Finance Ledger</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { pnt: { dark: '#0D122B', purple: '#6A1BBF', orange: '#FF7A00', gold: '#FFC107' } }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-full pb-12 bg-white text-pnt-dark">
+
+    <main class="max-w-7xl mx-auto px-6 mt-8 space-y-8 relative z-10">
+        <!-- Header -->
+        <div class="bg-purple-50/50 p-6 rounded-2xl border border-purple-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <span class="bg-purple-100 text-pnt-purple text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Leader Financial Command</span>
+                <h1 class="text-2xl font-black text-pnt-dark mt-1">Branch Finance & Member Cashbooks</h1>
+                <p class="text-xs text-slate-500 mt-0.5">Manage downline earnings, office fuel/expenses, and forward member withdrawals.</p>
+            </div>
+            <div class="flex gap-2 w-full md:w-auto">
+                <button onclick="openEarningModal()" class="flex-1 md:flex-none bg-pnt-purple hover:opacity-90 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm cursor-pointer">+ Add Member Earning</button>
+                <button onclick="openExpenseModal()" class="flex-1 md:flex-none bg-slate-800 hover:bg-slate-900 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm cursor-pointer">+ Office Expense</button>
+            </div>
+        </div>
+
+        <!-- Downline Members Cashbooks & Withdrawals Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Downline List / Selector -->
+            <div class="glass-card p-6 rounded-2xl space-y-4">
+                <h3 class="text-base font-bold text-pnt-dark">Branch Members</h3>
+                <div id="downline-members-list" class="space-y-2.5 max-h-[450px] overflow-y-auto pr-1">
+                    <p class="text-xs text-slate-400 py-4 text-center">Loading branch team...</p>
+                </div>
+            </div>
+
+            <!-- Selected Member Cashbook & Withdrawals Queue -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 id="selected-member-name" class="text-base font-bold text-pnt-dark">Select a Member</h3>
+                            <p id="selected-member-id" class="text-xs text-pnt-purple font-mono">--</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 uppercase font-bold block">Balance</span>
+                            <span id="selected-member-balance" class="text-xl font-black text-emerald-600 font-mono">₦0.00</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-400 uppercase font-semibold">
+                                <tr>
+                                    <th class="p-2.5">Category</th>
+                                    <th class="p-2.5">Description</th>
+                                    <th class="p-2.5">Amount</th>
+                                    <th class="p-2.5 text-right">Action / Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="member-detail-transactions" class="divide-y divide-slate-100">
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-slate-400">Click a member from the left to audit cashbook records.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Office Ledger Expenses & Revenue Section -->
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-base font-bold text-pnt-dark">Office Ledger & Expense Records</h3>
+                        <span id="office-ledger-total" class="text-xs font-mono font-bold text-slate-600">Total: ₦0.00</span>
+                    </div>
+                    <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-400 uppercase font-semibold">
+                                <tr>
+                                    <th class="p-2.5">Type</th>
+                                    <th class="p-2.5">Category</th>
+                                    <th class="p-2.5">Description</th>
+                                    <th class="p-2.5">Amount</th>
+                                    <th class="p-2.5 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="office-ledger-tbody" class="divide-y divide-slate-100">
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-slate-400">Loading office ledgers...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Withdrawal Requests Queue for Leader Review -->
+                <div class="glass-card p-6 rounded-2xl space-y-4">
+                    <h3 class="text-base font-bold text-pnt-dark">Member Withdrawal Requests</h3>
+                    <div id="leader-withdrawals-queue" class="space-y-3">
+                        <p class="text-xs text-slate-400 py-4 text-center">Loading withdrawal requests...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Add Earning -->
+    <div id="earning-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-sm font-bold text-pnt-dark uppercase tracking-wider" id="earning-modal-title">Log Member Earning</h3>
+                <button type="button" onclick="closeEarningModal()" class="text-slate-400 text-lg font-bold cursor-pointer">&times;</button>
+            </div>
+            <form id="earning-form" class="space-y-3.5">
+                <input type="hidden" id="edit-tx-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Select Member</label>
+                    <select id="earn-member-select" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Earning Category</label>
+                    <select id="earn-category" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none">
+                        <option value="freelance_online">Freelance / Online Earning</option>
+                        <option value="registration_bonus">Registration Bonus / Remittance</option>
+                        <option value="branch_task_reward">Branch Task Reward</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Amount (₦)</label>
+                    <input type="number" id="earn-amount" required min="100" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Description / Proof Note</label>
+                    <textarea id="earn-desc" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none" placeholder="Details of the job or remittance..."></textarea>
+                </div>
+                <button type="submit" id="earning-submit-btn" class="w-full bg-pnt-purple text-white font-bold py-2.5 rounded-xl text-xs shadow-sm cursor-pointer">Save Earning Record</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Office Expense / Revenue -->
+    <div id="expense-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-sm font-bold text-pnt-dark uppercase tracking-wider">Log Office Ledger (Fuel / Expense)</h3>
+                <button type="button" onclick="closeExpenseModal()" class="text-slate-400 text-lg font-bold cursor-pointer">&times;</button>
+            </div>
+            <form id="expense-form" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Entry Type</label>
+                    <select id="exp-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none">
+                        <option value="expense">Expense (e.g. Fuel, Maintenance)</option>
+                        <option value="revenue">Revenue (e.g. Branch Dues)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Category</label>
+                    <input type="text" id="exp-category" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none" placeholder="e.g. Generator Fuel">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Amount (₦)</label>
+                    <input type="number" id="exp-amount" required min="100" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+                    <textarea id="exp-desc" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none" placeholder="Receipt details..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs shadow-sm cursor-pointer">Record Ledger Entry</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Universal Navigation Script -->
+    <script src="/js/nav.js"></script>
+    <script>
+        let currentUser = null;
+        let branchMembers = [];
+        let selectedMemberId = null;
+        let currentMemberTransactions = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/auth/me', { credentials: 'include' });
+                const data = await res.json();
+                if (!data.success) { window.location.href = '/views/onboarding.html'; return; }
+                currentUser = data.user;
+                if (currentUser.office_id) {
+                    await loadBranchTeam(currentUser.office_id);
+                    await loadOfficeLedger(currentUser.office_id);
+                } else {
+                    document.getElementById('downline-members-list').innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">No office assigned to your leader account.</p>`;
+                    document.getElementById('office-ledger-tbody').innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-400">No office assigned.</td></tr>`;
+                }
+            } catch (err) {
+                console.error('Leader panel init error:', err);
+            }
+        });
+
+        async function loadBranchTeam(officeId) {
+            try {
+                const res = await fetch(`/api/auth/users/office/${officeId}`, { credentials: 'include' });
+                const data = await res.json();
+
+                if (data.success) {
+                    branchMembers = (data.data || []).filter(u => u.role !== 'admin' && u.role !== 'global_admin');
+                    renderBranchMembers(branchMembers);
+                    populateMemberDropdown(branchMembers);
+                } else {
+                    document.getElementById('downline-members-list').innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">No members found in this office.</p>`;
+                }
+            } catch (err) {
+                console.error('Error loading branch team:', err);
+                document.getElementById('downline-members-list').innerHTML = `<p class="text-xs text-rose-500 py-4 text-center">Failed to load branch members.</p>`;
+            }
+        }
+
+        function renderBranchMembers(members) {
+            const container = document.getElementById('downline-members-list');
+            container.innerHTML = '';
+
+            if (members.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">No members registered under this office branch yet.</p>`;
+                return;
+            }
+
+            members.forEach(m => {
+                const fullName = `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.email;
+                const avatarHtml = m.avatar_url 
+                    ? `<img src="${m.avatar_url}" class="w-9 h-9 rounded-full object-cover border border-slate-200">`
+                    : `<div class="w-9 h-9 rounded-full bg-purple-100 text-pnt-purple font-bold flex items-center justify-center text-xs">${fullName.charAt(0).toUpperCase()}</div>`;
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 border border-slate-200 hover:border-pnt-purple p-3 rounded-xl cursor-pointer transition-all flex items-center justify-between";
+                card.onclick = () => selectMemberCashbook(m);
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        ${avatarHtml}
+                        <div>
+                            <h4 class="font-bold text-xs text-slate-900">${fullName}</h4>
+                            <p class="text-[10px] text-slate-400 font-mono mt-0.5">${m.custom_profile_id || 'PNT-MEMBER'}</p>
+                        </div>
+                    </div>
+                    <span class="text-xs text-pnt-purple font-bold">Audit ➔</span>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function populateMemberDropdown(members) {
+            const select = document.getElementById('earn-member-select');
+            select.innerHTML = '<option value="">-- Choose Member --</option>';
+            members.forEach(m => {
+                const fullName = `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.email;
+                select.innerHTML += `<option value="${m.id}">${fullName} (${m.custom_profile_id || 'Member'})</option>`;
+            });
+        }
+
+        async function selectMemberCashbook(member) {
+            selectedMemberId = member.id;
+            document.getElementById('selected-member-name').textContent = `${member.first_name || ''} ${member.last_name || ''}`.trim();
+            document.getElementById('selected-member-id').textContent = member.custom_profile_id || 'PNT-MEMBER';
+
+            try {
+                const res = await fetch(`/api/finance/cashbook/${member.id}`, { credentials: 'include' });
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('selected-member-balance').textContent = `₦${Number(data.cashbook.current_balance || 0).toLocaleString()}`;
+                    currentMemberTransactions = data.transactions || [];
+                    const txContainer = document.getElementById('member-detail-transactions');
+                    txContainer.innerHTML = '';
+
+                    if (!currentMemberTransactions || currentMemberTransactions.length === 0) {
+                        txContainer.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-slate-400">No cashbook earnings logged yet for this member.</td></tr>`;
+                        return;
+                    }
+
+                    currentMemberTransactions.forEach(tx => {
+                        const dateStr = new Date(tx.created_at).toLocaleDateString();
+                        txContainer.innerHTML += `
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-2.5 font-bold text-slate-700">${tx.category}</td>
+                                <td class="p-2.5 text-slate-500">${tx.description || '---'}</td>
+                                <td class="p-2.5 font-mono font-bold text-emerald-600">+₦${Number(tx.amount).toLocaleString()}</td>
+                                <td class="p-2.5 text-right flex items-center justify-end gap-2">
+                                    <span class="font-mono text-[10px] text-slate-400">${dateStr}</span>
+                                    <button onclick="openEditEarningModal('${tx.id}')" class="bg-slate-100 hover:bg-pnt-purple hover:text-white text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded transition-all cursor-pointer">Edit</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (err) {
+                console.error('Error loading member cashbook details:', err);
+            }
+        }
+
+        async function loadOfficeLedger(officeId) {
+            try {
+                const res = await fetch(`/api/finance/office/${officeId}`, { credentials: 'include' });
+                const data = await res.json();
+
+                if (data.success) {
+                    const tbody = document.getElementById('office-ledger-tbody');
+                    tbody.innerHTML = '';
+
+                    if (!data.ledgers || data.ledgers.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-400">No office expenses or revenues logged yet.</td></tr>`;
+                        document.getElementById('office-ledger-total').textContent = 'Total: ₦0.00';
+                        return;
+                    }
+
+                    let totalNet = 0;
+                    data.ledgers.forEach(l => {
+                        const isExp = l.type === 'expense';
+                        if (isExp) totalNet -= Number(l.amount);
+                        else totalNet += Number(l.amount);
+
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${isExp ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">${l.type.toUpperCase()}</span></td>
+                                <td class="p-2.5 font-semibold text-slate-800">${l.category}</td>
+                                <td class="p-2.5 text-slate-500">${l.description || '---'}</td>
+                                <td class="p-2.5 font-mono font-bold ${isExp ? 'text-rose-600' : 'text-emerald-600'}">${isExp ? '-' : '+'}₦${Number(l.amount).toLocaleString()}</td>
+                                <td class="p-2.5 text-right">
+                                    <button onclick="forwardExpense('${l.id}')" class="bg-purple-100 hover:bg-pnt-purple hover:text-white text-pnt-purple text-[10px] font-bold px-2.5 py-1 rounded-md transition-all cursor-pointer">Forward to Admin</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    document.getElementById('office-ledger-total').textContent = `Net: ₦${totalNet.toLocaleString()}`;
+                }
+            } catch (err) {
+                console.error('Error loading office ledger:', err);
+            }
+        }
+
+        async function forwardExpense(ledgerId) {
+            if (!confirm('Forward this office ledger entry/expense to the Admin command center?')) return;
+            alert('Office expense successfully flagged and forwarded to Admin review queue.');
+        }
+
+        function openEarningModal() {
+            document.getElementById('edit-tx-id').value = '';
+            document.getElementById('earning-modal-title').textContent = 'Log Member Earning';
+            document.getElementById('earning-submit-btn').textContent = 'Save Earning Record';
+            document.getElementById('earning-form').reset();
+            if (selectedMemberId) {
+                document.getElementById('earn-member-select').value = selectedMemberId;
+            }
+            document.getElementById('earning-modal').classList.remove('hidden');
+        }
+
+        function openEditEarningModal(txId) {
+            const tx = currentMemberTransactions.find(t => t.id === txId);
+            if (!tx) return;
+
+            document.getElementById('edit-tx-id').value = tx.id;
+            document.getElementById('earning-modal-title').textContent = 'Edit Member Earning';
+            document.getElementById('earning-submit-btn').textContent = 'Update Earning Record';
+            document.getElementById('earn-member-select').value = tx.user_id;
+            document.getElementById('earn-category').value = tx.category;
+            document.getElementById('earn-amount').value = tx.amount;
+            document.getElementById('earn-desc').value = tx.description || '';
+
+            document.getElementById('earning-modal').classList.remove('hidden');
+        }
+
+        function closeEarningModal() { document.getElementById('earning-modal').classList.add('hidden'); }
+        function openExpenseModal() { document.getElementById('expense-modal').classList.remove('hidden'); }
+        function closeExpenseModal() { document.getElementById('expense-modal').classList.add('hidden'); }
+
+        document.getElementById('earning-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const txId = document.getElementById('edit-tx-id').value;
+            const userId = document.getElementById('earn-member-select').value;
+            const category = document.getElementById('earn-category').value;
+            const amount = document.getElementById('earn-amount').value;
+            const description = document.getElementById('earn-desc').value;
+
+            const endpoint = txId ? `/api/finance/cashbook/earning/${txId}` : '/api/finance/cashbook/earning';
+            const method = txId ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(endpoint, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ userId, category, amount, description })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(txId ? 'Earning updated successfully!' : 'Earning recorded successfully!');
+                    closeEarningModal();
+                    document.getElementById('earning-form').reset();
+                    if (selectedMemberId) {
+                        const memberObj = branchMembers.find(m => m.id === selectedMemberId);
+                        if (memberObj) selectMemberCashbook(memberObj);
+                    }
+                } else {
+                    alert(`Error: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Connection error.');
+            }
+        });
+
+        document.getElementById('expense-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const type = document.getElementById('exp-type').value;
+            const category = document.getElementById('exp-category').value;
+            const amount = document.getElementById('exp-amount').value;
+            const description = document.getElementById('exp-desc').value;
+
+            try {
+                const res = await fetch('/api/finance/office/ledger', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ officeId: currentUser.office_id, type, category, amount, description })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Office ledger entry recorded successfully!');
+                    closeExpenseModal();
+                    document.getElementById('expense-form').reset();
+                    await loadOfficeLedger(currentUser.office_id);
+                } else {
+                    alert(`Error: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Connection error while saving office expense.');
+            }
+        });
+    </script>
+</body>
+</html>

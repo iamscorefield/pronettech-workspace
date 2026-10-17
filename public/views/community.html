@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pronettech Workspace | Help Desk & Community</title>
+    <title>Pronettech Workspace | Help Desk & Channels</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
     <link rel="stylesheet" href="/css/styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -27,57 +27,123 @@
 </head>
 <body class="min-h-full pb-12 relative overflow-x-hidden bg-slate-50 text-pnt-dark">
 
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 mt-8 space-y-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 mt-8 space-y-6">
 
         <!-- Header Card -->
         <div class="glass-card p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <h2 class="text-xl font-black text-pnt-dark tracking-tight">Help Desk & Community Forum</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Collaborate with colleagues, ask operational questions, and escalate urgent issues</p>
+                <h2 class="text-xl font-black text-pnt-dark tracking-tight">Community Channels & Help Desk</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Collaborate in official admin channels, share rich media, links, and resolve operational tickets.</p>
             </div>
-            <button onclick="openModal('new-post-modal')" class="btn-brand-gradient text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer">
-                + New Discussion / Ticket
-            </button>
+            <div class="flex items-center gap-2">
+                <!-- Admin Only Create Channel Button -->
+                <button id="create-channel-nav-btn" onclick="openModal('new-channel-modal')" class="hidden bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-800 font-bold px-4 py-2.5 rounded-xl text-xs transition-all cursor-pointer">
+                    + Create Channel
+                </button>
+                <button onclick="openModal('new-post-modal')" class="btn-brand-gradient text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer">
+                    + Incident Ticket
+                </button>
+            </div>
         </div>
 
-        <!-- Feed / Discussions Stream -->
-        <div class="space-y-4" id="community-feed">
-            <div class="bg-white border border-slate-200 p-8 rounded-2xl text-center text-xs text-slate-400">
-                Loading community discussions...
+        <!-- Main Layout Grid for Channels & Feed -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            
+            <!-- Left Sidebar: Channels List -->
+            <div class="lg:col-span-1 glass-card p-4 rounded-2xl bg-white border border-slate-200 space-y-3 h-fit">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 px-2">Official Channels</h3>
+                <div id="channels-sidebar-list" class="space-y-1">
+                    <p class="text-xs text-slate-400 p-2">Loading channels...</p>
+                </div>
             </div>
+
+            <!-- Right Main Area: Active Channel / Feed -->
+            <div class="lg:col-span-3 space-y-4">
+                
+                <!-- Active Channel Banner -->
+                <div id="active-channel-banner" class="bg-white border border-slate-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div>
+                        <h3 id="active-channel-name" class="font-black text-sm text-pnt-dark">Select a Channel</h3>
+                        <p id="active-channel-desc" class="text-xs text-slate-500 mt-0.5">Browse official workspace communication hubs.</p>
+                    </div>
+                </div>
+
+                <!-- Messages / Posts Stream -->
+                <div id="community-feed" class="space-y-4">
+                    <div class="bg-white border border-slate-200 p-8 rounded-2xl text-center text-xs text-slate-400">
+                        Select a channel to view discussions.
+                    </div>
+                </div>
+
+                <!-- Post Message Input Form (For Channels) -->
+                <form id="channel-message-form" class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm space-y-3 hidden">
+                    <textarea id="channel-msg-content" rows="2" placeholder="Write a message, share insights..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none"></textarea>
+                    
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="channel-msg-link" placeholder="Optional Link URL (https://...)" class="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs w-full sm:w-64 focus:outline-none">
+                            <label class="cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-all">
+                                <span>📷 Attach Image</span>
+                                <input type="file" id="channel-msg-image" accept="image/*" class="hidden">
+                            </label>
+                        </div>
+                        <button type="submit" id="send-channel-msg-btn" class="btn-brand-gradient text-white font-bold px-6 py-2 rounded-xl text-xs shadow-md cursor-pointer">
+                            Post Message
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+
         </div>
 
     </main>
 
-    <!-- MODAL: CREATE POST / TICKET -->
+    <!-- MODAL: ADMIN CREATE CHANNEL -->
+    <div id="new-channel-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 relative">
+            <button type="button" onclick="closeModal('new-channel-modal')" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
+            <div class="border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-pnt-dark">Create New Community Channel</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Admin-governed room for general discussions or department announcements.</p>
+            </div>
+            <form id="create-channel-form" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Channel Name</label>
+                    <input type="text" id="channel-name-input" required placeholder="e.g., #lagos-operations" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+                    <textarea id="channel-desc-input" rows="2" placeholder="What is this channel about..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none"></textarea>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeModal('new-channel-modal')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl cursor-pointer">Cancel</button>
+                    <button type="submit" id="submit-channel-btn" class="w-1/2 py-2.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-md cursor-pointer">Create Channel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE INCIDENT TICKET -->
     <div id="new-post-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 relative">
             <button type="button" onclick="closeModal('new-post-modal')" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
-            
             <div class="border-b border-slate-100 pb-3">
-                <h3 class="text-base font-bold text-pnt-dark">Create Community Post or Ticket</h3>
-                <p class="text-xs text-slate-500 mt-0.5">Broadcast a question or escalate an operational inquiry to leaders and admins.</p>
+                <h3 class="text-base font-bold text-pnt-dark">Escalate Incident Ticket</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Escalate urgent operational inquiries directly to administrators.</p>
             </div>
-
             <form id="create-post-form" class="space-y-3.5">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Post Type</label>
-                    <select id="post-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
-                        <option value="discussion">General Discussion / Question</option>
-                        <option value="incident">Escalation / Incident Ticket</option>
-                    </select>
-                </div>
-                <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Subject / Headline</label>
-                    <input type="text" id="post-subject" required placeholder="Brief summary of your inquiry..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none">
+                    <input type="text" id="post-subject" required placeholder="Brief summary of your issue..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Detailed Message / Context</label>
-                    <textarea id="post-details" rows="4" required placeholder="Describe your question or incident in detail..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-pnt-purple focus:outline-none"></textarea>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Detailed Message</label>
+                    <textarea id="post-details" rows="4" required placeholder="Describe the incident..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none"></textarea>
                 </div>
                 <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="closeModal('new-post-modal')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer">Cancel</button>
-                    <button type="submit" id="submit-post-btn" class="w-1/2 py-2.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-md transition-all cursor-pointer">Publish Post</button>
+                    <button type="button" onclick="closeModal('new-post-modal')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl cursor-pointer">Cancel</button>
+                    <button type="submit" id="submit-post-btn" class="w-1/2 py-2.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-md cursor-pointer">Submit Ticket</button>
                 </div>
             </form>
         </div>
@@ -88,74 +154,214 @@
 
     <script>
         let currentUser = null;
+        let channelsList = [];
+        let activeChannelId = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const res = await fetch('/api/auth/me', { credentials: 'include' });
                 const data = await res.json();
-                if (!data.success) {
-                    window.location.href = '/views/onboarding.html';
-                    return;
-                }
+                if (!data.success) { window.location.href = '/views/onboarding.html'; return; }
                 currentUser = data.user;
-                await fetchCommunityFeed();
+
+                if (currentUser.role === 'admin' || currentUser.role === 'global_admin') {
+                    document.getElementById('create-channel-nav-btn').classList.remove('hidden');
+                }
+
+                await loadChannels();
             } catch (err) {
                 window.location.href = '/views/onboarding.html';
             }
         });
 
-        async function fetchCommunityFeed() {
+        async function loadChannels() {
             try {
-                const res = await fetch('/api/community/incidents', { credentials: 'include' });
+                const res = await fetch('/api/channels', { credentials: 'include' });
                 const data = await res.json();
                 if (data.success) {
-                    renderFeed(data.data || []);
-                } else {
-                    document.getElementById('community-feed').innerHTML = `<div class="bg-white border border-slate-200 p-8 rounded-2xl text-center text-xs text-slate-400">No discussions found. Be the first to post!</div>`;
+                    channelsList = data.channels || [];
+                    renderChannelsSidebar(channelsList);
+                    if (channelsList.length > 0) {
+                        selectChannel(channelsList[0]);
+                    }
                 }
             } catch (err) {
-                document.getElementById('community-feed').innerHTML = `<div class="bg-white border border-slate-200 p-8 rounded-2xl text-center text-xs text-red-400">Failed to load community stream.</div>`;
+                document.getElementById('channels-sidebar-list').innerHTML = `<p class="text-xs text-red-400 p-2">Failed to load channels.</p>`;
             }
         }
 
-        function renderFeed(posts) {
-            const container = document.getElementById('community-feed');
+        function renderChannelsSidebar(channels) {
+            const container = document.getElementById('channels-sidebar-list');
             container.innerHTML = '';
-
-            if (posts.length === 0) {
-                container.innerHTML = `<div class="bg-white border border-slate-200 p-8 rounded-2xl text-center text-xs text-slate-400">No community posts or tickets active.</div>`;
+            if (channels.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 p-2">No channels created yet.</p>`;
                 return;
             }
 
-            posts.forEach(post => {
-                const isIncident = post.type === 'incident' || post.details;
+            channels.forEach(ch => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `w-full text-left px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-between ${activeChannelId === ch.id ? 'bg-pnt-purple text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`;
+                btn.onclick = () => selectChannel(ch);
+                btn.innerHTML = `<span># ${ch.name}</span>`;
+                container.appendChild(btn);
+            });
+        }
+
+        async function selectChannel(channel) {
+            activeChannelId = channel.id;
+            renderChannelsSidebar(channelsList);
+
+            document.getElementById('active-channel-name').textContent = `# ${channel.name}`;
+            document.getElementById('active-channel-desc').textContent = channel.description || 'Official community channel.';
+            document.getElementById('channel-message-form').classList.remove('hidden');
+
+            await fetchChannelMessages(channel.id);
+        }
+
+        async function fetchChannelMessages(channelId) {
+            try {
+                const res = await fetch(`/api/channels/${channelId}/messages`, { credentials: 'include' });
+                const data = await res.json();
+                if (data.success) {
+                    renderChannelFeed(data.messages || []);
+                }
+            } catch (err) {
+                document.getElementById('community-feed').innerHTML = `<div class="bg-white border border-slate-200 p-8 rounded-2xl text-center text-xs text-red-400">Failed to load posts.</div>`;
+            }
+        }
+
+        function renderChannelFeed(messages) {
+            const container = document.getElementById('community-feed');
+            container.innerHTML = '';
+
+            if (messages.length === 0) {
+                container.innerHTML = `<div class="bg-white border border-slate-200 p-8 rounded-2xl text-center text-xs text-slate-400">No messages in this channel yet. Be the first to post!</div>`;
+                return;
+            }
+
+            messages.forEach(msg => {
+                const profile = msg.profiles || {};
+                const fullName = `${profile.first_name || 'Workspace'} ${profile.last_name || 'Member'}`;
+                const initials = `${profile.first_name?.[0] || ''}${profile.last_name?.[0] || ''}`.toUpperCase() || 'U';
+                const roleLabel = profile.role ? profile.role.replace('_', ' ').toUpperCase() : 'MEMBER';
+
+                let roleBadgeClass = "bg-purple-50 text-pnt-purple border-purple-200";
+                if (profile.role === 'admin' || profile.role === 'global_admin') roleBadgeClass = "bg-red-50 text-red-600 border-red-200";
+                else if (profile.role === 'leader' || profile.role === 'team_leader') roleBadgeClass = "bg-blue-50 text-[#0070c0] border-blue-200";
+
                 const card = document.createElement('div');
-                card.className = "bg-white border border-slate-200 p-6 rounded-2xl shadow-sm space-y-3";
+                card.className = "bg-white border border-slate-200 p-5 rounded-2xl shadow-sm space-y-3";
+                
+                let imageMarkup = msg.image_url ? `<div class="mt-2 rounded-xl overflow-hidden border border-slate-100 max-h-60 bg-slate-50"><img src="${msg.image_url}" class="w-full h-full object-cover"></div>` : '';
+                let linkMarkup = msg.link_url ? `<div class="mt-1"><a href="${msg.link_url}" target="_blank" class="text-xs font-semibold text-pnt-purple underline truncate block">🔗 ${msg.link_url}</a></div>` : '';
+
                 card.innerHTML = `
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full ${post.status === 'resolved' ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">${isIncident ? 'Incident Ticket' : 'Community Discussion'}</span>
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-purple-100 text-pnt-purple font-bold flex items-center justify-center text-xs overflow-hidden shrink-0">
+                                ${profile.avatar_url ? `<img src="${profile.avatar_url}" class="w-full h-full object-cover">` : initials}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-xs text-slate-900">${fullName}</h4>
+                                <div class="flex items-center gap-2 mt-0.5">
+                                    <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full border ${roleBadgeClass}">${roleLabel}</span>
+                                    <span class="text-[9px] font-mono text-slate-400">${profile.custom_profile_id || 'PNT'}</span>
+                                </div>
+                            </div>
                         </div>
-                        <span class="text-[10px] font-mono text-slate-400">${new Date(post.created_at || Date.now()).toLocaleDateString()}</span>
+                        <span class="text-[10px] font-mono text-slate-400">${new Date(msg.created_at).toLocaleDateString()}</span>
                     </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-900">${post.subject}</h3>
-                        <p class="text-xs text-slate-600 mt-1 leading-relaxed">${post.details || post.message}</p>
+                    <div class="text-xs text-slate-700 leading-relaxed pl-12">
+                        <p class="break-words">${msg.content}</p>
+                        ${linkMarkup}
+                        ${imageMarkup}
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        document.getElementById('create-post-form').addEventListener('submit', async (e) => {
+        // Post message to active channel
+        document.getElementById('channel-message-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('submit-post-btn');
-            const subject = document.getElementById('post-subject').value;
-            const details = document.getElementById('post-details').value;
+            if (!activeChannelId) return;
+
+            const content = document.getElementById('channel-msg-content').value.trim();
+            const link_url = document.getElementById('channel-msg-link').value.trim();
+            const imageFile = document.getElementById('channel-msg-image').files[0];
+            const btn = document.getElementById('send-channel-msg-btn');
+
+            if (!content && !imageFile) return;
+
+            const formData = new FormData();
+            if (content) formData.append('content', content);
+            if (link_url) formData.append('link_url', link_url);
+            if (imageFile) formData.append('image', imageFile);
 
             btn.disabled = true;
-            btn.textContent = 'Publishing...';
+            btn.textContent = 'Posting...';
+
+            try {
+                const res = await fetch(`/api/channels/${activeChannelId}/messages`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('channel-message-form').reset();
+                    await fetchChannelMessages(activeChannelId);
+                } else {
+                    alert(`Failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Connection error.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Post Message';
+            }
+        });
+
+        // Admin create channel form
+        document.getElementById('create-channel-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('channel-name-input').value.trim();
+            const description = document.getElementById('channel-desc-input').value.trim();
+            const btn = document.getElementById('submit-channel-btn');
+
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
+
+            try {
+                const res = await fetch('/api/channels', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ name, description })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('✨ Channel created successfully!');
+                    document.getElementById('create-channel-form').reset();
+                    closeModal('new-channel-modal');
+                    await loadChannels();
+                } else {
+                    alert(`Failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Connection error.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create Channel';
+            }
+        });
+
+        // Incident ticket submission
+        document.getElementById('create-post-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const subject = document.getElementById('post-subject').value;
+            const details = document.getElementById('post-details').value;
 
             try {
                 const res = await fetch('/api/community/incidents', {
@@ -166,18 +372,14 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    alert('💬 Discussion / Ticket published successfully!');
+                    alert('💬 Incident ticket escalated successfully!');
                     document.getElementById('create-post-form').reset();
                     closeModal('new-post-modal');
-                    fetchCommunityFeed();
                 } else {
                     alert(`Failed: ${data.message}`);
                 }
             } catch (err) {
                 alert('Connection error.');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Publish Post';
             }
         });
 
