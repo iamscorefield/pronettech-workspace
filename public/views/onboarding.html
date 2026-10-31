@@ -35,14 +35,14 @@
     <div class="sm:mx-auto sm:w-full sm:max-w-xl relative z-10">
         <div class="flex justify-center mb-4">
             <div class="flex items-center justify-center">
-                <img src="/assets/images/logo.png" alt="Pronettech Logo" class="h-12 w-auto rounded-xl shadow-md">
+                <img src="/assets/images/logo.png" alt="ProNet-Tech Logo" class="h-12 w-auto rounded-xl shadow-md">
             </div>
         </div>
         <h2 id="page-title" class="text-center text-3xl font-extrabold tracking-tight text-pnt-dark">
-            Join Pronettech Workspace
+            ProNet-Tech Space
         </h2>
         <p id="page-subtitle" class="mt-2 text-center text-sm text-slate-500">
-            Setup your verified corporate identity & downline profile.
+            Setup & verify your corporate identity profile.
         </p>
     </div>
 
@@ -51,7 +51,7 @@
 
             <div id="progress-container" class="mb-8">
                 <div class="flex items-center justify-between text-xs text-slate-500 uppercase tracking-widest font-semibold mb-2">
-                    <span id="step-label">Step 1: Identity & Sponsor Link</span>
+                    <span id="step-label">Step 1: Identity Input</span>
                     <span id="step-count">1 of 2</span>
                 </div>
                 <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
@@ -69,7 +69,7 @@
                     <div class="bg-purple-50/60 border border-purple-200 p-4 rounded-xl space-y-2">
                         <div class="flex items-center justify-between">
                             <label for="sponsor_id" class="block text-xs font-bold text-pnt-purple uppercase tracking-wider">
-                                Sponsor Workspace ID <span class="text-red-500">* (Mandatory)</span>
+                                Sponsor ID <span class="text-red-500">(Mandatory)</span>
                             </label>
                             <span id="sponsor-status-badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-md"></span>
                         </div>
@@ -94,7 +94,7 @@
                     </div>
 
                     <div>
-                        <label for="email" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Corporate Email Address</label>
+                        <label for="email" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Email Address</label>
                         <input type="email" id="email" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-pnt-dark placeholder-slate-300 placeholder:font-light focus:outline-none focus:ring-2 focus:ring-pnt-purple text-sm" placeholder="johndoe@pronettech.net">
                     </div>
 
@@ -178,7 +178,7 @@
                     </p>
                 </div>
 
-                <!-- STEP 2: DYNAMIC BRANCH ASSIGNMENT (ZERO MOCK) -->
+                <!-- STEP 2: DYNAMIC BRANCH ASSIGNMENT -->
                 <div id="step-2-container" class="step-transition hidden space-y-6">
                     <div>
                         <div class="flex items-center justify-between mb-2">
@@ -187,7 +187,6 @@
                         </div>
                         <p class="text-xs text-slate-500 mb-3" id="branch-status-note">Locating active office hubs created by administration...</p>
                         
-                        <!-- Real-time fetched branch container -->
                         <div class="space-y-3" id="office-grid">
                             <div class="text-center text-xs py-6 text-slate-400">Loading branch registry...</div>
                         </div>
@@ -208,7 +207,7 @@
             <form id="login-form" class="step-transition hidden space-y-6">
                 <div class="space-y-5">
                     <div>
-                        <label for="login_email" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Corporate Email Address</label>
+                        <label for="login_email" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Email Address</label>
                         <input type="email" id="login_email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-pnt-dark placeholder-slate-300 placeholder:font-light focus:outline-none focus:ring-2 focus:ring-pnt-purple text-sm" placeholder="johndoe@pronettech.net">
                     </div>
 
@@ -230,13 +229,13 @@
 
                     <div class="pt-2">
                         <button type="submit" class="w-full btn-brand-gradient font-semibold py-3 px-4 rounded-xl shadow-lg shadow-pnt-purple/20 transition-all text-sm flex items-center justify-center gap-2 text-white cursor-pointer">
-                            Authenticate Account
+                            Access Account
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                         </button>
                     </div>
 
                     <p class="text-center text-xs text-slate-500">
-                        New to the Workspace? 
+                        New to the Dashboard? 
                         <button type="button" id="toggle-to-register" class="text-pnt-purple hover:underline font-semibold focus:outline-none ml-1 cursor-pointer">Create an Account</button>
                     </p>
                 </div>
@@ -252,7 +251,7 @@
                 <h3 class="text-sm font-bold text-pnt-dark">Reset Password</h3>
                 <button type="button" onclick="closeForgotPasswordModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold leading-none cursor-pointer">&times;</button>
             </div>
-            <p class="text-xs text-slate-500">Enter your corporate email address and we'll dispatch a recovery link.</p>
+            <p class="text-xs text-slate-500">Enter your email address and we'll dispatch a recovery link.</p>
             <form id="forgot-form" class="space-y-3">
                 <input type="email" id="forgot-email" required placeholder="yourname@pronettech.net" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-pnt-dark placeholder-slate-300 placeholder:font-light focus:ring-1 focus:ring-pnt-purple focus:outline-none">
                 <div class="flex gap-2 pt-1">
@@ -444,7 +443,6 @@
                     `;
                 }
             } catch (err) {
-                console.error("Branch query failure:", err);
                 officeGrid.innerHTML = `<div class="text-center py-4 text-red-500 text-xs">Failed to communicate with office registry service.</div>`;
             }
         }
@@ -458,7 +456,6 @@
             }
         });
 
-        // STEP 1 -> STEP 2
         nextBtn.addEventListener('click', async () => {
             const firstName = document.getElementById('first_name').value.trim();
             const lastName = document.getElementById('last_name').value.trim();
@@ -491,7 +488,7 @@
 
             step1.classList.add('hidden');
             step2.classList.remove('hidden');
-            stepLabel.textContent = "Step 2: Regional Branch Node Assignment";
+            stepLabel.textContent = "Step 2: Select Branch Office";
             stepCount.textContent = "2 of 2";
             progressBar.style.width = "100%";
         });
@@ -499,12 +496,11 @@
         backBtn.addEventListener('click', () => {
             step2.classList.add('hidden');
             step1.classList.remove('hidden');
-            stepLabel.textContent = "Step 1: Identity & Sponsor Link";
+            stepLabel.textContent = "Step 1: Identity input";
             stepCount.textContent = "1 of 2";
             progressBar.style.width = "50%";
         });
 
-        // SUBMIT REGISTRATION
         onboardingForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -546,33 +542,32 @@
                 alert('Could not connect to registration server.');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Finalize Profile Registration';
+                submitBtn.textContent = 'Complete Registration';
             }
         });
 
-        // FORM TOGGLES
         toggleToLogin.addEventListener('click', () => {
             onboardingForm.classList.add('hidden');
             loginForm.classList.remove('hidden');
             progressContainer.classList.add('hidden');
-            pageTitle.textContent = "Sign In to Workspace";
-            pageSubtitle.textContent = "Enter your credentials to access your terminal.";
+            pageTitle.textContent = "Sign-In to Dashboard";
+            pageSubtitle.textContent = "Enter your credentials to access your Dashboard.";
         });
 
         toggleToRegister.addEventListener('click', () => {
             loginForm.classList.add('hidden');
             onboardingForm.classList.remove('hidden');
             progressContainer.classList.remove('hidden');
-            pageTitle.textContent = "Join Pronettech Workspace";
+            pageTitle.textContent = "ProNet-Tech Space";
             pageSubtitle.textContent = "Setup your verified corporate identity & downline profile.";
             step2.classList.add('hidden');
             step1.classList.remove('hidden');
-            stepLabel.textContent = "Step 1: Identity & Sponsor Link";
+            stepLabel.textContent = "Step 1: Identity Input";
             stepCount.textContent = "1 of 2";
             progressBar.style.width = "50%";
         });
 
-        // LOGIN SUBMISSION
+        // LOGIN SUBMISSION (Fixed for sub_admin routing)
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const payload = {
@@ -594,7 +589,7 @@
 
                     if (data.user.role === 'admin' || data.user.role === 'global_admin') {
                         window.location.href = './admin.html';
-                    } else if (data.user.role === 'leader' || data.user.role === 'team_leader') {
+                    } else if (data.user.role === 'leader' || data.user.role === 'team_leader' || data.user.role === 'sub_admin') {
                         window.location.href = './leader.html';
                     } else {
                         window.location.href = './dashboard.html';

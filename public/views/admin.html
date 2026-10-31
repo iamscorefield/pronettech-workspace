@@ -89,6 +89,38 @@
             </div>
         </div>
 
+        <!-- ================= PENDING REGISTRATION & CONSENT QUEUE ================= -->
+        <div id="pending-approval-section" class="glass-card p-6 rounded-2xl space-y-4 border-amber-200 bg-amber-50/20">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-base font-bold text-pnt-dark flex items-center gap-2">
+                        <span>Pending Accounts & Form of 9 Consent Queue</span>
+                        <span id="pending-badge-count" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">0 Pending</span>
+                    </h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Inspect signed Form of 9 consent agreements, edit registration details, and pre-approve users for workspace access</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-slate-400 uppercase font-semibold text-[10px] tracking-wider">
+                            <th class="py-3 px-4">Applicant Profile</th>
+                            <th class="py-3 px-4">Branch / State</th>
+                            <th class="py-3 px-4">Sponsor ID</th>
+                            <th class="py-3 px-4">Form of 9 Consent</th>
+                            <th class="py-3 px-4 text-right">Pre-Approval Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pending-directory-tbody" class="divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="5" class="text-center py-6 text-xs text-slate-400">Loading pending registration queue...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- ================= LEADER & SUB-ADMIN GOVERNANCE SECTION ================= -->
         <div id="leader-management-section" class="glass-card p-6 rounded-2xl space-y-4 border-blue-100">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -169,7 +201,7 @@
             <div class="lg:col-span-2 space-y-8">
                 <div class="glass-card p-6 rounded-2xl">
                     <h3 class="text-base font-bold text-pnt-dark mb-6">Administrative Control Panel</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div class="bg-purple-50/40 border border-purple-100 p-4 rounded-xl space-y-3">
                             <h4 class="text-xs font-bold uppercase tracking-wider text-pnt-purple">Regional Setup</h4>
                             <p class="text-xs text-slate-500 leading-relaxed">Audit active regional hubs or add corporate branch offices across Nigeria.</p>
@@ -183,14 +215,6 @@
                             <p class="text-xs text-slate-500 leading-relaxed">Send custom, company-wide instant push notifications to all users across every department.</p>
                             <button onclick="openModal('broadcast-modal')" class="w-full bg-[#9D4EDD] hover:opacity-90 text-white font-semibold py-2 rounded-lg text-xs transition-all duration-300 cursor-pointer">
                                 Send Push Notification
-                            </button>
-                        </div>
-
-                        <div class="bg-amber-50/40 border border-amber-100 p-4 rounded-xl space-y-3">
-                            <h4 class="text-xs font-bold uppercase tracking-wider text-amber-600">Global Settings</h4>
-                            <p class="text-xs text-slate-500 leading-relaxed">Configure default metadata styling criteria and pricing tiers for Softcopy / Hardcopy ID cards.</p>
-                            <button onclick="alert('Pricing scales configuration console locked for active quarter.')" class="w-full bg-slate-100 hover:bg-slate-200 text-pnt-dark font-semibold py-2 rounded-lg text-xs border border-slate-200 transition-all duration-300 cursor-pointer">
-                                Modify Price Scales
                             </button>
                         </div>
 
@@ -264,10 +288,62 @@
         </div>
     </main>
 
+    <!-- ================= MODAL: CONSENT INSPECTOR ================= -->
+    <div id="consent-inspector-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 relative">
+            <button type="button" onclick="closeModal('consent-inspector-modal')" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
+            <div class="border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-pnt-dark">Form of 9 Consent Agreement Audit</h3>
+                <p id="consent-audit-subtitle" class="text-xs text-slate-500 mt-0.5">Reviewing legal compliance submission.</p>
+            </div>
+            <div id="consent-audit-body" class="space-y-3 text-xs text-slate-700 max-h-[60vh] overflow-y-auto">
+                <p class="text-slate-400">Loading consent telemetry...</p>
+            </div>
+            <div class="pt-2 border-t border-slate-100 flex justify-end">
+                <button type="button" onclick="closeModal('consent-inspector-modal')" class="px-5 py-2 bg-pnt-purple text-white font-bold rounded-xl text-xs cursor-pointer">Close Audit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: PRE-APPROVAL EDIT & APPROVE ================= -->
+    <div id="preapprove-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 relative">
+            <button type="button" onclick="closeModal('preapprove-modal')" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
+            <div class="border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-pnt-dark">Pre-Approval & Registration Edit</h3>
+                <p id="preapprove-target-name" class="text-xs text-slate-500 mt-0.5">Verify and adjust applicant details before activation.</p>
+            </div>
+            <form id="preapprove-form" class="space-y-4 text-xs">
+                <input type="hidden" id="preapprove-user-id">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Assigned Branch Office</label>
+                    <select id="preapprove-office-select" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-pnt-dark focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+                        <option value="" disabled selected>Loading offices...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">State / Residence</label>
+                    <div class="relative">
+                        <select id="preapprove-state" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-pnt-dark appearance-none pr-10 focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+                            <option value="" disabled selected>Select State</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeModal('preapprove-modal')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 font-semibold rounded-xl cursor-pointer">Cancel</button>
+                    <button type="submit" class="w-1/2 py-2.5 btn-brand-gradient font-bold text-white rounded-xl shadow-md cursor-pointer">Approve & Grant Access</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ================= MODAL: EXECUTIVE DOSSIER INSPECTOR ================= -->
     <div id="user-profile-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            
+
             <!-- Modal Header -->
             <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-purple-50/40">
                 <div class="flex items-center gap-3">
@@ -287,7 +363,7 @@
 
             <!-- Scrollable Dossier Content -->
             <div class="p-6 overflow-y-auto space-y-5 text-xs text-slate-600 leading-relaxed">
-                
+
                 <!-- Core Telemetry Info -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
                     <h4 class="font-bold text-slate-900 uppercase tracking-wide text-[10px] text-pnt-purple">Contact & Assignment Telemetry</h4>
@@ -348,11 +424,11 @@
         </div>
     </div>
 
-    <!-- ================= MODAL: SUB-ADMIN PERMISSIONS OVERRIDE ================= -->
+    <!-- ================= MODAL: SUB-ADMIN PRIVILEGES OVERRIDE ================= -->
     <div id="subadmin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 relative">
             <button type="button" onclick="closeModal('subadmin-modal')" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
-            
+
             <div class="border-b border-slate-100 pb-3">
                 <h3 class="text-base font-bold text-pnt-dark">Configure Sub-Admin Privileges</h3>
                 <p id="subadmin-target-name" class="text-xs text-slate-500 mt-0.5">Select what this leader is allowed to manage.</p>
@@ -360,7 +436,7 @@
 
             <form id="subadmin-permissions-form" class="space-y-3.5">
                 <input type="hidden" id="subadmin-target-id">
-                
+
                 <div class="space-y-2.5 text-xs">
                     <label class="flex items-center gap-2.5 p-2 bg-slate-50 rounded-xl cursor-pointer">
                         <input type="checkbox" id="perm-approve-users" class="rounded text-pnt-purple focus:ring-pnt-purple w-4 h-4">
@@ -379,6 +455,39 @@
                 <div class="flex gap-2 pt-2">
                     <button type="button" onclick="closeModal('subadmin-modal')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer">Cancel</button>
                     <button type="submit" class="w-1/2 py-2.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-md transition-all cursor-pointer">Save Privileges</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: ROLE PROMOTION / OFFICE ASSIGNMENT ================= -->
+    <div id="role-assign-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 relative">
+            <button type="button" onclick="closeModal('role-assign-modal')" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
+
+            <div class="border-b border-slate-100 pb-3">
+                <h3 id="role-modal-title" class="text-base font-bold text-pnt-dark">Promote to Team Leader</h3>
+                <p id="role-modal-subtitle" class="text-xs text-slate-500 mt-0.5">Select office assignment for this role transition.</p>
+            </div>
+
+            <form id="role-assign-form" class="space-y-4 text-xs">
+                <input type="hidden" id="role-target-user-id">
+                <input type="hidden" id="role-target-next-role">
+
+                <div id="office-select-container">
+                    <label class="block font-semibold text-slate-700 mb-1">Assign Office / Branch Node</label>
+                    <select id="role-office-select" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-pnt-dark focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+                        <option value="" disabled selected>Loading active office nodes...</option>
+                    </select>
+                </div>
+
+                <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 text-[11px] text-pnt-purple leading-relaxed">
+                    💡 This will update the user's operational role and bind them to the selected regional hub office.
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeModal('role-assign-modal')" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 font-semibold rounded-xl transition-all cursor-pointer">Cancel</button>
+                    <button type="submit" id="confirm-role-btn" class="w-1/2 py-2.5 btn-brand-gradient font-bold text-white rounded-xl shadow-md cursor-pointer">Confirm Transition</button>
                 </div>
             </form>
         </div>
@@ -457,6 +566,14 @@
     <script src="/js/nav.js"></script>
 
     <script>
+        const nigerianStates = [
+            "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", 
+            "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "FCT - Abuja", "Gombe", 
+            "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", 
+            "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", 
+            "Taraba", "Yobe", "Zamfara"
+        ];
+
         let currentUser = null;
         let adminTaskQueue = [];
         let incidentReports = [];
@@ -481,6 +598,7 @@
                 }
 
                 localStorage.setItem('pnt_user', JSON.stringify(currentUser));
+                populateStateDropdowns();
                 await refreshAdminConsole();
 
                 document.getElementById('user-search-input').addEventListener('input', (e) => {
@@ -508,10 +626,23 @@
             }
         });
 
+        function populateStateDropdowns() {
+            const select = document.getElementById('preapprove-state');
+            if (!select) return;
+            select.innerHTML = '<option value="" disabled selected>Select State</option>';
+            nigerianStates.forEach(st => {
+                const opt = document.createElement('option');
+                opt.value = st;
+                opt.textContent = st;
+                select.appendChild(opt);
+            });
+        }
+
         async function refreshAdminConsole() {
             await Promise.all([
                 fetchGlobalMetrics(),
                 fetchUserDirectory(),
+                fetchPendingDirectory(),
                 fetchAdminTasksQueue(),
                 fetchIncidentReports(),
                 fetchLeadersForTaskAssignment(),
@@ -525,8 +656,34 @@
                 if (res.ok) {
                     verifiedOffices = await res.json();
                     renderOfficesInspector(verifiedOffices);
+                    populateOfficeSelectDropdown();
+                    populatePreapproveOfficeDropdown();
                 }
             } catch (err) { console.error("Offices query error:", err); }
+        }
+
+        function populateOfficeSelectDropdown() {
+            const select = document.getElementById('role-office-select');
+            if (!select) return;
+            select.innerHTML = '<option value="" disabled selected>Select regional office node...</option>';
+            verifiedOffices.forEach(office => {
+                const opt = document.createElement('option');
+                opt.value = office.id;
+                opt.textContent = `${office.branch_name} (${office.state})`;
+                select.appendChild(opt);
+            });
+        }
+
+        function populatePreapproveOfficeDropdown() {
+            const select = document.getElementById('preapprove-office-select');
+            if (!select) return;
+            select.innerHTML = '<option value="" disabled selected>Select branch office...</option>';
+            verifiedOffices.forEach(office => {
+                const opt = document.createElement('option');
+                opt.value = office.id;
+                opt.textContent = `${office.branch_name} (${office.state})`;
+                select.appendChild(opt);
+            });
         }
 
         function renderOfficesInspector(offices) {
@@ -601,6 +758,142 @@
             } catch (err) { console.error("Directory fetch error:", err); }
         }
 
+        async function fetchPendingDirectory() {
+            try {
+                const response = await fetch('/api/auth/users/all', { credentials: 'include' });
+                const resData = await response.json();
+                if (resData.success) {
+                    const pendingUsers = resData.data.filter(u => u.status === 'pending');
+                    renderPendingDirectory(pendingUsers);
+                }
+            } catch (err) { console.error("Pending fetch error:", err); }
+        }
+
+        function renderPendingDirectory(pendingUsers) {
+            const tbody = document.getElementById('pending-directory-tbody');
+            const badge = document.getElementById('pending-badge-count');
+            tbody.innerHTML = '';
+            badge.textContent = `${pendingUsers.length} Pending`;
+
+            if (!pendingUsers || pendingUsers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-xs text-slate-400">No pending registrations awaiting approval.</td></tr>`;
+                return;
+            }
+
+            pendingUsers.forEach(user => {
+                const initials = `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase() || 'U';
+                const row = document.createElement('tr');
+                row.className = "hover:bg-amber-50/40 transition-colors";
+                row.innerHTML = `
+                    <td class="py-3 px-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-800 font-bold flex items-center justify-center text-xs shrink-0">${initials}</div>
+                            <div>
+                                <div class="font-bold text-pnt-dark">${user.first_name} ${user.last_name}</div>
+                                <div class="text-[10px] text-slate-400 font-mono">${user.email} • ${user.phone_number || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 text-xs text-slate-600"><div>${user.office?.branch_name || 'Assigned Branch'}</div><div class="text-[10px] text-slate-400">${user.state || 'No State'}</div></td>
+                    <td class="py-3 px-4 font-mono text-xs text-slate-500 font-semibold">${user.sponsor_id || 'None'}</td>
+                    <td class="py-3 px-4">
+                        <button onclick="inspectUserConsent('${user.id}', '${user.first_name} ${user.last_name}')" class="text-[11px] font-bold text-pnt-purple hover:underline bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-lg cursor-pointer">
+                            Inspect Agreement ➔
+                        </button>
+                    </td>
+                    <td class="py-3 px-4 text-right space-x-2">
+                        <button onclick="openPreapproveModal('${user.id}', '${user.first_name} ${user.last_name}', '${user.office_id || ''}', '${user.state || ''}')" class="text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1 rounded-lg shadow-xs cursor-pointer">
+                            Edit & Approve
+                        </button>
+                        <button onclick="rejectPendingUser('${user.id}')" class="text-[11px] font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-2.5 py-1 rounded-lg cursor-pointer">
+                            Reject
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function inspectUserConsent(userId, userName) {
+            document.getElementById('consent-audit-subtitle').textContent = `Reviewing Form of 9 execution for: ${userName}`;
+            const body = document.getElementById('consent-audit-body');
+            body.innerHTML = `<p class="text-slate-400">Loading consent telemetry...</p>`;
+            openModal('consent-inspector-modal');
+
+            try {
+                const res = await fetch(`/api/auth/consent/${userId}`, { credentials: 'include' });
+                const data = await res.json();
+                if (data.success && data.data) {
+                    const c = data.data;
+                    body.innerHTML = `
+                        <div class="p-3 bg-slate-50 rounded-xl space-y-1 font-mono text-[11px]">
+                            <div><strong>Age Bracket:</strong> ${c.age_bracket === 'above_18' ? '18 & Above (Adult)' : 'Under 18 (Junior)'}</div>
+                            <div><strong>Signed Name:</strong> ${c.signed_name}</div>
+                            <div><strong>Signature Verification:</strong> ${c.signature_data}</div>
+                            <div><strong>Execution Timestamp:</strong> ${new Date(c.created_at || c.signed_date).toLocaleString()}</div>
+                        </div>
+                        <div class="p-3 bg-purple-50/50 rounded-xl space-y-1 text-xs">
+                            <strong>Status:</strong> Form of 9 fully read, acknowledged across all 9 slides, and digitally executed.
+                        </div>
+                    `;
+                } else {
+                    body.innerHTML = `<p class="text-amber-600">No consent record submitted yet for this user.</p>`;
+                }
+            } catch (err) {
+                body.innerHTML = `<p class="text-red-500">Failed to fetch consent agreement details.</p>`;
+            }
+        }
+
+        function openPreapproveModal(userId, name, officeId, state) {
+            document.getElementById('preapprove-user-id').value = userId;
+            document.getElementById('preapprove-target-name').textContent = `Adjust details for: ${name}`;
+            document.getElementById('preapprove-office-select').value = officeId || '';
+            document.getElementById('preapprove-state').value = state || '';
+            openModal('preapprove-modal');
+        }
+
+        document.getElementById('preapprove-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('preapprove-user-id').value;
+            const office_id = document.getElementById('preapprove-office-select').value;
+            const state = document.getElementById('preapprove-state').value;
+
+            try {
+                const res = await fetch(`/api/auth/approve/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ office_id, state })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('🎉 Member successfully approved and granted dashboard access!');
+                    closeModal('preapprove-modal');
+                    refreshAdminConsole();
+                } else {
+                    alert(`Approval failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Server connection error during approval.');
+            }
+        });
+
+        async function rejectPendingUser(userId) {
+            if (!confirm('Reject this registration? This will mark the account as rejected.')) return;
+            try {
+                const res = await fetch(`/api/auth/reject/${userId}`, { method: 'PUT', credentials: 'include' });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Registration rejected.');
+                    refreshAdminConsole();
+                } else {
+                    alert(`Failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Connection error.');
+            }
+        }
+
         function renderLeaderDirectory(leaders) {
             const tbody = document.getElementById('leader-directory-tbody');
             tbody.innerHTML = '';
@@ -641,7 +934,7 @@
                         <button onclick="openSubAdminModal('${leader.id}', '${leader.first_name} ${leader.last_name}', '${leader.role}')" class="text-[11px] font-bold text-pnt-purple hover:underline bg-purple-50 hover:bg-purple-100 border border-purple-200 px-2.5 py-1 rounded-lg cursor-pointer">
                             ${isSubAdmin ? 'Edit Privileges' : 'Promote to Sub-Admin'}
                         </button>
-                        <button onclick="toggleUserRole('${leader.id}', '${leader.role}')" class="text-[11px] font-bold text-red-600 hover:underline bg-red-50 hover:bg-red-100 border border-red-200 px-2.5 py-1 rounded-lg cursor-pointer">
+                        <button onclick="promptRoleTransition('${leader.id}', 'member')" class="text-[11px] font-bold text-red-600 hover:underline bg-red-50 hover:bg-red-100 border border-red-200 px-2.5 py-1 rounded-lg cursor-pointer">
                             Demote
                         </button>
                     </td>
@@ -686,19 +979,72 @@
             } catch (err) { alert('Server connection error.'); }
         });
 
+        function promptRoleTransition(userId, nextRole) {
+            document.getElementById('role-target-user-id').value = userId;
+            document.getElementById('role-target-next-role').value = nextRole;
+
+            const isMakingLeader = nextRole === 'leader' || nextRole === 'team_leader';
+            document.getElementById('role-modal-title').textContent = isMakingLeader ? "Promote User to Team Leader" : "Revert Role to Standard Member";
+            document.getElementById('role-modal-subtitle').textContent = isMakingLeader ? "Select target office/branch node for this leader." : "Confirm role adjustment back to standard member status.";
+
+            const officeContainer = document.getElementById('office-select-container');
+            if (isMakingLeader) {
+                officeContainer.classList.remove('hidden');
+                document.getElementById('role-office-select').required = true;
+            } else {
+                officeContainer.classList.add('hidden');
+                document.getElementById('role-office-select').required = false;
+            }
+
+            openModal('role-assign-modal');
+        }
+
+        document.getElementById('role-assign-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('role-target-user-id').value;
+            const role = document.getElementById('role-target-next-role').value;
+            const office_id = document.getElementById('role-office-select').value;
+
+            const payload = { role };
+            if (role === 'leader' || role === 'team_leader') {
+                payload.office_id = office_id;
+            }
+
+            try {
+                const res = await fetch(`/api/auth/users/${userId}/role`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`✅ Successfully updated role to ${role.toUpperCase()}!`);
+                    closeModal('role-assign-modal');
+                    refreshAdminConsole();
+                } else {
+                    alert(`Failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Connection error during role transition.');
+            }
+        });
+
         function renderUserDirectory(users) {
             const tbody = document.getElementById('user-directory-tbody');
             tbody.innerHTML = '';
 
-            if (!users || users.length === 0) {
+            const activeUsers = users.filter(u => u.status !== 'pending');
+
+            if (!activeUsers || activeUsers.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-xs text-slate-400">No personnel records found.</td></tr>`;
                 return;
             }
 
-            users.forEach(user => {
+            activeUsers.forEach(user => {
                 const isLeader = user.role === 'leader' || user.role === 'team_leader' || user.role === 'sub_admin';
                 const isAdmin = user.role === 'admin' || user.role === 'global_admin';
-                
+
                 let roleBadge = "bg-purple-50 text-pnt-purple border border-purple-200";
                 let roleLabel = "Member";
 
@@ -706,8 +1052,20 @@
                 else if (user.role === 'sub_admin') { roleBadge = "bg-amber-100 text-amber-800 border border-amber-300"; roleLabel = "Sub-Admin"; }
                 else if (isLeader) { roleBadge = "bg-blue-50 text-[#0070c0] border border-blue-200"; roleLabel = "Team Leader"; }
 
-                let statusBadge = "bg-emerald-50 text-emerald-700 border-emerald-200";
                 const userStatus = (user.status || 'active').toLowerCase();
+                const isAlreadyActive = userStatus === 'active';
+
+                // DISTINCT COLOR-CODED STATUS BADGES
+                let statusBadge = "bg-emerald-50 text-emerald-700 border-emerald-200"; // default active
+                if (userStatus === 'warning') {
+                    statusBadge = "bg-amber-50 text-amber-700 border-amber-300 font-bold";
+                } else if (userStatus === 'inactive') {
+                    statusBadge = "bg-slate-100 text-slate-600 border-slate-300";
+                } else if (userStatus === 'suspended') {
+                    statusBadge = "bg-orange-50 text-orange-700 border-orange-300 font-bold";
+                } else if (userStatus === 'banned' || userStatus === 'ban') {
+                    statusBadge = "bg-red-100 text-red-800 border-red-400 font-bold";
+                }
 
                 const initials = `${user.first_name?.[0] || ''}${user.last_name?.[0] || ''}`.toUpperCase() || 'U';
                 const avatarMarkup = user.avatar_url 
@@ -731,12 +1089,66 @@
                     <td class="py-3 px-4 font-mono text-xs text-slate-500 font-semibold">${user.sponsor_id || '<span class="text-slate-300">None</span>'}</td>
                     <td class="py-3 px-4"><span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${roleBadge}">${roleLabel}</span></td>
                     <td class="py-3 px-4"><span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${statusBadge}">${userStatus}</span></td>
-                    <td class="py-3 px-4 text-center">${isAdmin ? `<span class="text-[10px] font-mono text-slate-400 uppercase">Protected</span>` : `<button onclick="toggleUserRole('${user.id}', '${user.role}')" class="text-[11px] font-bold text-pnt-purple hover:underline bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-lg cursor-pointer">Make ${user.role === 'member' ? 'Leader' : 'Member'}</button>`}</td>
-                    <td class="py-3 px-4 text-right">${isAdmin ? `<span class="text-[10px] font-mono text-slate-400">---</span>` : `<select onchange="initiateDisciplinaryAction('${user.id}', '${user.first_name}${user.last_name}', this)" class="bg-slate-50 border border-slate-200 text-[11px] font-semibold text-slate-700 rounded-lg px-2 py-1 cursor-pointer"><option value="" disabled selected>Action</option><option value="active">Set Active</option><option value="warning">Issue Warning</option><option value="inactive">Mark Inactive</option><option value="suspended">Suspend</option><option value="ban">Ban</option></select>`}</td>
+                    <td class="py-3 px-4 text-center">${isAdmin ? `<span class="text-[10px] font-mono text-slate-400 uppercase">Protected</span>` : `<button onclick="promptRoleTransition('${user.id}', '${user.role === 'member' ? 'leader' : 'member'}')" class="text-[11px] font-bold text-pnt-purple hover:underline bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-lg cursor-pointer">Make ${user.role === 'member' ? 'Leader' : 'Member'}</button>`}</td>
+                    <td class="py-3 px-4 text-right">${isAdmin ? `<span class="text-[10px] font-mono text-slate-400">---</span>` : `<select onchange="initiateDisciplinaryAction('${user.id}', '${user.first_name} ${user.last_name}', this)" class="bg-slate-50 border border-slate-200 text-[11px] font-semibold text-slate-700 rounded-lg px-2 py-1 cursor-pointer"><option value="" disabled selected>Action</option>${!isAlreadyActive ? '<option value="active">Set Active</option>' : ''}<option value="pending">Set Pending (Form of 9)</option><option value="warning">Issue Warning</option><option value="inactive">Mark Inactive</option><option value="suspended">Suspend</option><option value="ban">Ban</option></select>`}</td>
                 `;
                 tbody.appendChild(row);
             });
         }
+
+        function initiateDisciplinaryAction(userId, userName, selectEl) {
+            const status = selectEl.value;
+            selectEl.value = "";
+            if (!status) return;
+
+            document.getElementById('action-target-user-id').value = userId;
+            document.getElementById('action-target-status').value = status;
+
+            const modalTitle = document.getElementById('modal-action-title');
+            const reasonContainer = document.getElementById('reason-container');
+            const reasonInput = document.getElementById('action-reason');
+
+            if (status === 'active' || status === 'pending') {
+                modalTitle.textContent = status === 'active' ? `Set Account Active: ${userName}` : `Reset to Pending: ${userName}`;
+                reasonContainer.classList.add('hidden');
+                reasonInput.required = false;
+                reasonInput.value = status === 'active' ? "Restored to active status by admin command." : "Reset to pending compliance review by admin command.";
+            } else {
+                modalTitle.textContent = `Apply Action (${status.toUpperCase()}): ${userName}`;
+                reasonContainer.classList.remove('hidden');
+                reasonInput.required = true;
+                reasonInput.value = "";
+            }
+
+            openModal('disciplinary-modal');
+        }
+
+        document.getElementById('disciplinary-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('action-target-user-id').value;
+            const status = document.getElementById('action-target-status').value;
+            const reason = document.getElementById('action-reason').value;
+
+            try {
+                const response = await fetch(`/api/auth/users/${userId}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ status, reason })
+                });
+
+                const resData = await response.json();
+                if (resData.success) {
+                    alert(resData.message);
+                    closeModal('disciplinary-modal');
+                    refreshAdminConsole();
+                } else {
+                    alert(`Failed: ${resData.message}`);
+                }
+            } catch (err) {
+                alert('Server connection error during disciplinary action.');
+            }
+        });
 
         async function inspectUserProfile(user) {
             document.getElementById('inspect-fullname').textContent = `${user.first_name} ${user.last_name}`;
@@ -761,17 +1173,14 @@
                 avatarContainer.innerHTML = `<span class="font-bold text-base">${initials}</span>`;
             }
 
-            // Format Sign-Up Date
             const signupDate = user.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown';
             document.getElementById('inspect-signup-date').textContent = signupDate;
 
-            // Default temporary values while fetching telemetry
             document.getElementById('inspect-attendance-ratio').textContent = "Fetching telemetry...";
             document.getElementById('inspect-ledger-tbody').innerHTML = `<tr><td colspan="4" class="text-center py-3 text-slate-400">Loading ledger...</td></tr>`;
 
             openModal('user-profile-modal');
 
-            // Fetch extended telemetry (attendance counts & transaction ledger)
             try {
                 const res = await fetch(`/api/auth/profile/telemetry/${user.id}`, { credentials: 'include' });
                 const data = await res.json();
@@ -808,26 +1217,6 @@
                 document.getElementById('inspect-attendance-ratio').textContent = "Telemetry unavailable";
                 document.getElementById('inspect-ledger-tbody').innerHTML = `<tr><td colspan="4" class="text-center py-3 text-red-400">Failed to load financial ledger.</td></tr>`;
             }
-        }
-
-        async function toggleUserRole(userId, currentRole) {
-            const nextRole = (currentRole === 'member') ? 'leader' : 'member';
-            if (!confirm(`Switch this user role to ${nextRole.toUpperCase()}?`)) return;
-
-            try {
-                const response = await fetch(`/api/auth/users/${userId}/role`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ role: nextRole })
-                });
-
-                const resData = await response.json();
-                if (resData.success) {
-                    alert(resData.message);
-                    refreshAdminConsole();
-                } else { alert(`Failed: ${resData.message}`); }
-            } catch (err) { alert("Server connection failed."); }
         }
 
         async function fetchGlobalMetrics() {

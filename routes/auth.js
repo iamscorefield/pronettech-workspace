@@ -1,3 +1,8 @@
+/**
+ * Pronettech Workspace - Authentication & User Management Router
+ * File: routes/auth.js
+ */
+
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
@@ -10,6 +15,38 @@ const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
+
+// Helper function for Official Launch Trial (November 1, 2026)
+function calculateTrialStatus(profile) {
+    const launchDate = new Date('2026-11-01T00:00:00Z'); // Official Launch Nov 1, 2026
+    const trialExpiresAt = new Date(launchDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // Dec 1, 2026
+    const now = new Date();
+
+    const diffTime = trialExpiresAt - now;
+    let daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    let isExpired = false;
+
+    if (daysRemaining > 0) {
+        isExpired = false;
+    } else {
+        daysRemaining = 0;
+        isExpired = true;
+    }
+
+    // If user has paid annual membership or softcopy, override expiration
+    const isAnnualPaid = profile.membership_expires_at && new Date(profile.membership_expires_at) > now;
+    const hasPaidSoftcopy = Boolean(profile.has_paid_softcopy);
+
+    if (isAnnualPaid || hasPaidSoftcopy) {
+        isExpired = false;
+    }
+
+    return {
+        trialExpiresAt: trialExpiresAt.toISOString(),
+        daysRemaining,
+        isExpired
+    };
+}
 
 // ===================================================
 // 1. LIVE SPONSOR VALIDATION ENDPOINT (STRICT GATEWAY)
@@ -90,21 +127,7 @@ router.get('/me', protect, async (req, res) => {
             }
         }
 
-        const now = new Date();
-        const expiresAt = profile.membership_expires_at ? new Date(profile.membership_expires_at) : null;
-        let daysRemaining = null;
-        let isExpired = true;
-
-        if (expiresAt && !isNaN(expiresAt.getTime())) {
-            const diffTime = expiresAt - now;
-            daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            if (daysRemaining > 0) {
-                isExpired = false;
-            } else {
-                daysRemaining = 0;
-                isExpired = true;
-            }
-        }
+        const trialInfo = calculateTrialStatus(profile);
 
         return res.status(200).json({
             success: true,
@@ -114,10 +137,11 @@ router.get('/me', protect, async (req, res) => {
                 permissions: null,
                 status: profile.status || 'active',
                 status_reason: profile.status_reason || null,
-                membership_expires_at: profile.membership_expires_at || null,
+                created_at: profile.created_at || new Date().toISOString(),
+                membership_expires_at: trialInfo.trialExpiresAt,
                 has_paid_softcopy: Boolean(profile.has_paid_softcopy),
-                days_remaining: daysRemaining,
-                is_expired: isExpired,
+                days_remaining: trialInfo.daysRemaining,
+                is_expired: trialInfo.isExpired,
                 first_name: profile.first_name || '',
                 last_name: profile.last_name || '',
                 name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(),
@@ -349,7 +373,7 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // ===================================================
-// 6. SIGNUP ROUTE (ZERO MOCK MEMBERSHIP DURATION)
+// 6. SIGNUP ROUTE
 // ===================================================
 router.post('/signup', async (req, res) => {
     const { email, password, first_name, last_name, phone_number, state, office_id, sponsor_id } = req.body;
@@ -445,7 +469,7 @@ router.post('/signup', async (req, res) => {
 });
 
 // ===================================================
-// 7. LOGIN ROUTE (BULLETPROOF BYPASS)
+// 7. LOGIN ROUTE
 // ===================================================
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -493,6 +517,8 @@ router.post('/login', async (req, res) => {
             }
         }
 
+        const trialInfo = calculateTrialStatus(profile);
+
         const token = jwt.sign(
             { id: profile.id, role: profile.role || 'member', customId: profile.custom_profile_id },
             process.env.JWT_SECRET,
@@ -515,8 +541,11 @@ router.post('/login', async (req, res) => {
                 permissions: null,
                 status: profile.status || 'active', 
                 status_reason: profile.status_reason || null, 
-                membership_expires_at: profile.membership_expires_at || null,
+                created_at: profile.created_at || new Date().toISOString(),
+                membership_expires_at: trialInfo.trialExpiresAt,
                 has_paid_softcopy: Boolean(profile.has_paid_softcopy),
+                days_remaining: trialInfo.daysRemaining,
+                is_expired: trialInfo.isExpired,
                 name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim(), 
                 email: profile.email, 
                 phone_number: profile.phone_number || '', 
@@ -536,9 +565,9 @@ router.post('/login', async (req, res) => {
 });
 
 // ===================================================
-// 8. LEADER REGISTRATION CONTROLS
+// 8. LEADER REGISTRATION CONTROLS & CONSENT PIPELINE
 // ===================================================
-router.get('/pending/office/:officeId', protect, authorize('leader', 'team_leader', 'sub_admin', 'admin'), async (req, res) => {
+router.get('/pending/office/:officeId', protect, authorize('leader', 'team_leader', 'sub_admin', 'admin', 'global_admin'), async (req, res) => {
     const { officeId } = req.params;
     try {
         const { data, error } = await supabase
@@ -557,12 +586,73 @@ router.get('/pending/office/:officeId', protect, authorize('leader', 'team_leade
     }
 });
 
-router.put('/approve/:profileId', protect, authorize('leader', 'team_leader', 'sub_admin', 'admin'), async (req, res) => {
-    const { profileId } = req.params;
+router.post('/consent', protect, async (req, res) => {
+    const { age_bracket, slide_acknowledgments, signed_name, signature_data } = req.body;
+
+    if (!age_bracket || !signed_name || !signature_data) {
+        return res.status(400).json({ success: false, message: 'Age bracket and legal signature details are required.' });
+    }
+
     try {
         const { data, error } = await supabase
+            .from('user_consents')
+            .insert([{
+                user_id: req.user.id,
+                age_bracket,
+                slide_acknowledgments: slide_acknowledgments || {},
+                signed_name: signed_name.trim(),
+                signature_data: signature_data.trim()
+            }])
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        return res.status(201).json({
+            success: true,
+            message: 'Consent agreement successfully recorded.',
+            data
+        });
+    } catch (err) {
+        console.error('Consent submission error:', err.message);
+        return res.status(500).json({ success: false, message: 'Failed to record consent agreement.' });
+    }
+});
+
+router.get('/consent/:userId', protect, authorize('admin', 'sub_admin', 'global_admin', 'leader', 'team_leader'), async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const { data, error } = await supabase
+            .from('user_consents')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (error) throw error;
+        if (!data) {
+            return res.status(404).json({ success: false, message: 'No consent record found for this user.' });
+        }
+        return res.status(200).json({ success: true, data });
+    } catch (err) {
+        console.error('Fetch consent error:', err.message);
+        return res.status(500).json({ success: false, message: 'Could not fetch user consent record.' });
+    }
+});
+
+router.put('/approve/:profileId', protect, authorize('leader', 'team_leader', 'sub_admin', 'admin', 'global_admin'), async (req, res) => {
+    const { profileId } = req.params;
+    const { office_id, state } = req.body;
+
+    try {
+        const updatePayload = { status: 'active' };
+        if (office_id) updatePayload.office_id = office_id;
+        if (state) updatePayload.state = state.trim();
+
+        const { data, error } = await supabase
             .from('profiles')
-            .update({ status: 'active' })
+            .update(updatePayload)
             .eq('id', profileId)
             .select();
 
@@ -574,7 +664,7 @@ router.put('/approve/:profileId', protect, authorize('leader', 'team_leader', 's
     }
 });
 
-router.put('/reject/:profileId', protect, authorize('leader', 'team_leader', 'sub_admin', 'admin'), async (req, res) => {
+router.put('/reject/:profileId', protect, authorize('leader', 'team_leader', 'sub_admin', 'admin', 'global_admin'), async (req, res) => {
     const { profileId } = req.params;
     try {
         const { data, error } = await supabase
@@ -594,7 +684,7 @@ router.put('/reject/:profileId', protect, authorize('leader', 'team_leader', 'su
 // ===================================================
 // 9. GLOBAL METRICS FOR ADMIN COMMAND CENTER
 // ===================================================
-router.get('/metrics/global', protect, authorize('admin', 'sub_admin'), async (req, res) => {
+router.get('/metrics/global', protect, authorize('admin', 'sub_admin', 'global_admin'), async (req, res) => {
     try {
         const { count: totalStaff, error: staffError } = await supabase
             .from('profiles')
@@ -643,11 +733,11 @@ router.get('/metrics/global', protect, authorize('admin', 'sub_admin'), async (r
 // ===================================================
 // 10. ADMIN DIRECTORY & DISCIPLINARY ACTIONS
 // ===================================================
-router.get('/users/all', protect, authorize('admin', 'sub_admin'), async (req, res) => {
+router.get('/users/all', protect, authorize('admin', 'sub_admin', 'global_admin'), async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, email, phone_number, bio, state, sponsor_id, custom_profile_id, role, status, status_reason, membership_expires_at, has_paid_softcopy, created_at, avatar_url, office:offices(branch_name)')
+            .select('id, first_name, last_name, email, phone_number, bio, state, sponsor_id, custom_profile_id, role, status, status_reason, membership_expires_at, has_paid_softcopy, created_at, avatar_url, office_id, office:offices(branch_name)')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -658,8 +748,7 @@ router.get('/users/all', protect, authorize('admin', 'sub_admin'), async (req, r
     }
 });
 
-// NEW ENDPOINT: Fetch office team members for leaders & admins
-router.get('/users/office/:officeId', protect, authorize('leader', 'team_leader', 'sub_admin', 'admin'), async (req, res) => {
+router.get('/users/office/:officeId', protect, authorize('leader', 'team_leader', 'sub_admin', 'admin', 'global_admin'), async (req, res) => {
     try {
         const { officeId } = req.params;
         const { data, error } = await supabase
@@ -676,16 +765,17 @@ router.get('/users/office/:officeId', protect, authorize('leader', 'team_leader'
     }
 });
 
-router.patch('/users/:id/role', protect, authorize('admin'), async (req, res) => {
+router.patch('/users/:id/role', protect, authorize('admin', 'global_admin'), async (req, res) => {
     try {
         const { id } = req.params;
-        const { role } = req.body;
+        const { role, office_id } = req.body;
 
         if (!['member', 'leader', 'team_leader', 'sub_admin'].includes(role)) {
             return res.status(400).json({ success: false, message: 'Invalid target role specification.' });
         }
 
         const updatePayload = { role };
+        if (office_id) updatePayload.office_id = office_id;
 
         const { data, error } = await supabase
             .from('profiles')
@@ -707,49 +797,65 @@ router.patch('/users/:id/role', protect, authorize('admin'), async (req, res) =>
     }
 });
 
-router.patch('/users/:id/status', protect, authorize('admin', 'sub_admin'), async (req, res) => {
+router.patch('/users/:id/status', protect, async (req, res) => {
     try {
+        const adminId = req.user.id;
+        
+        const { data: adminProfile, error: adminErr } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', adminId)
+            .single();
+
+        if (adminErr || !adminProfile || !['admin', 'global_admin', 'sub_admin'].includes(adminProfile.role)) {
+            return res.status(403).json({ success: false, message: 'Unauthorized: Admin privileges required.' });
+        }
+
         const { id } = req.params;
         const { status, reason } = req.body;
 
-        const validStatuses = ['active', 'warning', 'inactive', 'suspended', 'ban', 'banned'];
-        if (!validStatuses.includes(status?.toLowerCase())) {
-            return res.status(400).json({ success: false, message: 'Invalid status provided.' });
+        let dbStatus = status?.toLowerCase();
+        if (dbStatus === 'ban') dbStatus = 'banned';
+
+        const validStatuses = ['active', 'pending', 'warning', 'inactive', 'suspended', 'banned'];
+        if (!validStatuses.includes(dbStatus)) {
+            dbStatus = 'suspended';
         }
 
-        if (status !== 'active' && (!reason || reason.trim() === '')) {
+        if (dbStatus !== 'active' && dbStatus !== 'pending' && (!reason || reason.trim() === '')) {
             return res.status(400).json({ success: false, message: 'A written justification or reason is required for disciplinary actions.' });
         }
-
-        const normalizedStatus = status === 'ban' ? 'banned' : status.toLowerCase();
 
         const { data, error } = await supabase
             .from('profiles')
             .update({ 
-                status: normalizedStatus,
-                status_reason: status === 'active' ? null : reason.trim()
+                status: dbStatus,
+                status_reason: (dbStatus === 'active' || dbStatus === 'pending') ? null : reason.trim()
             })
             .eq('id', id)
-            .select()
-            .single();
+            .select();
 
         if (error) throw error;
 
+        if (!data || data.length === 0) {
+            return res.status(404).json({ success: false, message: 'User profile not found in database.' });
+        }
+
         return res.json({
             success: true,
-            message: `User status set to ${normalizedStatus.toUpperCase()} successfully.`,
-            data
+            message: `User status set to ${dbStatus.toUpperCase()} successfully.`,
+            data: data[0]
         });
     } catch (err) {
         console.error('Admin status update failed:', err);
-        return res.status(500).json({ success: false, message: 'Failed to apply disciplinary action.' });
+        return res.status(500).json({ success: false, message: `Failed: ${err.message}` });
     }
 });
 
 // ===================================================
 // 11. FINANCIAL & ATTENDANCE DATA ENDPOINTS
 // ===================================================
-router.get('/ledger/all', protect, authorize('admin', 'sub_admin'), async (req, res) => {
+router.get('/ledger/all', protect, authorize('admin', 'sub_admin', 'global_admin'), async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('ledger')
@@ -765,12 +871,12 @@ router.get('/ledger/all', protect, authorize('admin', 'sub_admin'), async (req, 
     }
 });
 
-router.get('/attendance/all', protect, authorize('admin', 'sub_admin', 'leader', 'team_leader'), async (req, res) => {
+router.get('/attendance/all', protect, authorize('admin', 'sub_admin', 'leader', 'team_leader', 'global_admin'), async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('attendance')
-            .select('*')
-            .order('created_at', { ascending: false });
+            .select('*, profiles:profile_id(first_name, last_name, email, custom_profile_id)')
+            .order('marked_time', { ascending: false });
 
         if (error) {
             return res.status(200).json({ success: true, data: [] });
@@ -816,14 +922,15 @@ router.post('/announcements', protect, authorize('admin', 'sub_admin', 'global_a
                 author_id: req.user.id,
                 is_global: true
             }])
-            .select();
+            .select()
+            .single();
 
         if (error) throw error;
 
         return res.status(201).json({
             success: true,
             message: 'Announcement broadcasted successfully!',
-            data: data[0]
+            data
         });
     } catch (err) {
         console.error('Announcement creation error:', err.message);
@@ -832,40 +939,56 @@ router.post('/announcements', protect, authorize('admin', 'sub_admin', 'global_a
 });
 
 // ===================================================
-// 13. USER PROFILE TELEMETRY ENDPOINT (DOSSIER DATA)
+// 13. USER PROFILE TELEMETRY ENDPOINT (CORRECTED COLUMN)
 // ===================================================
 router.get('/profile/telemetry/:userId', protect, async (req, res) => {
     try {
         const { userId } = req.params;
 
-        // 1. Fetch total confirmed attendance logs for this user
-        const { data: attendanceLogs, error: attError } = await supabase
-            .from('attendance')
-            .select('marked_time, status')
-            .eq('user_id', userId)
+        // Count confirmed attendance logs using the correct profile_id column
+        let attendanceCount = 0;
+        const { count: attCount, error: attError } = await supabase
+            .from('attendance_logs')
+            .select('*', { count: 'exact', head: true })
+            .eq('profile_id', userId)
             .eq('status', 'confirmed');
 
-        if (attError) throw attError;
-        const attendanceCount = attendanceLogs ? attendanceLogs.length : 0;
+        if (!attError && attCount !== null) {
+            attendanceCount = attCount;
+        }
 
-        // 2. Fetch financial transaction records or ledger items for this user
         let transactions = [];
-        const { data: ledgerData, error: ledgerError } = await supabase
-            .from('ledger')
+
+        // Fetch financial transactions (Deposits) and tag them explicitly
+        const { data: finData, error: finError } = await supabase
+            .from('financial_transactions')
             .select('*')
             .eq('user_id', userId)
             .order('created_at', { ascending: false });
 
-        if (!ledgerError && ledgerData) {
-            transactions = ledgerData;
-        } else {
-            // Fallback check if user_id column is named differently or query marketplace payments table if applicable
-            const { data: payData } = await supabase
-                .from('payments')
-                .select('*')
-                .eq('user_id', userId)
-                .order('created_at', { ascending: false });
-            if (payData) transactions = payData;
+        if (!finError && finData) {
+            const taggedDeposits = finData.map(tx => ({
+                ...tx,
+                transaction_type: 'deposit',
+                purpose: tx.category || tx.purpose || tx.description || 'Workspace Deposit'
+            }));
+            transactions = transactions.concat(taggedDeposits);
+        }
+
+        // Fetch withdrawal requests (Withdrawals) and tag them explicitly
+        const { data: wdData, error: wdError } = await supabase
+            .from('withdrawal_requests')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+
+        if (!wdError && wdData) {
+            const taggedWithdrawals = wdData.map(wd => ({
+                ...wd,
+                transaction_type: 'withdrawal',
+                purpose: wd.purpose || 'Cash Payout Withdrawal'
+            }));
+            transactions = transactions.concat(taggedWithdrawals);
         }
 
         return res.status(200).json({
@@ -878,6 +1001,82 @@ router.get('/profile/telemetry/:userId', protect, async (req, res) => {
     } catch (err) {
         console.error('Error fetching profile telemetry:', err.message);
         return res.status(500).json({ success: false, message: 'Could not fetch telemetry records.' });
+    }
+});
+
+// ===================================================
+// 14. LIVE SIDEBAR BADGES SUMMARY ENDPOINT
+// ===================================================
+router.get('/badges/summary', protect, async (req, res) => {
+    try {
+        let attendancePending = 0;
+        let financePending = 0;
+        let communityUnread = 0;
+        let announcementsUnread = 0;
+
+        // 1. Check unapproved records in attendance_logs
+        try {
+            const { count, error } = await supabase
+                .from('attendance_logs')
+                .select('*', { count: 'exact', head: true })
+                .neq('status', 'confirmed');
+            
+            if (!error && count !== null) {
+                attendancePending = count;
+            } else {
+                const { count: pendingCount } = await supabase
+                    .from('attendance_logs')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('status', 'pending');
+                if (pendingCount) attendancePending = pendingCount;
+            }
+        } catch (e) {}
+
+        // 2. Check pending wallet/finance requests
+        try {
+            const { count } = await supabase
+                .from('withdrawal_requests')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'pending');
+            if (count) financePending = count;
+        } catch (e) {
+            try {
+                const { count } = await supabase
+                    .from('ledger')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('status', 'pending');
+                if (count) financePending = count;
+            } catch (err) {}
+        }
+
+        // 3. Check community unread items in channel_messages
+        try {
+            const { count } = await supabase
+                .from('channel_messages')
+                .select('*', { count: 'exact', head: true });
+            if (count) communityUnread = count;
+        } catch (e) {}
+
+        // 4. Check announcements count
+        try {
+            const { count } = await supabase
+                .from('announcements')
+                .select('*', { count: 'exact', head: true });
+            if (count) announcementsUnread = count;
+        } catch (e) {}
+
+        return res.json({
+            success: true,
+            badges: {
+                attendance: attendancePending,
+                finance: financePending,
+                community: communityUnread,
+                announcements: announcementsUnread
+            }
+        });
+    } catch (err) {
+        console.error('Badges summary fetch error:', err);
+        return res.status(500).json({ success: false, message: err.message });
     }
 });
 

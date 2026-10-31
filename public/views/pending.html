@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronettech Workspace | Account Verification & Compliance</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pnt: {
+                            dark: '#0D122B',
+                            purple: '#6A1BBF',
+                            'purple-light': '#9D4EDD',
+                            orange: '#FF7A00',
+                            gold: '#FFC107'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-full bg-slate-50 text-pnt-dark flex flex-col justify-between selection:bg-pnt-purple selection:text-white">
+
+    <!-- Top Navigation / Brand Bar -->
+    <header class="w-full border-b border-slate-200 bg-white/90 backdrop-blur-md px-6 py-4 flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-pnt-purple flex items-center justify-center font-black text-white shadow-md shadow-pnt-purple/20">P</div>
+            <div>
+                <h1 class="text-sm font-black tracking-tight text-pnt-dark">Pronettech Workspace</h1>
+                <p class="text-[10px] text-slate-500 font-mono">Compliance & Security Gateway</p>
+            </div>
+        </div>
+        <button onclick="handleLogout()" class="text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition-all cursor-pointer">
+            Sign Out
+        </button>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-3xl mx-auto px-6 py-12 w-full space-y-8 my-auto">
+
+        <!-- Status Card -->
+        <div class="bg-white border border-slate-200/80 p-8 rounded-3xl shadow-xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-pnt-purple/5 rounded-full blur-3xl -z-10"></div>
+            
+            <div class="space-y-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold uppercase tracking-wider">
+                    <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    Account Status: Pending Administrative Pre-Approval
+                </div>
+                
+                <h2 class="text-2xl sm:text-3xl font-black text-pnt-dark tracking-tight">Welcome, <span id="user-display-name" class="text-pnt-purple">Member</span></h2>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    Your workspace registration has been received. Before your account can be activated by your regional Team Leader or Administrator, you are required to review and sign our mandatory <strong class="text-pnt-dark">"Form of 9" Compliance Agreement</strong>.
+                </p>
+            </div>
+
+            <!-- Age Bracket Selection Gate -->
+            <div id="age-gate-container" class="mt-8 pt-6 border-t border-slate-100 space-y-4">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Step 1: Select Your Age Bracket</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Over 18 Button (Purple Accent) -->
+                    <button type="button" onclick="selectAgeBracket('above_18')" class="p-4 rounded-2xl bg-purple-50/40 hover:bg-purple-50 border-2 border-pnt-purple text-left transition-all cursor-pointer group shadow-2xs">
+                        <div class="font-black text-pnt-purple text-sm">18 Years & Above</div>
+                        <div class="text-[11px] text-slate-600 mt-1">Standard adult member participation & workspace accountability terms.</div>
+                    </button>
+                    <!-- Under 18 Button (Orange Accent) -->
+                    <button type="button" onclick="triggerUnder18Warning()" class="p-4 rounded-2xl bg-orange-50/40 hover:bg-orange-50 border-2 border-pnt-orange text-left transition-all cursor-pointer group shadow-2xs">
+                        <div class="font-black text-pnt-orange text-sm">Under 18 Years</div>
+                        <div class="text-[11px] text-slate-600 mt-1">Junior participant terms requiring parental/guardian oversight.</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- "Form of 9" Slides Container (Hidden initially) -->
+            <div id="form-of-9-container" class="hidden mt-8 pt-6 border-t border-slate-100 space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <button type="button" onclick="resetAgeBracket()" class="text-[10px] font-bold text-pnt-purple hover:underline mb-1 block cursor-pointer">← Change Age Bracket / Reset</button>
+                        <h3 class="text-xs font-bold text-pnt-purple uppercase tracking-wider" id="slide-header-title">Form of 9: Slide 1 of 12</h3>
+                    </div>
+                    <div class="flex gap-1 flex-wrap max-w-xs justify-end" id="slide-dots">
+                        <!-- Dots populated via JS -->
+                    </div>
+                </div>
+
+                <!-- Slide Content Box -->
+                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl min-h-[300px] flex flex-col justify-between space-y-4 shadow-inner">
+                    <div id="slide-content" class="text-xs sm:text-sm text-slate-700 leading-relaxed space-y-3 max-h-[380px] overflow-y-auto pr-2">
+                        <!-- Detailed slide body injected here -->
+                    </div>
+                    <div class="flex items-center gap-2 pt-3 border-t border-slate-200/60">
+                        <input type="checkbox" id="slide-ack-check" class="rounded bg-white border-slate-300 text-pnt-purple focus:ring-pnt-purple w-4 h-4 cursor-pointer">
+                        <label for="slide-ack-check" class="text-xs font-medium text-slate-700 cursor-pointer">I have read, understood, and agree to the comprehensive terms outlined in this section.</label>
+                    </div>
+                </div>
+
+                <!-- Slider Navigation -->
+                <div class="flex justify-between items-center">
+                    <button type="button" id="prev-slide-btn" onclick="prevSlide()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed">
+                        ← Previous Slide
+                    </button>
+                    <button type="button" id="next-slide-btn" onclick="nextSlide()" disabled class="px-6 py-2.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                        Next Slide →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Final Signature & Submission Panel (Hidden until Slide 12 acknowledged) -->
+            <div id="signature-panel" class="hidden mt-8 pt-6 border-t border-slate-100 space-y-6">
+                <div class="bg-purple-50 border border-purple-100 p-4 rounded-2xl space-y-1">
+                    <h4 class="text-xs font-bold text-pnt-purple uppercase tracking-wider">Final Legal Attestation</h4>
+                    <p class="text-xs text-slate-600">By typing your legal name and providing your digital confirmation below, you formally execute the Pronettech Workspace Form of 9 Compliance Agreement.</p>
+                </div>
+
+                <form id="consent-submit-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Full Legal Name (Typed Signature)</label>
+                        <input type="text" id="sig-legal-name" required placeholder="e.g., Segun Aremu" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Digital Verification Code / Confirmation Statement</label>
+                        <input type="text" id="sig-code" required placeholder="Type 'I AGREE AND EXECUTE'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-mono text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+                    </div>
+
+                    <button type="submit" id="submit-consent-btn" class="w-full py-3.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-lg transition-all cursor-pointer">
+                        Submit Signed Form of 9 & Await Approval
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ================= MODAL: UNDER 18 GUARDIAN WARNING ================= -->
+    <div id="under18-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col p-6 space-y-4 relative">
+            <button type="button" onclick="closeUnder18Modal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
+            <div class="border-b border-slate-100 pb-3">
+                <h3 class="text-sm font-black text-red-600 flex items-center gap-2">
+                    <span>⚠️ WARNING: APPLICANTS UNDER 18</span>
+                </h3>
+            </div>
+            <div class="space-y-3 text-xs text-slate-700 leading-relaxed">
+                <p>Applicants below the age of 18 are required to appear with their parent or legal guardian for proper assessment, verification, and review before their application can be approved.</p>
+                <p>Please note that applications from individuals under 18 will remain <strong class="text-pnt-dark">PENDING</strong> until their parent or legal guardian is present for the required assessment and verification.</p>
+                
+                <div class="pt-3 border-t border-slate-100 flex items-start gap-2.5">
+                    <input type="checkbox" id="modal-guardian-check" class="rounded bg-white border-slate-300 text-pnt-orange focus:ring-pnt-orange w-4 h-4 mt-0.5 cursor-pointer">
+                    <label for="modal-guardian-check" class="text-xs font-semibold text-slate-800 cursor-pointer">
+                        I understand and agree that my parent or legal guardian must be present for assessment and verification.
+                    </label>
+                </div>
+            </div>
+            <div class="pt-2 border-t border-slate-100 flex gap-2">
+                <button type="button" onclick="closeUnder18Modal()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded-xl cursor-pointer">Cancel</button>
+                <button type="button" id="agree-under18-btn" onclick="proceedUnder18()" disabled class="w-1/2 py-2.5 bg-orange-600 text-xs font-bold text-white rounded-xl shadow-md transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">Agree & Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 border-t border-slate-200 bg-white text-[11px] text-slate-500">
+        &copy; 2026 Pronettech Workspace Ecosystem. All rights reserved.
+    </footer>
+
+    <script>
+        let currentUser = null;
+        let selectedAgeBracket = null;
+        let currentSlideIndex = 0;
+        let slideAcknowledgments = {};
+
+        const formSlides = {
+            above_18: [
+                {
+                    title: "Slide 1: Important Information & Partnership Confirmation",
+                    body: `
+                        <p class="font-bold text-pnt-dark">IMPORTANT INFORMATION READ CAREFULLY</p>
+                        <p class="font-semibold text-pnt-purple">PARTNERSHIP CONFIRMATION WITH PRONET-TECH GLOBAL LIMITED TERMS</p>
+                        
+                        <div class="space-y-3 mt-3">
+                            <div>
+                                <strong class="text-pnt-dark">1. Commitment to Partnership:</strong>
+                                <p class="text-slate-600 mt-0.5">By signing this Agreement, you acknowledge and agree to fully partner with ProNet-Tech Global Limited for at least three (3) years. During this time, you commit to dedicating your time, efforts, and resources to the growth and success of your business within our organization's system.</p>
+                            </div>
+                            <div>
+                                <strong class="text-pnt-dark">2. Exclusivity:</strong>
+                                <p class="text-slate-600 mt-0.5">During the partnership period, you agree that you won't engage in any other business ventures that conflict with or compete with ProNet-Tech Global Limited. This exclusivity ensures that your focus remains solely on building your business within our organization.</p>
+                            </div>
+                            <div>
+                                <strong class="text-pnt-dark">3. Termination and Surrender of Tools:</strong>
+                                <p class="text-slate-600 mt-0.5">While we believe in building long-term and mutually beneficial partnerships, we understand that circumstances may change. If you decide to terminate this partnership for any reason within the three years, you agree to surrender all tools and resources acquired through our business opportunity. These tools may include, but are not limited to, mobile phones, laptops, or any other equipment or resources provided to you by ProNet-Tech Global Limited to support the growth of your business. By surrendering these tools, you acknowledge that they were exclusively intended for use within the context of our business system.</p>
+                            </div>
+                            <div>
+                                <strong class="text-pnt-dark">4. Confidentiality:</strong>
+                                <p class="text-slate-600 mt-0.5">During and after the course of this partnership, you agree to maintain the confidentiality of any proprietary information, trade secrets, or business strategies shared with you by ProNet-Tech Global Limited. This includes not disclosing such information to any third parties without our prior written consent.</p>
+                            </div>
+                            <div>
+                                <strong class="text-pnt-dark">5. Independent Contractor Status:</strong>
+                                <p class="text-slate-600 mt-0.5">You acknowledge and agree that, as a partner with ProNet-Tech Global Limited, you are an independent contractor and not an employee, agent, or legal representative of our company. This Agreement does not create an employer-employee relationship between us.</p>
+                            </div>
+                            <div>
+                                <strong class="text-pnt-dark">6. Governing Law and Jurisdiction:</strong>
+                                <p class="text-slate-600 mt-0.5">This Agreement shall be governed by and construed in accordance with the laws of Nigerian constitution. Any disputes arising out of or in connection with this Agreement shall be resolved through arbitration in accordance with the rules of law in the Nigerian constitution.</p>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 2: Pronettech Global Operation Rules",
+                    body: `
+                        <p class="font-bold text-pnt-dark">PRONET-TECH GLOBAL OPERATION RULES</p>
+                        <p class="font-semibold text-pnt-purple">PREFACE</p>
+                        <p class="text-slate-600 mt-1">It is understood and agreed by all beneficiaries and members of PRONET-TECH ORGANIZATION (PNT) that these rules and regulations may be reviewed or amended as organizational needs arise. All members and beneficiaries within the PNT network are expected to comply with the following rules:</p>
+                        
+                        <div class="space-y-3 mt-3">
+                            <div>
+                                <strong class="text-pnt-dark">1. Organization Rules</strong>
+                                <ul class="list-none space-y-2 mt-1 pl-2 text-slate-600">
+                                    <li><strong>a) Confidentiality:</strong> All organizational business plans, strategies, and related information must be treated as confidential and disclosed only when necessary for legitimate networking and business development activities.</li>
+                                    <li><strong>b) Protection of Business Information:</strong> Members must not disclose or share the organization’s business ideas, strategies, or proprietary information with unauthorized individuals, including relatives, friends, or other third parties.</li>
+                                    <li><strong>c) Compliance with the Operations Manual:</strong> Failure to comply with the organization’s Operations Manual may result in permanent termination of membership and access to the network.</li>
+                                    <li><strong>d) Voluntary Withdrawal:</strong> Members who choose to leave or withdraw from the organization will also be subject to the applicable termination procedures and policies.<br>
+                                    <span class="font-semibold text-slate-800 mt-1 block">Consequences of Termination: Removal from the organization includes</span>
+                                    <ul class="list-disc pl-5 mt-1 space-y-0.5 text-slate-600">
+                                        <li>Termination or deactivation of the member’s account</li>
+                                        <li>Loss of access to team support and resources</li>
+                                        <li>Loss of access to any available funds in wallet</li>
+                                        <li>Loss of access to applicable training-related benefits or profits</li>
+                                        <li>Complete termination of membership and participation in the organization</li>
+                                    </ul></li>
+                                    <li><strong>e)</strong> It is required that an atmosphere of mutual respect prevail at the workplace. The use of Mr, Miss or Mrs is desirable.</li>
+                                    <li><strong>f)</strong> Every existing member is automatically a leader to a new member, regardless of age or social status.</li>
+                                    <li><strong>g)</strong> Absenteeism of three consecutive days leads to automatic removal from the next prospecting period.</li>
+                                    <li><strong>h) Prohibited and Illegal Activities:</strong> Each member is personally responsible for their actions and conduct. Any member who engages in illegal activities does so independently and assumes full personal responsibility. Such activities are not authorized, endorsed, or conducted on behalf of PNT (PRONET-TECH ORGANIZATION).<br>
+                                    <span class="mt-1 block">Prohibited activities include, but are not limited to:</span>
+                                    <ul class="list-disc pl-5 mt-1 space-y-0.5 text-slate-600">
+                                        <li>Fraud or fraudulent activities</li>
+                                        <li>Child trafficking or exploitation</li>
+                                        <li>Drug trafficking or other illegal drug-related activities</li>
+                                        <li>Any other activity that violates applicable laws or regulations</li>
+                                        <li>Smoking where prohibited by applicable law or organizational policy</li>
+                                        <li>Illegal or unauthorized use of applications, software, or tools provided for organizational work</li>
+                                    </ul>
+                                    <p class="mt-1 text-slate-600">Where there are reasonable grounds or lawful evidence of involvement in serious illegal activity, the organization may report the matter to the appropriate law enforcement authorities and cooperate with any resulting investigation or legal proceedings. Members are expected to conduct themselves lawfully and responsibly at all times and must not use the organization's name, resources, or platforms to facilitate illegal activities.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 text-xs font-medium text-pnt-purple">
+                                <em>"I hereby declare that I have carefully read, understood, and agreed to the rules and regulations of PNT (PRONET-TECH ORGANIZATION). By signing below, I voluntarily subscribe to and agree to abide by these rules and regulations."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 3: Payment and Funds Regulation Rules",
+                    body: `
+                        <p class="font-bold text-pnt-dark">PAYMENT AND FUNDS REGULATION RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li>A 10% monthly charge shall be paid by each member separately, in addition to the monthly membership fee. This 10% contribution shall be allocated toward team development and office maintenance.</li>
+                                <li>Full disclosure of all payment and financial information is required to be provided to sponsors and team leaders. Unauthorized exchange or transfer of funds with external parties is strictly prohibited and may be subject to disciplinary action.</li>
+                                <li>No request for cards or funds on behalf of a non-PNT member shall be entertained.</li>
+                                <li>Members must provide complete and accurate payment information to their sponsors and team leaders. Any change or alteration to payment information must be reported promptly. Failure to disclose or update payment information may result in restrictions on payment access or the use of the team's payment sources.</li>
+                            </ol>
+                            <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 text-xs font-medium text-pnt-purple">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Payment and Funds Regulation Rules. I confirm that I am signing this declaration voluntarily and of my own free will."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 4: Account Creation Rules",
+                    body: `
+                        <p class="font-bold text-pnt-dark">ACCOUNT CREATION RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li>No member shall create an account unless they have completed one of the following required training in email marketing, Beta Reading, Video editing, website design, or AI automation.</li>
+                                <li>Members are prohibited from using another person's image or name when creating an account. Members should use their own identity or an approved cartoon, logo, or business name where applicable.</li>
+                                <li>Creating fraudulent, fake, or unauthorized accounts is strictly prohibited. Each member is permitted to have only one account.</li>
+                            </ol>
+                            <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 text-xs font-medium text-pnt-purple">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read and understood the Account Creation Rules and agree to comply with them voluntarily and of my own free will."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 5: Prospecting Rules",
+                    body: `
+                        <p class="font-bold text-pnt-dark">PROSPECTING RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li>A member who introduces a new guest to the team shall become the sponsor of that guest, provided that another independent member within the business does not already sponsor the guest. Existing members and underage individuals shall be appropriately protected according to the team’s existing sponsorship structure.</li>
+                                <li>A team leader must be informed before a member refers or introduces a prospect to another office.</li>
+                                <li>Only a Director is allowed to connect a team member to another office for training.</li>
+                            </ol>
+                            <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 text-xs font-medium text-pnt-purple">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Prospecting Rules. I voluntarily subscribe to these rules and sign this declaration of my own free will."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 6: Team Leadership Rules",
+                    body: `
+                        <p class="font-bold text-pnt-dark">TEAM LEADERSHIP RULES</p>
+                        <p class="text-slate-600 mt-1">To qualify as a Team Leader, a member must meet the following requirements:</p>
+                        <div class="space-y-3 mt-2">
+                            <ul class="list-disc pl-5 space-y-1 text-slate-600">
+                                <li>Complete all required training programs.</li>
+                                <li>Possess the necessary tools and resources to effectively support their team members.</li>
+                                <li>Have at least four (4) trainees, or demonstrate relevant working experience supporting trainees who are not direct team members.</li>
+                                <li>Attain a minimum status of Executive Manager.</li>
+                                <li>Complete the required leadership training for a minimum of three (3) months and demonstrate the ability to resolve and manage common online and offline challenges, including:
+                                    <ul class="list-disc pl-5 mt-1 space-y-0.5 text-slate-500">
+                                        <li>Fiverr Support</li>
+                                        <li>Payment Support</li>
+                                        <li>Effective Communication Skills</li>
+                                        <li>Professional/Corporate Dressing</li>
+                                        <li>Training & Team Support</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 text-xs font-medium text-pnt-purple">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Team Leadership Rules. I voluntarily subscribe to these rules and sign this declaration of my own free will."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 7: Responsibility Rules",
+                    body: `
+                        <p class="font-bold text-pnt-dark">RESPONSIBILITY RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li>Every member is required to pay a monthly responsibility fee based on their earnings. Any team member who earns through Fiverr or other approved freelance platforms shall contribute 10% of their earnings to PNT for office maintenance and development.</li>
+                                <li>Any member who isn't interested in working with PNT should drop all the tools that were achieved during the course of training with us, and if they don't want to, they must settle the applicable membership fees based on the total number of months they have been part of the organization. A fee of $52 per month will be calculated for the entire period of membership, and all outstanding fees must be paid in full before the member is permitted to leave with or retain any tools, resources, or materials acquired through PNT training and mentorship.</li>
+                            </ol>
+                            <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 text-xs font-medium text-pnt-purple">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Responsibility Rules. I voluntarily subscribe to these rules and sign this declaration of my own free will."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 8: Training & Event Rules",
+                    body: `
+                        <p class="font-bold text-pnt-dark">TRAINING & EVENT RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li>Failure to attend regular office training for three (3) consecutive days without prior permission may result in automatic suspension for two (2) weeks.</li>
+                                <li>Every new member must attend the designated Guest Training within 15 days of joining the organization.</li>
+                                <li>Except for professionals with proven relevant experience, every member is expected to participate in at least one basic network marketing training session each day.</li>
+                                <li><strong>Mandatory Training Programs:</strong>
+                                    <ul class="list-disc pl-5 mt-1 space-y-0.5 text-slate-600">
+                                        <li>Network Varsity Orientation Training</li>
+                                        <li>Distributor Training – held on weekends</li>
+                                        <li>Cheque Rally – held once a month</li>
+                                        <li>Team Leader Training – mandatory for all PNT Team Leaders</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                            <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 text-xs font-medium text-pnt-purple">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Training & Event Rules. I voluntarily subscribe to these rules and sign this declaration of my own free will."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 9: Network Marketing Registration Rules",
+                    body: `
+                        <p class="font-bold text-pnt-dark">NETWORK MARKETING REGISTRATION RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li><strong>Previous Registration:</strong> I have/have not previously registered as a Distributor? (If Yes, please provide your NeoLife ID Number).</li>
+                                <li>No member shall be registered with the network marketing business until the member demonstrates the ability to earn income as a freelancer first, complete and deliver 100% of assigned projects.</li>
+                                <li>Within the Network marketing business, a prospective member must demonstrate sufficient financial capacity to obtain and maintain the necessary business tools, such as a laptop, smartphone, and internet connection before the registration.</li>
+                                <li>A prospective member is required to have the appropriate PNT vest/identification and at least one person actively supporting or working with them in the team before commencing operations as a PNT member.</li>
+                            </ol>
+                            <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 text-xs font-medium text-pnt-purple">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Network Marketing Registration Rules. I voluntarily subscribe to these rules and sign this declaration of my own free will."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 10: Dating & Professional Relationship Rules",
+                    body: `
+                        <p class="font-bold text-pnt-dark">DATING & PROFESSIONAL RELATIONSHIP RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li>Except for married members, romantic relationships between members are considered to be outside of the business affairs and should be handled with discretion. The use of social media or PNT business tools to publicly promote or conduct personal romantic relationships is prohibited.</li>
+                                <li>If a member introduces a romantic partner to each other, the relationship should be disclosed to the appropriate team leader.</li>
+                            </ol>
+                            <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 text-xs font-medium text-pnt-purple">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Dating & Professional Relationship Rules. I voluntarily subscribe to these rules and sign this declaration of my own free will."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 11: Assets & Property Declaration",
+                    body: `
+                        <p class="font-bold text-pnt-dark">PRONET-TECH GLOBAL LIMITED</p>
+                        <p class="font-semibold text-pnt-purple">ASSETS & PROPERTY DECLARATION</p>
+                        <div class="space-y-3 mt-3 text-slate-600">
+                            <p>I hereby declare and acknowledge that all assets, cash, equipment, tools, and other items purchased or acquired using funds or proceeds from ProNet-Tech Global Limited (RC 7331721) are considered property of ProNet-Tech Global Limited, subject to the organization's applicable policies and agreements.</p>
+                            <p>I further acknowledge that, upon my decision to leave or discontinue my participation in the organization, any property, cash, equipment, tools, or other assets covered by this declaration may be subject to recovery or return in accordance with the organization's applicable terms and policies.</p>
+                            <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 text-xs font-medium text-pnt-purple">
+                                <em>"By signing below, I confirm that I have read, understood, and voluntarily accepted this declaration."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 12: Final Execution & Submission",
+                    body: `
+                        <p class="font-bold text-pnt-dark">FINAL COMPLIANCE ACKNOWLEDGMENT</p>
+                        <p class="text-slate-600 mt-1">You have reached the final step of the Form of 9 Compliance Agreement. Review your agreement across all preceding sections and fill in your details below to submit for administrative review and team leader activation.</p>
+                        <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-800 mt-3">
+                            ✓ All 11 operational and partnership modules reviewed. Proceed to type your legal signature below to complete your registration gate.
+                        </div>
+                    `
+                }
+            ],
+            under_18: [
+                {
+                    title: "Slide 1: Junior Partnership Confirmation",
+                    body: `
+                        <p class="font-bold text-pnt-dark">IMPORTANT INFORMATION READ CAREFULLY (JUNIOR TRACK)</p>
+                        <p class="font-semibold text-pnt-orange">PARTNERSHIP CONFIRMATION WITH PRONET-TECH GLOBAL LIMITED (UNDER 18)</p>
+                        
+                        <div class="space-y-3 mt-3">
+                            <div>
+                                <strong class="text-pnt-dark">1. Commitment to Partnership:</strong>
+                                <p class="text-slate-600 mt-0.5">By signing this Agreement with parental/guardian guidance, you acknowledge and agree to fully partner with ProNet-Tech Global Limited under junior developmental terms.</p>
+                            </div>
+                            <div>
+                                <strong class="text-pnt-dark">2. Exclusivity & Learning Focus:</strong>
+                                <p class="text-slate-600 mt-0.5">During the partnership period, you agree to focus your learning efforts within ProNet-Tech Global Limited and avoid conflicting external commitments.</p>
+                            </div>
+                            <div>
+                                <strong class="text-pnt-dark">3. Termination and Surrender of Tools:</strong>
+                                <p class="text-slate-600 mt-0.5">If participation is terminated within the partnership period, educational equipment and tools provided to support growth must be surrendered as per organizational policy.</p>
+                            </div>
+                            <div>
+                                <strong class="text-pnt-dark">4. Confidentiality:</strong>
+                                <p class="text-slate-600 mt-0.5">Maintain strict confidentiality regarding proprietary platform information, training methods, and internal business strategies.</p>
+                            </div>
+                            <div>
+                                <strong class="text-pnt-dark">5. Trainee Status:</strong>
+                                <p class="text-slate-600 mt-0.5">Junior participants are enrolled as specialized tech trainees under guardian supervision and are not direct employees or legal agents.</p>
+                            </div>
+                            <div>
+                                <strong class="text-pnt-dark">6. Governing Law and Jurisdiction:</strong>
+                                <p class="text-slate-600 mt-0.5">This Agreement shall be governed by and construed in accordance with the laws of Nigerian constitution. Any disputes arising out of or in connection with this Agreement shall be resolved through arbitration in accordance with the rules of law in the Nigerian constitution.</p>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 2: Pronettech Global Operation Rules (Junior)",
+                    body: `
+                        <p class="font-bold text-pnt-dark">PRONET-TECH GLOBAL OPERATION RULES (JUNIOR)</p>
+                        <p class="font-semibold text-pnt-orange">PREFACE & OVERSIGHT</p>
+                        <p class="text-slate-600 mt-1">Junior members and their guardians agree to comply with all organizational operating standards and compliance protocols.</p>
+                        
+                        <div class="space-y-3 mt-3">
+                            <div>
+                                <strong class="text-pnt-dark">1. Organization Rules</strong>
+                                <ul class="list-none space-y-2 mt-1 pl-2 text-slate-600">
+                                    <li><strong>a) Confidentiality:</strong> Treat all business plans, strategies, and related information as confidential.</li>
+                                    <li><strong>b) Protection of Information:</strong> Do not share proprietary learning strategies with unauthorized third parties.</li>
+                                    <li><strong>c) Compliance:</strong> Comply fully with junior operational guidelines and safety policies.</li>
+                                    <li><strong>d) Withdrawal & Supervision:</strong> Voluntary withdrawal follows standard organizational procedures under guardian review.<br>
+                                    <span class="font-semibold text-slate-800 mt-1 block">Consequences of Termination: Removal includes</span>
+                                    <ul class="list-disc pl-5 mt-1 space-y-0.5 text-slate-600">
+                                        <li>Deactivation of trainee account and portal access</li>
+                                        <li>Loss of access to mentor support and learning resources</li>
+                                        <li>Complete termination of junior network participation</li>
+                                    </ul></li>
+                                    <li><strong>e)</strong> Maintain an atmosphere of mutual respect across all training channels.</li>
+                                    <li><strong>f)</strong> Absenteeism without valid guardian notification leads to review of active training status.</li>
+                                    <li><strong>h) Prohibited Activities:</strong> Strict adherence to lawful conduct. Engaging in prohibited or unauthorized activities is strictly forbidden.</li>
+                                </ul>
+                            </div>
+                            <div class="p-3 bg-orange-50 rounded-xl border border-orange-100 text-xs font-medium text-pnt-orange">
+                                <em>"I hereby declare that I have carefully read, understood, and agreed to the rules and regulations under guardian supervision."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 3: Payment and Funds Regulation Rules (Junior)",
+                    body: `
+                        <p class="font-bold text-pnt-dark">PAYMENT AND FUNDS REGULATION RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li>Financial contributions and development charges are handled through verified channels with full guardian awareness and transparency.</li>
+                                <li>Full disclosure of financial information is required. Unauthorized exchange of funds with external parties is strictly prohibited.</li>
+                                <li>No request for cards or funds on behalf of non-PNT members shall be entertained.</li>
+                                <li>Complete and accurate payment details must be provided through approved parental/sponsor channels.</li>
+                            </ol>
+                            <div class="p-3 bg-orange-50 rounded-xl border border-orange-100 text-xs font-medium text-pnt-orange">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Payment and Funds Regulation Rules under guardian guidance."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 4: Account Creation Rules (Junior)",
+                    body: `
+                        <p class="font-bold text-pnt-dark">ACCOUNT CREATION RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li>Junior accounts require completion of foundational training modules (email marketing, web design, or video editing) under proper mentorship.</li>
+                                <li>Members must use their own identity or approved identifiers when setting up accounts. Fake or unauthorized accounts are strictly prohibited.</li>
+                                <li>Each participant is permitted to maintain only one active account.</li>
+                            </ol>
+                            <div class="p-3 bg-orange-50 rounded-xl border border-orange-100 text-xs font-medium text-pnt-orange">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read and understood the Account Creation Rules and agree to comply with them voluntarily."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 5: Prospecting Rules (Junior)",
+                    body: `
+                        <p class="font-bold text-pnt-dark">PROSPECTING RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li>Junior participants operate under protected sponsorship structures designed to ensure safe and supportive peer engagement.</li>
+                                <li>Team leaders must be informed regarding any collaborative guest introductions or office visits.</li>
+                                <li>Cross-office training connections are managed strictly through authorized directors.</li>
+                            </ol>
+                            <div class="p-3 bg-orange-50 rounded-xl border border-orange-100 text-xs font-medium text-pnt-orange">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Prospecting Rules."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 6: Team Leadership & Mentorship Rules",
+                    body: `
+                        <p class="font-bold text-pnt-dark">TEAM LEADERSHIP RULES</p>
+                        <p class="text-slate-600 mt-1">Junior trainees progress through structured learning milestones supported by qualified branch leaders and mentors:</p>
+                        <div class="space-y-3 mt-2">
+                            <ul class="list-disc pl-5 space-y-1 text-slate-600">
+                                <li>Complete required foundational training modules.</li>
+                                <li>Engage in guided peer support and collaborative learning tasks.</li>
+                                <li>Demonstrate commitment to professional communication and teamwork standards.</li>
+                            </ul>
+                            <div class="p-3 bg-orange-50 rounded-xl border border-orange-100 text-xs font-medium text-pnt-orange">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Team Leadership Rules."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 7: Responsibility Rules (Junior)",
+                    body: `
+                        <p class="font-bold text-pnt-dark">RESPONSIBILITY RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li>Junior participants contribute responsibly to learning milestones and office development standards under mentorship guidance.</li>
+                                <li>Members discontinuing training must return assigned learning tools or settle applicable membership requirements in coordination with guardians and administrators.</li>
+                            </ol>
+                            <div class="p-3 bg-orange-50 rounded-xl border border-orange-100 text-xs font-medium text-pnt-orange">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Responsibility Rules."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 8: Training & Event Rules (Junior)",
+                    body: `
+                        <p class="font-bold text-pnt-dark">TRAINING & EVENT RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li>Consistent attendance in training sessions is required. Unexcused absence for three consecutive days leads to review.</li>
+                                <li>Participation in scheduled junior orientation and mentorship webinars.</li>
+                                <li><strong>Mandatory Training Focus:</strong> Skill acceleration modules, digital literacy, and professional conduct.</li>
+                            </ol>
+                            <div class="p-3 bg-orange-50 rounded-xl border border-orange-100 text-xs font-medium text-pnt-orange">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Training & Event Rules."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 9: Network Marketing & Skill Registration Rules",
+                    body: `
+                        <p class="font-bold text-pnt-dark">NETWORK MARKETING REGISTRATION RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li><strong>Previous Registration:</strong> Indicate prior participation where applicable.</li>
+                                <li>Junior participants focus primarily on mastering freelance skills (such as coding, writing, or design) and completing assigned learning projects.</li>
+                                <li>Demonstrate readiness and appropriate tool proficiency under guardian supervision before engaging in advanced network operations.</li>
+                            </ol>
+                            <div class="p-3 bg-orange-50 rounded-xl border border-orange-100 text-xs font-medium text-pnt-orange">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Registration Rules."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 10: Dating & Professional Relationship Rules",
+                    body: `
+                        <p class="font-bold text-pnt-dark">DATING & PROFESSIONAL RELATIONSHIP RULES</p>
+                        <div class="space-y-3 mt-3">
+                            <ol class="list-decimal pl-5 space-y-2 text-slate-600">
+                                <li>All peer interactions within the junior academy must remain strictly professional, wholesome, and focused on educational collaboration.</li>
+                                <li>Appropriate boundaries must be maintained across all workspace and communication channels.</li>
+                            </ol>
+                            <div class="p-3 bg-orange-50 rounded-xl border border-orange-100 text-xs font-medium text-pnt-orange">
+                                <strong>Member Declaration:</strong> <em>"I hereby declare that I have read, understood, and agreed to comply with the Relationship Rules."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 11: Assets & Property Declaration (Junior)",
+                    body: `
+                        <p class="font-bold text-pnt-dark">PRONET-TECH GLOBAL LIMITED</p>
+                        <p class="font-semibold text-pnt-orange">ASSETS & PROPERTY DECLARATION</p>
+                        <div class="space-y-3 mt-3 text-slate-600">
+                            <p>I hereby declare and acknowledge on behalf of the junior participant that all equipment, tools, and educational items purchased or acquired using funds or proceeds from ProNet-Tech Global Limited (RC 7331721) remain property of the organization, subject to applicable policies.</p>
+                            <p>Upon discontinuation, any property or equipment covered by this declaration is subject to recovery or return in accordance with organizational terms.</p>
+                            <div class="p-3 bg-orange-50 rounded-xl border border-orange-100 text-xs font-medium text-pnt-orange">
+                                <em>"By signing below, I confirm that I have read, understood, and voluntarily accepted this declaration with guardian consent."</em>
+                            </div>
+                        </div>
+                    `
+                },
+                {
+                    title: "Slide 12: Final Execution & Submission",
+                    body: `
+                        <p class="font-bold text-pnt-dark">FINAL COMPLIANCE ACKNOWLEDGMENT (JUNIOR)</p>
+                        <p class="text-slate-600 mt-1">You have reached the final step of the Form of 9 Compliance Agreement. Review your agreement across all preceding sections and fill in your details below to submit for administrative review and team leader activation.</p>
+                        <div class="p-4 bg-orange-50 rounded-xl border border-orange-200 text-xs text-orange-800 mt-3">
+                            ✓ All 11 operational and partnership modules reviewed. Proceed to type your legal signature below to complete your registration gate.
+                        </div>
+                    `
+                }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/auth/me', { credentials: 'include' });
+                const data = await res.json();
+
+                if (!data.success) {
+                    window.location.href = '/views/onboarding.html';
+                    return;
+                }
+
+                currentUser = data.user;
+                document.getElementById('user-display-name').textContent = currentUser.name || currentUser.email;
+
+                if (currentUser.status === 'active') {
+                    window.location.href = '/views/dashboard.html';
+                }
+            } catch (err) {
+                window.location.href = '/views/onboarding.html';
+            }
+        });
+
+        function triggerUnder18Warning() {
+            document.getElementById('modal-guardian-check').checked = false;
+            document.getElementById('agree-under18-btn').disabled = true;
+            document.getElementById('under18-modal').classList.remove('hidden');
+        }
+
+        function closeUnder18Modal() {
+            document.getElementById('under18-modal').classList.add('hidden');
+        }
+
+        document.getElementById('modal-guardian-check').addEventListener('change', (e) => {
+            document.getElementById('agree-under18-btn').disabled = !e.target.checked;
+        });
+
+        function proceedUnder18() {
+            closeUnder18Modal();
+            selectAgeBracket('under_18');
+        }
+
+        function selectAgeBracket(bracket) {
+            selectedAgeBracket = bracket;
+            currentSlideIndex = 0;
+            slideAcknowledgments = {};
+
+            document.getElementById('age-gate-container').classList.add('hidden');
+            document.getElementById('form-of-9-container').classList.remove('hidden');
+            renderCurrentSlide();
+        }
+
+        function resetAgeBracket() {
+            selectedAgeBracket = null;
+            currentSlideIndex = 0;
+            slideAcknowledgments = {};
+
+            document.getElementById('form-of-9-container').classList.add('hidden');
+            document.getElementById('signature-panel').classList.add('hidden');
+            document.getElementById('age-gate-container').classList.remove('hidden');
+        }
+
+        function renderCurrentSlide() {
+            const slides = formSlides[selectedAgeBracket];
+            const slide = slides[currentSlideIndex];
+
+            document.getElementById('slide-header-title').textContent = `Form of 9 (${selectedAgeBracket === 'above_18' ? 'Adult' : 'Junior'}): Slide ${currentSlideIndex + 1} of 12`;
+            document.getElementById('slide-content').innerHTML = `
+                <h4 class="font-bold text-slate-900 text-sm mb-1">${slide.title}</h4>
+                <div>${slide.body}</div>
+            `;
+
+            const checkbox = document.getElementById('slide-ack-check');
+            checkbox.checked = Boolean(slideAcknowledgments[currentSlideIndex]);
+            checkbox.onchange = (e) => {
+                slideAcknowledgments[currentSlideIndex] = e.target.checked;
+                document.getElementById('next-slide-btn').disabled = !e.target.checked;
+            };
+
+            document.getElementById('next-slide-btn').disabled = !checkbox.checked;
+            document.getElementById('prev-slide-btn').disabled = currentSlideIndex === 0;
+
+            const dotsContainer = document.getElementById('slide-dots');
+            dotsContainer.innerHTML = '';
+            slides.forEach((_, idx) => {
+                const dot = document.createElement('span');
+                dot.className = `w-1.5 h-1.5 rounded-full transition-all ${idx === currentSlideIndex ? 'bg-pnt-purple w-4' : (slideAcknowledgments[idx] ? 'bg-emerald-500' : 'bg-slate-300')}`;
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function nextSlide() {
+            if (!slideAcknowledgments[currentSlideIndex]) return;
+
+            if (currentSlideIndex < 11) {
+                currentSlideIndex++;
+                renderCurrentSlide();
+            } else {
+                document.getElementById('form-of-9-container').classList.add('hidden');
+                document.getElementById('signature-panel').classList.remove('hidden');
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                renderCurrentSlide();
+            }
+        }
+
+        document.getElementById('consent-submit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const signedName = document.getElementById('sig-legal-name').value.trim();
+            const signatureCode = document.getElementById('sig-code').value.trim();
+            const btn = document.getElementById('submit-consent-btn');
+
+            if (!signedName || signatureCode.toUpperCase() !== 'I AGREE AND EXECUTE') {
+                alert("Please provide your full legal name and type 'I AGREE AND EXECUTE' to confirm your signature.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Submitting Consent Record...';
+
+            try {
+                const res = await fetch('/api/auth/consent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        age_bracket: selectedAgeBracket,
+                        slide_acknowledgments: slideAcknowledgments,
+                        signed_name: signedName,
+                        signature_data: signatureCode
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert('🎉 Form of 9 successfully executed and submitted to administrative review!');
+                    window.location.reload();
+                } else {
+                    alert(`Submission failed: ${data.message}`);
+                    btn.disabled = false;
+                    btn.textContent = 'Submit Signed Form of 9 & Await Approval';
+                }
+            } catch (err) {
+                alert('Server connection error during consent submission.');
+                btn.disabled = false;
+                btn.textContent = 'Submit Signed Form of 9 & Await Approval';
+            }
+        });
+
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+            } catch(e) {}
+            window.location.href = '/views/onboarding.html';
+        }
+    </script>
+</body>
+</html>

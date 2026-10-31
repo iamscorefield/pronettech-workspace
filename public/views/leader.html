@@ -109,6 +109,23 @@
             
             <div class="lg:col-span-2 space-y-6">
 
+                <!-- LEADER ATTENDANCE MARKING DESK -->
+                <div class="glass-card p-6 rounded-2xl text-center relative overflow-hidden" id="attendance-card-box">
+                    <h3 class="text-base font-bold mb-1 text-pnt-dark">Ready for Daily Logging?</h3>
+                    <p class="text-slate-500 text-xs max-w-md mx-auto mb-4" id="attendance-desc-text">Tap the button below to register your attendance coordinates.</p>
+                    <button id="mark-attendance-btn" class="btn-brand-gradient inline-flex items-center gap-2 font-bold px-6 py-3 rounded-xl shadow-md text-white text-xs cursor-pointer">
+                        Mark Today's Attendance
+                    </button>
+                </div>
+
+                <!-- WEEKLY TRACKING HISTORY -->
+                <div class="glass-card p-6 rounded-2xl">
+                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Weekly Tracking History</h3>
+                    <div class="grid grid-cols-7 gap-3 text-center" id="weekly-strip-container">
+                        <div class="text-xs text-slate-400 py-4 col-span-7">Loading tracking strip...</div>
+                    </div>
+                </div>
+
                 <!-- Management Directives -->
                 <div class="glass-card p-6 rounded-2xl border-purple-200 bg-purple-50/20">
                     <div class="flex justify-between items-center mb-6">
@@ -279,8 +296,8 @@
                                         <p class="leading-tight font-medium">Feyintola Complex, Hope Hospital junction opp. carwash beside Dr. water, Adigbe, Abeokuta, Ogun State, Nigeria.</p>
                                     </div>
                                     <div class="flex items-center gap-1.5">
-                                        <span class="text-[#0070c0] text-[9px] flex-shrink-0">📞</span>
-                                        <p class="font-bold text-slate-900">07062727081</p>
+                                        <span class="text-[#0070c0] text-[9px] flex-shrink-0">✉️</span>
+                                        <p class="font-bold text-slate-900">pronettech1@gmail.com</p>
                                     </div>
                                     <div class="flex items-center gap-1.5">
                                         <span class="text-[#0070c0] text-[9px] flex-shrink-0">✉️</span>
@@ -291,19 +308,10 @@
                                 <div class="relative z-10 flex flex-col items-center">
                                     <div class="h-9 flex items-center justify-center">
                                         <img src="/assets/images/signature.png" alt="Signature" class="h-8 w-auto object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                        <svg class="h-8 w-24 text-slate-900 hidden" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M10,30 C20,10 25,35 35,15 C45,-5 40,35 55,25 C65,15 75,20 85,25 C75,35 60,30 65,20 C70,10 85,15 90,25" />
-                                        </svg>
                                     </div>
                                     <div class="text-[8px] uppercase tracking-wider font-bold text-slate-900 border-t border-slate-300 pt-0.5 w-32 text-center">
                                         Authorised Signature
                                     </div>
-                                </div>
-
-                                <div class="relative z-10 mb-1 px-4">
-                                    <svg class="w-full h-7" viewBox="0 0 200 30" preserveAspectRatio="none">
-                                        <rect x="0" y="0" width="3" height="30" fill="#0D122B"/><rect x="5" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="9" y="0" width="4" height="30" fill="#0D122B"/><rect x="15" y="0" width="2" height="30" fill="#0D122B"/><rect x="20" y="0" width="1" height="30" fill="#0D122B"/><rect x="23" y="0" width="3" height="30" fill="#0D122B"/><rect x="28" y="0" width="5" height="30" fill="#0D122B"/><rect x="35" y="0" width="2" height="30" fill="#0D122B"/><rect x="39" y="0" width="1" height="30" fill="#0D122B"/><rect x="42" y="0" width="4" height="30" fill="#0D122B"/><rect x="48" y="0" width="2.5" height="30" fill="#0D122B"/><rect x="53" y="0" width="1" height="30" fill="#0D122B"/><rect x="56" y="0" width="3.5" height="30" fill="#0D122B"/><rect x="62" y="0" width="2" height="30" fill="#0D122B"/><rect x="66" y="0" width="4" height="30" fill="#0D122B"/><rect x="72" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="76" y="0" width="3" height="30" fill="#0D122B"/><rect x="81" y="0" width="1" height="30" fill="#0D122B"/><rect x="84" y="0" width="4.5" height="30" fill="#0D122B"/><rect x="91" y="0" width="2" height="30" fill="#0D122B"/><rect x="95" y="0" width="1" height="30" fill="#0D122B"/><rect x="98" y="0" width="3" height="30" fill="#0D122B"/><rect x="103" y="0" width="4" height="30" fill="#0D122B"/><rect x="109" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="113" y="0" width="2.5" height="30" fill="#0D122B"/><rect x="118" y="0" width="4" height="30" fill="#0D122B"/><rect x="124" y="0" width="1" height="30" fill="#0D122B"/><rect x="127" y="0" width="3" height="30" fill="#0D122B"/><rect x="132" y="0" width="2" height="30" fill="#0D122B"/><rect x="136" y="0" width="4" height="30" fill="#0D122B"/><rect x="142" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="146" y="0" width="3" height="30" fill="#0D122B"/><rect x="151" y="0" width="1" height="30" fill="#0D122B"/><rect x="154" y="0" width="4" height="30" fill="#0D122B"/><rect x="160" y="0" width="2" height="30" fill="#0D122B"/><rect x="164" y="0" width="3.5" height="30" fill="#0D122B"/><rect x="170" y="0" width="1.5" height="30" fill="#0D122B"/><rect x="174" y="0" width="3" height="30" fill="#0D122B"/><rect x="179" y="0" width="1" height="30" fill="#0D122B"/><rect x="182" y="0" width="4" height="30" fill="#0D122B"/><rect x="188" y="0" width="2" height="30" fill="#0D122B"/><rect x="192" y="0" width="3" height="30" fill="#0D122B"/><rect x="197" y="0" width="3" height="30" fill="#0D122B"/>
-                                    </svg>
                                 </div>
 
                                 <div class="absolute left-0 top-1/3 bottom-0 w-2 bg-[#ff7a00]"></div>
@@ -314,7 +322,7 @@
                     </div>
                 </div>
 
-                <!-- ACTION BUTTONS: DYNAMICALLY CONTROLLED VIA ENTITLEMENTS -->
+                <!-- ACTION BUTTONS -->
                 <div class="mt-6 space-y-3">
                     <button id="download-soft-copy-btn" class="w-full bg-slate-50 hover:bg-slate-100 border border-slate-300 text-slate-700 font-semibold py-3 px-4 rounded-xl text-xs transition-all duration-300 shadow-sm flex items-center justify-center gap-2 cursor-pointer">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
@@ -328,7 +336,7 @@
                     </button>
                 </div>
 
-                <!-- 4-BOX DIGITAL COUNTDOWN CLOCK COMPONENT -->
+                <!-- COUNTDOWN CLOCK -->
                 <div class="mt-4 bg-[#4A154B] p-4 rounded-2xl shadow-inner border border-purple-900/30 text-white">
                     <div class="text-[9px] font-bold text-center tracking-widest uppercase text-purple-200 mb-2.5">
                         Membership Validity Countdown
@@ -339,17 +347,14 @@
                             <span id="timer-days" class="text-xl sm:text-2xl font-black text-pnt-gold leading-none">00</span>
                             <span class="text-[8px] font-bold uppercase tracking-widest text-purple-200 mt-1">Days</span>
                         </div>
-
                         <div class="bg-[#3F0E40]/90 border border-white/10 rounded-xl py-2 px-1 flex flex-col items-center justify-center shadow">
                             <span id="timer-hours" class="text-xl sm:text-2xl font-black text-white leading-none">00</span>
                             <span class="text-[8px] font-bold uppercase tracking-widest text-purple-200 mt-1">Hours</span>
                         </div>
-
                         <div class="bg-[#3F0E40]/90 border border-white/10 rounded-xl py-2 px-1 flex flex-col items-center justify-center shadow">
                             <span id="timer-mins" class="text-xl sm:text-2xl font-black text-white leading-none">00</span>
                             <span class="text-[8px] font-bold uppercase tracking-widest text-purple-200 mt-1">Mins</span>
                         </div>
-
                         <div class="bg-[#3F0E40]/90 border border-white/10 rounded-xl py-2 px-1 flex flex-col items-center justify-center shadow">
                             <span id="timer-secs" class="text-xl sm:text-2xl font-black text-pnt-gold leading-none">00</span>
                             <span class="text-[8px] font-bold uppercase tracking-widest text-purple-200 mt-1">Secs</span>
@@ -364,7 +369,7 @@
 
             </div>
 
-            <!-- Deploy Task Form to Branch Members -->
+            <!-- Deploy Task Form -->
             <div class="glass-card p-6 rounded-2xl border-purple-100" id="task-deploy-card">
                 <h3 class="text-sm font-semibold text-pnt-purple uppercase tracking-wider mb-1">Assign Member Task</h3>
                 <p class="text-slate-500 text-xs mb-4" id="task-deploy-desc">Deploy action items directly to member terminal dashboards.</p>
@@ -542,7 +547,8 @@
                 if (!authData.success) { window.location.href = '/views/onboarding.html'; return; }
 
                 currentUser = authData.user;
-                if (!['leader', 'team_leader', 'admin', 'global_admin'].includes(currentUser.role)) {
+                // FIX: Allow leaders, team leaders, sub-admins, admins, and global admins without throwing security errors
+                if (!['leader', 'team_leader', 'admin', 'sub_admin', 'global_admin'].includes(currentUser.role)) {
                     alert('Access Forbidden: Security tier parameter mismatch.');
                     window.location.href = '/views/dashboard.html';
                     return;
@@ -621,6 +627,7 @@
             } catch (err) { console.error("Could not sync entitlements:", err); }
         }
 
+        // Anchor trial strictly starting November 1, 2026 ending December 1, 2026
         function initCountdownEngine(expiresAtString, createdAtString) {
             const warningStrip = document.getElementById('unpaid-warning-strip');
             const dateReadout = document.getElementById('timer-date-readout');
@@ -629,15 +636,8 @@
             const bannerIcon = document.getElementById('banner-icon');
             const timerLabel = document.getElementById('timer-status-label');
 
-            let targetDate = null;
-            if (expiresAtString) {
-                targetDate = new Date(expiresAtString).getTime();
-            } else if (createdAtString) {
-                const createdTime = new Date(createdAtString).getTime();
-                targetDate = createdTime + (30 * 24 * 60 * 60 * 1000); // 30-day free trial
-            } else {
-                targetDate = new Date().getTime() + (30 * 24 * 60 * 60 * 1000);
-            }
+            const launchDate = new Date('2026-11-01T00:00:00Z').getTime();
+            const targetDate = launchDate + (30 * 24 * 60 * 60 * 1000); // Dec 1, 2026
 
             warningStrip.className = "bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 text-white px-6 py-3 shadow-md relative z-20";
             bannerTitle.textContent = "✨ 1-MONTH FREE TRIAL ACTIVE:";
@@ -691,6 +691,16 @@
                 modal.classList.remove('hidden');
             }
         }
+
+        // --- ATTENDANCE MARKING HANDLER FOR LEADERS ---
+        document.getElementById('mark-attendance-btn').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/attendance/checkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include' });
+                const data = await response.json();
+                if (data.success) { alert(`📡 Check-in Successful!\n\n${data.message}`); }
+                else { alert(`Check-in Blocked: ${data.message}`); }
+            } catch (err) { alert('Connection with server lost.'); }
+        });
 
         // --- CONSENT & PAYMENT FLOW TRIGGER ---
         document.getElementById('download-soft-copy-btn').addEventListener('click', () => {

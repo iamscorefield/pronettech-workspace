@@ -7,6 +7,7 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
     <link rel="stylesheet" href="/css/styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/js/finance-shared.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -26,12 +27,17 @@
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-purple-50/50 p-6 rounded-2xl border border-purple-100">
             <div>
                 <span class="bg-purple-100 text-pnt-purple text-[10px] font-bold uppercase px-2.5 py-1 rounded-md">Personal Ledger</span>
-                <h1 class="text-2xl font-black text-pnt-dark mt-1">My Finance & Earnings</h1>
-                <p class="text-xs text-slate-500 mt-0.5">Track your live cashbook balance, earnings history, and submit withdrawal requests.</p>
+                <h1 class="text-2xl font-black text-pnt-dark mt-1">My Finances</h1>
+                <p class="text-xs text-slate-500 mt-0.5">Track your live transaction history, deposits and withdrawal.</p>
             </div>
-            <button onclick="openWithdrawModal()" class="w-full md:w-auto bg-pnt-purple hover:opacity-90 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer">
-                Request Withdrawal ➔
-            </button>
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <button onclick="openDepositModal()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer">
+                    + Add Funds
+                </button>
+                <button onclick="openWithdrawModal()" class="flex-1 md:flex-none bg-pnt-purple hover:opacity-90 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all cursor-pointer">
+                    Request Funds ➔
+                </button>
+            </div>
         </div>
 
         <!-- Telemetry Cards -->
@@ -53,11 +59,23 @@
             </div>
         </div>
 
+        <!-- Pending Transactions Acknowledgment Section (Strictly for Leader/Admin Entries) -->
+        <div id="pending-actions-section" class="hidden p-6 rounded-2xl border border-amber-200 bg-amber-50/40 space-y-4">
+            <div>
+                <h3 class="text-base font-bold text-amber-900 flex items-center gap-2">
+                    <span>Action Required: Pending Deposits & Cash-Ins</span>
+                    <span id="pending-count-badge" class="bg-amber-200 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full">0 Pending</span>
+                </h3>
+                <p class="text-xs text-amber-700 mt-0.5">Please review cash-ins recorded by your team leader. Acknowledge them if accurate or flag them if not.</p>
+            </div>
+            <div id="pending-transactions-list" class="space-y-3"></div>
+        </div>
+
         <!-- Two Column Layout: Transactions & Withdrawals -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Earnings & Transaction History -->
             <div class="p-6 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-4">
-                <h3 class="text-base font-bold text-pnt-dark">Earnings Breakdown</h3>
+                <h3 class="text-base font-bold text-pnt-dark">Earnings & Transaction History</h3>
                 <div id="transactions-list" class="space-y-3">
                     <p class="text-xs text-slate-400 py-4 text-center">Loading transactions...</p>
                 </div>
@@ -73,24 +91,93 @@
         </div>
     </main>
 
-    <!-- Withdrawal Request Modal -->
+    <!-- Modal: Add Funds / Deposit -->
+    <div id="deposit-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-sm font-bold text-pnt-dark uppercase tracking-wider">Submit Deposit / Funding</h3>
+                <button type="button" onclick="closeDepositModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer">&times;</button>
+            </div>
+            <form id="deposit-form" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Deposit Amount (₦)</label>
+                    <input type="number" id="deposit-amount" required min="100" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-1 focus:ring-pnt-purple" placeholder="e.g. 10000">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Category / Purpose</label>
+                    <select id="deposit-category" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+                        <option value="Self Deposit">Self Deposit / Funding</option>
+                        <option value="Dues Payment">Monthly Dues Payment</option>
+                        <option value="Program Fee">Program / Registration Fee</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Upload Payment Proof (Receipt Image)</label>
+                    <input type="file" id="deposit-proof-file" accept="image/*" onchange="handleImagePreview(this, document.getElementById('deposit-proof-preview'))" class="w-full text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-pnt-purple file:text-white cursor-pointer">
+                    <div id="deposit-proof-preview" class="mt-2 hidden"></div>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Notes / Description</label>
+                    <textarea id="deposit-description" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-1 focus:ring-pnt-purple" placeholder="Bank teller or transfer reference details..."></textarea>
+                </div>
+                <button type="submit" id="submit-deposit-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer">
+                    Submit for Approval
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Withdrawal Request with Live Balance Preview -->
     <div id="withdrawal-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                 <h3 class="text-sm font-bold text-pnt-dark uppercase tracking-wider">New Withdrawal Request</h3>
                 <button type="button" onclick="closeWithdrawModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer">&times;</button>
             </div>
-            <form id="withdrawal-form" class="space-y-4">
+
+            <!-- Live Available Balance Card inside Modal -->
+            <div class="bg-purple-50 border border-purple-100 p-3 rounded-xl flex justify-between items-center text-xs">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Amount to Withdraw (₦)</label>
-                    <input type="number" id="withdraw-amount" required min="100" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-pnt-purple" placeholder="e.g. 5000">
+                    <span class="text-slate-500 font-semibold uppercase block text-[10px]">Available Balance</span>
+                    <span id="modal-available-balance" class="font-mono font-black text-pnt-purple text-sm">₦0.00</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-slate-500 font-semibold uppercase block text-[10px]">Balance After Payout</span>
+                    <span id="modal-remaining-balance" class="font-mono font-black text-emerald-600 text-sm">₦0.00</span>
+                </div>
+            </div>
+
+            <form id="withdrawal-form" class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">Amount to Withdraw (₦)</label>
+                    <input type="number" id="withdraw-amount" required min="100" oninput="calculateRemainingBalance()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-1 focus:ring-pnt-purple" placeholder="e.g. 5000">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1">Purpose / Details</label>
-                    <textarea id="withdraw-purpose" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-pnt-purple" placeholder="Reason for cash out..."></textarea>
+                    <label class="block font-semibold text-slate-600 mb-1">Purpose / Details</label>
+                    <textarea id="withdraw-purpose" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-1 focus:ring-pnt-purple" placeholder="Reason for cash out..."></textarea>
                 </div>
-                <button type="submit" id="submit-withdraw-btn" class="w-full bg-pnt-purple hover:opacity-90 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-sm cursor-pointer">
+                <button type="submit" id="submit-withdraw-btn" class="w-full bg-pnt-purple hover:opacity-90 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer">
                     Submit Request
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Dispute / Not Accurate Reason -->
+    <div id="dispute-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-sm font-bold text-red-600 uppercase tracking-wider">Dispute Transaction ("Not Accurate")</h3>
+                <button type="button" onclick="closeDisputeModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer">&times;</button>
+            </div>
+            <form id="dispute-form" class="space-y-4 text-xs">
+                <input type="hidden" id="dispute-tx-id">
+                <div>
+                    <label class="block font-semibold text-slate-600 mb-1">State Correction or Reason</label>
+                    <textarea id="dispute-reason-input" rows="3" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:ring-1 focus:ring-red-500" placeholder="Explain why this amount is inaccurate..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl shadow-md cursor-pointer">
+                    Submit Dispute to Leader
                 </button>
             </form>
         </div>
@@ -100,6 +187,8 @@
     <script src="/js/nav.js"></script>
     <script>
         let currentUser = null;
+        let memberTransactions = [];
+        let currentLiveBalance = 0;
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -119,10 +208,13 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    document.getElementById('stat-balance').textContent = `₦${Number(data.cashbook.current_balance || 0).toLocaleString()}`;
-                    document.getElementById('stat-total-earned').textContent = `₦${Number(data.cashbook.total_earned || 0).toLocaleString()}`;
+                    currentLiveBalance = Number(data.cashbook.current_balance || 0);
+                    document.getElementById('stat-balance').textContent = formatNaira(currentLiveBalance);
+                    document.getElementById('stat-total-earned').textContent = formatNaira(data.cashbook.total_earned);
 
-                    renderTransactions(data.transactions);
+                    memberTransactions = data.transactions || [];
+                    renderPendingTransactions(memberTransactions);
+                    renderTransactions(memberTransactions);
                     renderWithdrawals(data.withdrawals);
                 }
             } catch (err) {
@@ -130,23 +222,148 @@
             }
         }
 
+        function calculateRemainingBalance() {
+            const inputVal = parseFloat(document.getElementById('withdraw-amount').value) || 0;
+            const remaining = currentLiveBalance - inputVal;
+            document.getElementById('modal-available-balance').textContent = formatNaira(currentLiveBalance);
+            document.getElementById('modal-remaining-balance').textContent = formatNaira(remaining < 0 ? 0 : remaining);
+        }
+
+        function renderPendingTransactions(txs) {
+            const section = document.getElementById('pending-actions-section');
+            const container = document.getElementById('pending-transactions-list');
+            const badge = document.getElementById('pending-count-badge');
+            
+            const pending = txs.filter(tx => tx.submitted_by_role && tx.submitted_by_role !== 'member' && (tx.status === 'pending_leader_approval' || tx.status === 'pending_admin_approval'));
+            
+            if (pending.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+            badge.textContent = `${pending.length} Pending`;
+            container.innerHTML = '';
+
+            pending.forEach(tx => {
+                const date = new Date(tx.created_at).toLocaleDateString();
+                const isCashIn = tx.transaction_type === 'deposit';
+                container.innerHTML += `
+                    <div class="bg-white border border-amber-200 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-bold uppercase bg-amber-100 text-amber-900 px-2 py-0.5 rounded">${tx.category}</span>
+                                <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${isCashIn ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}">Deposit</span>
+                                <span class="font-mono font-bold text-slate-900 text-sm">${formatNaira(tx.amount)}</span>
+                            </div>
+                            <p class="text-xs text-slate-700">${tx.description || 'Cash deposit record'}</p>
+                            ${tx.proof_image_url ? `<a href="${tx.proof_image_url}" target="_blank" class="text-[11px] font-bold text-pnt-purple underline block">View Receipt Proof ➔</a>` : ''}
+                            <p class="text-[10px] text-slate-400">Recorded on ${date}</p>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <button onclick="respondTransaction('${tx.id}', 'acknowledge')" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-lg cursor-pointer shadow-xs">
+                                ✓ Acknowledge
+                            </button>
+                            <button onclick="openDisputeModal('${tx.id}')" class="flex-1 sm:flex-none bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-xs px-4 py-2 rounded-lg cursor-pointer">
+                                ✕ Not Accurate
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function respondTransaction(txId, action) {
+            if (!confirm(`Are you sure you want to ${action} this transaction?`)) return;
+
+            try {
+                const res = await fetch(`/api/finance/transactions/${txId}/response`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ action })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Transaction response recorded successfully!');
+                    loadMemberCashbook(currentUser.id);
+                } else {
+                    alert(`Failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Connection error.');
+            }
+        }
+
+        function openDisputeModal(txId) {
+            document.getElementById('dispute-tx-id').value = txId;
+            document.getElementById('dispute-reason-input').value = '';
+            document.getElementById('dispute-modal').classList.remove('hidden');
+        }
+        function closeDisputeModal() {
+            document.getElementById('dispute-modal').classList.add('hidden');
+        }
+
+        document.getElementById('dispute-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const txId = document.getElementById('dispute-tx-id').value;
+            const disputeReason = document.getElementById('dispute-reason-input').value.trim();
+
+            try {
+                const res = await fetch(`/api/finance/transactions/${txId}/response`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ action: 'dispute', disputeReason })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Dispute submitted successfully to your leader.');
+                    closeDisputeModal();
+                    loadMemberCashbook(currentUser.id);
+                } else {
+                    alert(`Failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Connection error.');
+            }
+        });
+
         function renderTransactions(txs) {
             const container = document.getElementById('transactions-list');
             container.innerHTML = '';
-            if (!txs || txs.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">No earnings recorded yet.</p>`;
+            
+            const displayableTxs = txs.filter(tx => 
+                ['approved', 'acknowledged'].includes(tx.status) || 
+                (tx.submitted_by_role === 'member' && ['pending_leader_approval', 'pending_admin_approval'].includes(tx.status))
+            );
+
+            if (displayableTxs.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 py-4 text-center">No transaction records found yet.</p>`;
                 return;
             }
-            txs.forEach(tx => {
+
+            displayableTxs.forEach(tx => {
                 const date = new Date(tx.created_at).toLocaleDateString();
+                const isCashIn = tx.transaction_type === 'deposit';
+                let statusBadge = `<span class="text-[9px] font-bold uppercase bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Active</span>`;
+                
+                if (tx.submitted_by_role === 'member' && ['pending_leader_approval', 'pending_admin_approval'].includes(tx.status)) {
+                    statusBadge = `<span class="text-[9px] font-bold uppercase bg-amber-100 text-amber-800 px-2 py-0.5 rounded">Pending Approval</span>`;
+                }
+
                 container.innerHTML += `
                     <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-xl flex justify-between items-center">
                         <div>
-                            <span class="text-[10px] font-bold uppercase bg-purple-50 text-pnt-purple border border-purple-200 px-2 py-0.5 rounded">${tx.category}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-bold uppercase bg-purple-50 text-pnt-purple border border-purple-200 px-2 py-0.5 rounded">${tx.category}</span>
+                                <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${isCashIn ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}">Deposit</span>
+                                ${statusBadge}
+                            </div>
                             <p class="text-xs text-slate-700 font-medium mt-1">${tx.description || 'No description'}</p>
                             <p class="text-[10px] text-slate-400 mt-0.5">${date}</p>
                         </div>
-                        <span class="font-mono font-bold text-emerald-600 text-sm">+₦${Number(tx.amount).toLocaleString()}</span>
+                        <span class="font-mono font-bold text-emerald-600 text-sm">+${formatNaira(tx.amount)}</span>
                     </div>
                 `;
             });
@@ -169,7 +386,10 @@
                 container.innerHTML += `
                     <div class="bg-slate-50 border border-slate-200 p-3.5 rounded-xl space-y-2">
                         <div class="flex justify-between items-center">
-                            <span class="font-mono font-bold text-slate-900 text-sm">₦${Number(w.amount).toLocaleString()}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="font-mono font-bold text-slate-900 text-sm">${formatNaira(w.amount)}</span>
+                                <span class="text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border bg-rose-50 text-rose-700 border-rose-200">Withdrawal</span>
+                            </div>
                             <span class="text-[10px] uppercase font-bold px-2 py-0.5 border rounded ${badgeClass}">${w.status}</span>
                         </div>
                         <p class="text-xs text-slate-600">${w.purpose}</p>
@@ -179,8 +399,46 @@
             });
         }
 
-        function openWithdrawModal() { document.getElementById('withdrawal-modal').classList.remove('hidden'); }
+        function openDepositModal() { document.getElementById('deposit-modal').classList.remove('hidden'); }
+        function closeDepositModal() { document.getElementById('deposit-modal').classList.add('hidden'); }
+
+        function openWithdrawModal() { 
+            calculateRemainingBalance();
+            document.getElementById('withdrawal-modal').classList.remove('hidden'); 
+        }
         function closeWithdrawModal() { document.getElementById('withdrawal-modal').classList.add('hidden'); }
+
+        document.getElementById('deposit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amount = document.getElementById('deposit-amount').value;
+            const category = document.getElementById('deposit-category').value;
+            const description = document.getElementById('deposit-description').value;
+            
+            let proofUrl = null;
+            const previewImg = document.querySelector('#deposit-proof-preview img');
+            if (previewImg) proofUrl = previewImg.src;
+
+            try {
+                const res = await fetch('/api/finance/cashbook/earning', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ amount, category, description, proofUrl, type: 'deposit' })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Deposit request submitted successfully for approval!');
+                    closeDepositModal();
+                    document.getElementById('deposit-form').reset();
+                    document.getElementById('deposit-proof-preview').classList.add('hidden');
+                    loadMemberCashbook(currentUser.id);
+                } else {
+                    alert(`Failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Connection error.');
+            }
+        });
 
         document.getElementById('withdrawal-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -198,6 +456,7 @@
                 if (data.success) {
                     alert('Withdrawal request submitted successfully!');
                     closeWithdrawModal();
+                    document.getElementById('withdrawal-form').reset();
                     loadMemberCashbook(currentUser.id);
                 } else {
                     alert(`Failed: ${data.message}`);

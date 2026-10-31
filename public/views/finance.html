@@ -7,6 +7,7 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
     <link rel="stylesheet" href="/css/styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/js/finance-shared.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -27,7 +28,7 @@
         <div class="glass-card p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <h2 class="text-xl font-black text-pnt-dark tracking-tight">Enterprise Financial Ledger</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Global oversight of member earnings, branch office ledgers, and withdrawal request queues</p>
+                <p class="text-xs text-slate-500 mt-0.5">Global oversight of member earnings, deposit approvals, branch office ledgers, and withdrawal request queues</p>
             </div>
             <div class="flex items-center gap-2">
                 <button onclick="fetchAllFinancialData()" class="inline-flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-semibold px-3 py-2 rounded-xl text-xs transition-all cursor-pointer">
@@ -51,7 +52,7 @@
             <div class="bg-white border border-emerald-100 p-5 rounded-2xl shadow-xs">
                 <span class="text-[11px] font-semibold text-emerald-600 uppercase tracking-wider">Total Cash-In</span>
                 <h3 class="text-2xl font-black text-emerald-600 mt-1" id="metric-total-in">₦0</h3>
-                <p class="text-[10px] text-slate-400 mt-0.5">Member earnings & softcopy revenues</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">Member earnings & approved deposits</p>
             </div>
 
             <div class="bg-white border border-rose-100 p-5 rounded-2xl shadow-xs">
@@ -61,15 +62,16 @@
             </div>
 
             <div class="bg-white border border-amber-100 p-5 rounded-2xl shadow-xs">
-                <span class="text-[11px] font-semibold text-amber-600 uppercase tracking-wider">Pending Withdrawals</span>
+                <span class="text-[11px] font-semibold text-amber-600 uppercase tracking-wider">Pending Approvals</span>
                 <h3 class="text-2xl font-black text-amber-600 mt-1" id="metric-pending-count">0</h3>
                 <p class="text-[10px] text-slate-400 mt-0.5">Awaiting admin review sign-off</p>
             </div>
         </div>
 
         <!-- Section Tabs / Filters -->
-        <div class="flex gap-2 border-b border-slate-200 pb-2">
+        <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2">
             <button onclick="switchTab('all')" id="tab-all" class="px-4 py-2 bg-pnt-purple text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer transition-all">Master Transaction Ledger</button>
+            <button onclick="switchTab('deposits')" id="tab-deposits" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 cursor-pointer transition-all">Deposit Approvals</button>
             <button onclick="switchTab('earnings')" id="tab-earnings" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 cursor-pointer transition-all">Member Earnings</button>
             <button onclick="switchTab('expenses')" id="tab-expenses" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 cursor-pointer transition-all">Office Expenses</button>
             <button onclick="switchTab('withdrawals')" id="tab-withdrawals" class="px-4 py-2 bg-white border border-slate-200 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-50 cursor-pointer transition-all">Withdrawal Queue</button>
@@ -85,7 +87,9 @@
                 </select>
                 <select id="filter-status" onchange="applyFilters()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none">
                     <option value="all">All Statuses</option>
-                    <option value="forwarded">Pending Queue</option>
+                    <option value="pending_leader_approval">Pending Leader</option>
+                    <option value="pending_admin_approval">Pending Admin</option>
+                    <option value="forwarded">Forwarded</option>
                     <option value="approved">Approved</option>
                     <option value="paid">Paid Out</option>
                 </select>
@@ -102,6 +106,7 @@
                             <th class="py-3 px-4">Initiator / Member</th>
                             <th class="py-3 px-4">Category & Note</th>
                             <th class="py-3 px-4">Stream Source</th>
+                            <th class="py-3 px-4">Type / Nature</th>
                             <th class="py-3 px-4">Amount</th>
                             <th class="py-3 px-4">Status</th>
                             <th class="py-3 px-4 text-right">Actions / Timestamp</th>
@@ -109,7 +114,7 @@
                     </thead>
                     <tbody id="ledger-tbody" class="divide-y divide-slate-100">
                         <tr>
-                            <td colspan="6" class="text-center py-10 text-slate-400 font-medium">Synchronizing enterprise financial streams...</td>
+                            <td colspan="7" class="text-center py-10 text-slate-400 font-medium">Synchronizing enterprise financial streams...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -203,7 +208,7 @@
                     usersData.data.forEach(u => {
                         usersMap[u.id] = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email;
                         
-                        // Softcopy ID purchase revenue stream
+                        // Softcopy ID purchase revenue stream (Deposit)
                         if (u.has_paid_softcopy) {
                             masterLedgerEntries.push({
                                 id: `soft-${u.id}`,
@@ -213,6 +218,7 @@
                                 source: 'Member Registration',
                                 notes: 'Digital credential activation fee',
                                 direction: 'in',
+                                tx_type: 'Deposit',
                                 amount: 2000,
                                 status: 'approved',
                                 created_at: u.created_at
@@ -220,25 +226,28 @@
                         }
                     });
 
-                    // Fetch member cashbooks & earnings
+                    // Fetch member cashbooks & earnings / deposits
                     for (const u of usersData.data) {
                         try {
                             const cbRes = await fetch(`/api/finance/cashbook/${u.id}`, { credentials: 'include' });
                             const cbData = await cbRes.json();
                             if (cbData.success) {
-                                // Member earnings
+                                // Member earnings & deposits
                                 if (cbData.transactions) {
                                     cbData.transactions.forEach(tx => {
+                                        const isDeposit = tx.type === 'deposit' || tx.submitted_by_role === 'member';
                                         masterLedgerEntries.push({
                                             id: tx.id,
                                             initiator: usersMap[u.id] || 'Branch Member',
                                             meta: u.custom_profile_id || 'PNT-MEMBER',
                                             category: tx.category,
-                                            source: 'Member Earnings',
-                                            notes: tx.description || 'Logged by team leader',
+                                            source: isDeposit ? 'Deposit Approvals' : 'Member Earnings',
+                                            notes: tx.description || 'Cashbook entry',
                                             direction: 'in',
+                                            tx_type: 'Deposit',
                                             amount: Number(tx.amount),
-                                            status: 'approved',
+                                            status: tx.status,
+                                            proof_image_url: tx.proof_image_url,
                                             created_at: tx.created_at
                                         });
                                     });
@@ -254,8 +263,9 @@
                                             source: 'Withdrawal Queue',
                                             notes: w.purpose || 'Member cash payout request',
                                             direction: 'out',
+                                            tx_type: 'Withdrawal',
                                             amount: Number(w.amount),
-                                            status: w.status, // forwarded, approved, paid, rejected
+                                            status: w.status,
                                             created_at: w.created_at
                                         });
                                     });
@@ -282,6 +292,7 @@
                                         source: 'Office Expenses',
                                         notes: l.description || 'Office operational ledger',
                                         direction: isExp ? 'out' : 'in',
+                                        tx_type: isExp ? 'Withdrawal' : 'Deposit',
                                         amount: Number(l.amount),
                                         status: 'approved',
                                         created_at: l.created_at
@@ -319,27 +330,48 @@
             }
         }
 
+        async function evaluateDeposit(txId, status) {
+            try {
+                const res = await fetch(`/api/finance/transactions/${txId}/evaluate`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ status })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`Deposit request successfully ${status}!`);
+                    fetchAllFinancialData();
+                } else {
+                    alert(`Action failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Connection error.');
+            }
+        }
+
         function computeMetrics(entries) {
             let totalIn = 0;
             let totalOut = 0;
             let pendingCount = 0;
 
             entries.forEach(e => {
-                if (e.status === 'forwarded' || e.status === 'pending') pendingCount++;
-                if (e.direction === 'in' && e.status !== 'rejected') totalIn += Number(e.amount);
+                if (['forwarded', 'pending', 'pending_leader_approval', 'pending_admin_approval'].includes(e.status)) pendingCount++;
+                if (e.direction === 'in' && ['approved', 'acknowledged', 'paid'].includes(e.status)) totalIn += Number(e.amount);
                 if (e.direction === 'out' && e.status !== 'rejected') totalOut += Number(e.amount);
             });
 
-            document.getElementById('metric-net-balance').textContent = `₦${(totalIn - totalOut).toLocaleString()}`;
-            document.getElementById('metric-total-in').textContent = `₦${totalIn.toLocaleString()}`;
-            document.getElementById('metric-total-out').textContent = `₦${totalOut.toLocaleString()}`;
+            document.getElementById('metric-net-balance').textContent = formatNaira(totalIn - totalOut);
+            document.getElementById('metric-total-in').textContent = formatNaira(totalIn);
+            document.getElementById('metric-total-out').textContent = formatNaira(totalOut);
             document.getElementById('metric-pending-count').textContent = pendingCount;
         }
 
         function switchTab(tab) {
             activeTabFilter = tab;
-            ['all', 'earnings', 'expenses', 'withdrawals'].forEach(t => {
+            ['all', 'deposits', 'earnings', 'expenses', 'withdrawals'].forEach(t => {
                 const btn = document.getElementById(`tab-${t}`);
+                if (!btn) return;
                 if (t === tab) {
                     btn.className = "px-4 py-2 bg-pnt-purple text-white font-bold text-xs rounded-xl shadow-xs cursor-pointer transition-all";
                 } else {
@@ -355,7 +387,7 @@
             const status = document.getElementById('filter-status').value;
 
             const filtered = masterLedgerEntries.filter(tx => {
-                // Tab filtering
+                if (activeTabFilter === 'deposits' && tx.source !== 'Deposit Approvals') return false;
                 if (activeTabFilter === 'earnings' && tx.source !== 'Member Earnings') return false;
                 if (activeTabFilter === 'expenses' && tx.source !== 'Office Expenses') return false;
                 if (activeTabFilter === 'withdrawals' && tx.source !== 'Withdrawal Queue') return false;
@@ -378,7 +410,7 @@
             tbody.innerHTML = '';
 
             if (!entries || entries.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-slate-400 font-medium">No ledger records found in this stream.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-10 text-slate-400 font-medium">No ledger records found in this stream.</td></tr>`;
                 return;
             }
 
@@ -388,11 +420,19 @@
                 row.className = "hover:bg-slate-50/75 transition-colors";
 
                 let actionSlot = `<span class="text-slate-400 font-mono text-[11px]">${new Date(item.created_at).toLocaleDateString()}</span>`;
-                if (item.status === 'forwarded' || item.status === 'pending') {
+                
+                if (['forwarded', 'pending'].includes(item.status)) {
                     actionSlot = `
                         <div class="flex items-center justify-end gap-1.5">
                             <button onclick="evaluateWithdrawal('${item.id}', 'approved')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer">Approve</button>
                             <button onclick="evaluateWithdrawal('${item.id}', 'rejected')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer">Reject</button>
+                        </div>
+                    `;
+                } else if (['pending_leader_approval', 'pending_admin_approval'].includes(item.status)) {
+                    actionSlot = `
+                        <div class="flex items-center justify-end gap-1.5">
+                            <button onclick="evaluateDeposit('${item.id}', 'approved')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer">Approve Deposit</button>
+                            <button onclick="evaluateDeposit('${item.id}', 'rejected')" class="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer">Reject</button>
                         </div>
                     `;
                 }
@@ -405,15 +445,21 @@
                     <td class="py-3 px-4">
                         <span class="font-semibold text-slate-700">${item.category}</span>
                         <div class="text-[10px] text-slate-400 truncate max-w-xs">${item.notes || '---'}</div>
+                        ${item.proof_image_url ? `<a href="${item.proof_image_url}" target="_blank" class="text-[10px] font-bold text-pnt-purple underline block mt-0.5">View Receipt Proof ➔</a>` : ''}
                     </td>
                     <td class="py-3 px-4">
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-50 text-pnt-purple border border-purple-100">${item.source}</span>
                     </td>
+                    <td class="py-3 px-4">
+                        <span class="text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${isCashIn ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}">
+                            ${item.tx_type || (isCashIn ? 'Deposit' : 'Withdrawal')}
+                        </span>
+                    </td>
                     <td class="py-3 px-4 font-mono font-bold ${isCashIn ? 'text-emerald-700' : 'text-rose-600'}">
-                        ${isCashIn ? '+' : '-'}₦${Number(item.amount).toLocaleString()}
+                        ${isCashIn ? '+' : '-'}${formatNaira(item.amount)}
                     </td>
                     <td class="py-3 px-4">
-                        <span class="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${item.status === 'approved' ? 'bg-slate-100 text-slate-700' : item.status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                        <span class="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${['approved', 'acknowledged'].includes(item.status) ? 'bg-slate-100 text-slate-700' : item.status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
                             ${item.status}
                         </span>
                     </td>
@@ -444,6 +490,7 @@
                 if (data.success) {
                     alert('Ledger entry recorded successfully!');
                     closeModal('entry-modal');
+                    document.getElementById('ledger-form').reset();
                     fetchAllFinancialData();
                 } else {
                     alert(`Error: ${data.message}`);

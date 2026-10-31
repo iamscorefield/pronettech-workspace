@@ -85,6 +85,7 @@
         let activeRecipientId = null;
         let contactsList = [];
         let pollingInterval = null;
+        let contactsPollInterval = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -94,56 +95,86 @@
                 currentUser = authData.user;
 
                 await loadContacts();
+                
+                // Poll contacts list every 4 seconds to check for incoming unread message counts
+                contactsPollInterval = setInterval(() => loadContacts(false), 4000);
             } catch (err) {
                 console.error("Auth session error:", err);
             }
         });
 
-        async function loadContacts() {
+        async function loadContacts(shouldRender = true) {
             try {
                 const res = await fetch('/api/chat/contacts', { credentials: 'include' });
                 const data = await res.json();
                 if (data.success) {
                     contactsList = data.contacts || [];
-                    renderContacts(contactsList);
+                    if (shouldRender) {
+                        const searchQuery = document.getElementById('contact-search').value.toLowerCase().trim();
+                        filterAndRenderContacts(searchQuery);
+                    }
                 }
             } catch (err) {
-                document.getElementById('contacts-list').innerHTML = `<div class="p-4 text-xs text-red-400 text-center">Failed to load contacts.</div>`;
+                const container = document.getElementById('contacts-list');
+                if (container && container.children.length === 0) {
+                    container.innerHTML = `<div class="p-4 text-xs text-red-400 text-center">Failed to load contacts.</div>`;
+                }
             }
+        }
+
+        function filterAndRenderContacts(query = '') {
+            const filtered = contactsList.filter(c => 
+                `${c.first_name} ${c.last_name}`.toLowerCase().includes(query) || 
+                (c.custom_profile_id && c.custom_profile_id.toLowerCase().includes(query))
+            );
+            renderContacts(filtered);
         }
 
         function renderContacts(contacts) {
             const container = document.getElementById('contacts-list');
+            const scrollPos = container.scrollTop;
             container.innerHTML = '';
+            
             if (contacts.length === 0) {
-                container.innerHTML = `<div class="p-4 text-xs text-slate-400 text-center">No other contacts found.</div>`;
+                container.innerHTML = `<div class="p-4 text-xs text-slate-400 text-center">No contacts found.</div>`;
                 return;
             }
 
             contacts.forEach(contact => {
                 const initials = `${contact.first_name?.[0] || ''}${contact.last_name?.[0] || ''}`.toUpperCase() || 'U';
                 const roleBadge = contact.role ? contact.role.replace('_', ' ').toUpperCase() : 'MEMBER';
+                const unreadCount = contact.unread_count || 0;
                 
                 const item = document.createElement('div');
-                item.className = `p-3 flex items-center gap-3 cursor-pointer transition-all hover:bg-purple-50/50 ${activeRecipientId === contact.id ? 'bg-purple-50 border-l-4 border-pnt-purple' : ''}`;
+                item.className = `p-3 flex items-center justify-between gap-3 cursor-pointer transition-all hover:bg-purple-50/50 ${activeRecipientId === contact.id ? 'bg-purple-50 border-l-4 border-pnt-purple' : ''}`;
                 item.onclick = () => selectContact(contact);
                 
                 item.innerHTML = `
-                    <div class="w-10 h-10 rounded-full bg-purple-100 text-pnt-purple font-bold flex items-center justify-center text-xs shrink-0 overflow-hidden">
-                        ${contact.avatar_url ? `<img src="${contact.avatar_url}" class="w-full h-full object-cover">` : initials}
+                    <div class="flex items-center gap-3 overflow-hidden flex-1">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 text-pnt-purple font-bold flex items-center justify-center text-xs shrink-0 overflow-hidden relative">
+                            ${contact.avatar_url ? `<img src="${contact.avatar_url}" class="w-full h-full object-cover">` : initials}
+                        </div>
+                        <div class="overflow-hidden flex-1">
+                            <h4 class="font-bold text-xs text-slate-900 truncate">${contact.first_name} ${contact.last_name}</h4>
+                            <p class="text-[9px] font-mono text-pnt-purple uppercase truncate">${roleBadge} • ${contact.custom_profile_id || 'PNT'}</p>
+                        </div>
                     </div>
-                    <div class="overflow-hidden flex-1">
-                        <h4 class="font-bold text-xs text-slate-900 truncate">${contact.first_name} ${contact.last_name}</h4>
-                        <p class="text-[9px] font-mono text-pnt-purple uppercase">${roleBadge} • ${contact.custom_profile_id || 'PNT'}</p>
+                    <div>
+                        ${unreadCount > 0 ? `<span class="bg-red-500 text-white font-bold text-[10px] px-2 py-0.5 rounded-full shrink-0 shadow-sm animate-pulse">${unreadCount}</span>` : ''}
                     </div>
                 `;
                 container.appendChild(item);
             });
+            container.scrollTop = scrollPos;
         }
 
         async function selectContact(contact) {
             activeRecipientId = contact.id;
-            renderContacts(contactsList); // highlight selected
+            
+            // Clear unread count locally immediately for smooth UX
+            contact.unread_count = 0;
+            const searchQuery = document.getElementById('contact-search').value.toLowerCase().trim();
+            filterAndRenderContacts(searchQuery);
 
             document.getElementById('active-contact-name').textContent = `${contact.first_name} ${contact.last_name}`;
             document.getElementById('active-contact-role').textContent = `${contact.role?.replace('_', ' ').toUpperCase()} • ${contact.custom_profile_id}`;
@@ -156,7 +187,7 @@
 
             await fetchMessages();
             if (pollingInterval) clearInterval(pollingInterval);
-            pollingInterval = setInterval(fetchMessages, 3000); // Poll for live updates every 3 seconds
+            pollingInterval = setInterval(fetchMessages, 3000); // Poll chat messages every 3 seconds
         }
 
         async function fetchMessages() {
@@ -172,6 +203,8 @@
 
         function renderMessages(messages) {
             const container = document.getElementById('chat-messages-container');
+            const isScrolledToBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
+
             container.innerHTML = '';
             if (messages.length === 0) {
                 container.innerHTML = `<div class="text-center text-xs text-slate-400 my-auto">No direct messages yet. Say hello!</div>`;
@@ -188,7 +221,10 @@
                 `;
                 container.appendChild(bubble);
             });
-            container.scrollTop = container.scrollHeight;
+
+            if (isScrolledToBottom) {
+                container.scrollTop = container.scrollHeight;
+            }
         }
 
         document.getElementById('chat-input-form').addEventListener('submit', async (e) => {
@@ -216,8 +252,7 @@
 
         document.getElementById('contact-search').addEventListener('input', (e) => {
             const q = e.target.value.toLowerCase().trim();
-            const filtered = contactsList.filter(c => `${c.first_name} ${c.last_name}`.toLowerCase().includes(q) || (c.custom_profile_id && c.custom_profile_id.toLowerCase().includes(q)));
-            renderContacts(filtered);
+            filterAndRenderContacts(q);
         });
     </script>
 </body>

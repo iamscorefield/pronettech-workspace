@@ -5,7 +5,7 @@ const { protect, authorize } = require('../middleware/auth');
 
 // ===================================================
 // 1. MY DIRECT DOWNLINES (FOR ALL USERS)
-// Fetches members registered with caller's customId
+// Fetches members registered with caller's customId as sponsor
 // ===================================================
 router.get('/my-network', protect, async (req, res) => {
     try {
@@ -18,16 +18,16 @@ router.get('/my-network', protect, async (req, res) => {
             });
         }
 
-        // 1. Fetch direct downline profiles
+        // Fetch direct downline profiles case-insensitively
         const { data: downlines, error } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, email, phone_number, state, custom_profile_id, status, membership_expires_at, created_at, avatar_url, office:offices(branch_name)')
-            .eq('sponsor_id', callerCustomId.trim().toUpperCase())
+            .select('id, first_name, last_name, email, phone_number, state, custom_profile_id, sponsor_id, status, role, membership_expires_at, created_at, avatar_url, office:offices(branch_name)')
+            .ilike('sponsor_id', callerCustomId.trim())
             .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        // 2. Fetch softcopy orders to track ID card purchase statuses
+        // Fetch softcopy orders to track ID card purchase statuses
         const downlineIds = (downlines || []).map(d => d.id);
         let softcopyPaidMap = {};
 
@@ -68,23 +68,29 @@ router.get('/my-network', protect, async (req, res) => {
 });
 
 // ===================================================
-// 2. OFFICE BRANCH ROSTER (LEADERS & ADMINS)
-// Fetches all physical staff assigned to leader's branch
+// 2. OFFICE BRANCH ROSTER (MEMBERS, LEADERS & ADMINS)
+// Fetches physical staff assigned to the user's branch office
 // ===================================================
-router.get('/office-roster', protect, authorize('leader', 'admin'), async (req, res) => {
+router.get('/office-roster', protect, async (req, res) => {
     try {
-        const officeId = req.user.office_id || req.query.office_id;
+        let officeId = req.user.office_id;
 
         if (!officeId) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'No assigned regional branch office detected for your account.' 
-            });
+            const { data: userProfile } = await supabase
+                .from('profiles')
+                .select('office_id')
+                .eq('id', req.user.id)
+                .single();
+            if (userProfile) officeId = userProfile.office_id;
+        }
+
+        if (!officeId) {
+            return res.status(200).json({ success: true, totalStaff: 0, roster: [] });
         }
 
         const { data: staff, error } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, email, phone_number, state, custom_profile_id, role, status, membership_expires_at, created_at, avatar_url')
+            .select('id, first_name, last_name, email, phone_number, state, custom_profile_id, sponsor_id, role, status, membership_expires_at, created_at, avatar_url, office:offices(branch_name)')
             .eq('office_id', officeId)
             .order('first_name', { ascending: true });
 
@@ -102,9 +108,9 @@ router.get('/office-roster', protect, authorize('leader', 'admin'), async (req, 
 });
 
 // ===================================================
-// 3. GLOBAL HIERARCHY TREE AUDIT (ADMIN ONLY)
+// 3. GLOBAL HIERARCHY TREE AUDIT (ADMIN & SUB-ADMIN)
 // ===================================================
-router.get('/tree', protect, authorize('admin'), async (req, res) => {
+router.get('/tree', protect, authorize('admin', 'sub_admin', 'global_admin'), async (req, res) => {
     try {
         const { data: networkProfiles, error } = await supabase
             .from('profiles')

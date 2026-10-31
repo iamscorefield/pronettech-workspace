@@ -1,3 +1,8 @@
+/**
+ * Pronettech Workspace - Task Management Router
+ * File: routes/tasks.js
+ */
+
 const express = require('express');
 const router = express.Router();
 const supabase = require('../config/supabase');
@@ -22,7 +27,7 @@ router.get('/user/:userId', protect, async (req, res) => {
 });
 
 // 2. GET: Fetch tasks for a specific regional office (Leader Monitor View)
-router.get('/office/:officeId', protect, authorize('leader', 'admin'), async (req, res) => {
+router.get('/office/:officeId', protect, authorize('leader', 'admin', 'sub_admin', 'global_admin'), async (req, res) => {
     const { officeId } = req.params;
     try {
         const { data, error } = await supabase
@@ -40,7 +45,7 @@ router.get('/office/:officeId', protect, authorize('leader', 'admin'), async (re
 });
 
 // 3. GET: Fetch all completed tasks globally (Admin Queue Review)
-router.get('/global/completed', protect, authorize('admin'), async (req, res) => {
+router.get('/global/completed', protect, authorize('admin', 'sub_admin', 'global_admin'), async (req, res) => {
     try {
         const { data, error } = await supabase
             .from('tasks')
@@ -56,32 +61,41 @@ router.get('/global/completed', protect, authorize('admin'), async (req, res) =>
     }
 });
 
-// 4. GET: Fetch active leaders for task assignment dropdown (Admin View)
-router.get('/leaders/list', protect, authorize('admin'), async (req, res) => {
+// 4. GET: Fetch active leaders for task assignment dropdown (Foolproof Query)
+router.get('/leaders/list', protect, authorize('admin', 'sub_admin', 'global_admin'), async (req, res) => {
     try {
+        // Fetch all profiles to ensure we don't miss anyone due to strict role matching variations
         const { data, error } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, custom_profile_id, role, office:offices(branch_name)')
-            .in('role', ['leader', 'team_leader'])
-            .eq('status', 'active')
+            .select('id, first_name, last_name, custom_profile_id, role, status')
             .order('first_name', { ascending: true });
 
         if (error) throw error;
-        res.status(200).json({ success: true, data });
+
+        // Filter intelligently: include anyone who is a leader, sub_admin, team_leader, or even admins if needed, 
+        // while excluding banned profiles. If role matching is loose, this guarantees they appear.
+        const leadersList = (data || []).filter(u => {
+            const role = (u.role || '').toLowerCase();
+            const status = (u.status || 'active').toLowerCase();
+            const isNotBanned = status !== 'banned' && status !== 'ban' && status !== 'suspended';
+            const isLeaderRole = role.includes('leader') || role.includes('sub_admin') || role === 'admin' || role === 'global_admin';
+            return isNotBanned && isLeaderRole;
+        });
+
+        res.status(200).json({ success: true, data: leadersList });
     } catch (err) {
         console.error('Error fetching leaders list:', err.message);
         res.status(500).json({ success: false, message: 'Failed to load leaders list.' });
     }
 });
 
-// 5. POST: Deploy a new task (by Custom ID or direct user UUID)
-router.post('/', protect, authorize('leader', 'admin'), async (req, res) => {
+// 5. POST: Deploy a new task
+router.post('/', protect, authorize('leader', 'admin', 'sub_admin', 'global_admin'), async (req, res) => {
     const { title, assigneeCustomId, assigneeId, description, assigned_by } = req.body;
 
     try {
         let targetUserId = assigneeId;
 
-        // If assigned by custom ID (like PNT-2026-10001)
         if (!targetUserId && assigneeCustomId) {
             const { data: userProfile, error: profileError } = await supabase
                 .from('profiles')

@@ -91,7 +91,7 @@
                             <th class="py-3 px-4">Workspace ID</th>
                             <th class="py-3 px-4">Clock-in Time</th>
                             <th class="py-3 px-4">Geofence Status</th>
-                            <th class="py-3 px-4 text-right">Verification</th>
+                            <th class="py-3 px-4 text-right">Verification Action</th>
                         </tr>
                     </thead>
                     <tbody id="att-tbody" class="divide-y divide-slate-100">
@@ -171,12 +171,13 @@
                 }
 
                 currentLeader = authData.user;
-                if (currentLeader.role !== 'leader' && currentLeader.role !== 'team_leader' && currentLeader.role !== 'admin') {
+                const isAdmin = currentLeader.role === 'admin' || currentLeader.role === 'global_admin' || currentLeader.role === 'sub_admin';
+                if (!isAdmin && currentLeader.role !== 'leader' && currentLeader.role !== 'team_leader') {
                     window.location.href = '/views/dashboard.html';
                     return;
                 }
 
-                document.getElementById('branch-badge').textContent = currentLeader.office_name || 'Regional Office Hub';
+                document.getElementById('branch-badge').textContent = currentLeader.office_name || (isAdmin ? 'Global Enterprise Hub' : 'Regional Office Hub');
 
                 await Promise.all([
                     fetchBranchAttendance(),
@@ -208,13 +209,23 @@
         });
 
         async function fetchBranchAttendance() {
-            if (!currentLeader.office_id) return;
             try {
-                const res = await fetch(`/api/attendance/office/${currentLeader.office_id}/today`, { credentials: 'include' });
+                const isAdmin = currentLeader.role === 'admin' || currentLeader.role === 'global_admin' || currentLeader.role === 'sub_admin';
+                let endpoint = '';
+
+                if (currentLeader.office_id) {
+                    endpoint = `/api/attendance/office/${currentLeader.office_id}/today`;
+                } else if (isAdmin) {
+                    endpoint = `/api/attendance/all`;
+                } else {
+                    return;
+                }
+
+                const res = await fetch(endpoint, { credentials: 'include' });
                 const data = await res.json();
 
                 if (data.success) {
-                    attendanceLogs = data.attendance || [];
+                    attendanceLogs = data.attendance || data.data || [];
                     document.getElementById('metric-clocked-in').textContent = attendanceLogs.length;
                     document.getElementById('badge-att-count').textContent = attendanceLogs.length;
                     renderAttendanceTable(attendanceLogs);
@@ -229,12 +240,14 @@
             tbody.innerHTML = '';
 
             if (!logs || logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400 font-medium">No check-ins logged for this branch today yet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400 font-medium">No check-ins logged yet.</td></tr>`;
                 return;
             }
 
             logs.forEach(log => {
-                const time = log.clock_in ? new Date(log.clock_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                const time = log.marked_time || log.clock_in ? new Date(log.marked_time || log.clock_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+                const isPending = log.status === 'pending';
+                
                 const row = document.createElement('tr');
                 row.className = "hover:bg-slate-50/70 transition-colors";
                 row.innerHTML = `
@@ -242,38 +255,70 @@
                         <div class="font-bold text-slate-900">${log.profiles?.first_name || 'Member'} ${log.profiles?.last_name || ''}</div>
                         <div class="text-[10px] text-slate-400 font-mono">${log.profiles?.email || 'N/A'}</div>
                     </td>
-                    <td class="py-3 px-4 font-mono font-bold text-pnt-purple">${log.profiles?.custom_profile_id || 'PENDING'}</td>
+                    <td class="py-3 px-4 font-mono font-bold text-pnt-purple">${log.profiles?.custom_profile_id || log.profile_id || 'PENDING'}</td>
                     <td class="py-3 px-4 font-mono text-slate-600">${time}</td>
                     <td class="py-3 px-4">
                         <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
                             Geofence Verified
                         </span>
                     </td>
-                    <td class="py-3 px-4 text-right">
-                        <span class="text-[10px] font-bold text-emerald-600 uppercase">Confirmed</span>
+                    <td class="py-3 px-4 text-right space-x-2">
+                        ${isPending ? `
+                            <button onclick="verifyAttendance('${log.id}', 'confirmed')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] rounded-lg cursor-pointer shadow-xs">Approve</button>
+                            <button onclick="verifyAttendance('${log.id}', 'rejected')" class="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 font-bold text-[10px] rounded-lg cursor-pointer">Reject</button>
+                        ` : `
+                            <span class="text-[10px] font-bold uppercase ${log.status === 'confirmed' ? 'text-emerald-600' : 'text-red-600'}">${log.status || 'Confirmed'}</span>
+                        `}
                     </td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
+        async function verifyAttendance(logId, status) {
+            try {
+                const res = await fetch(`/api/attendance/verify/${logId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ status, notes: `Verified by leader/admin: ${currentLeader.name}` })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(`✅ Attendance log marked as ${status}!`);
+                    fetchBranchAttendance();
+                } else {
+                    alert(`Failed: ${data.message}`);
+                }
+            } catch (err) {
+                alert('Server connection error during verification.');
+            }
+        }
+
         async function fetchBranchMemberIDs() {
             try {
-                let res = await fetch('/api/downlines/office-roster', { credentials: 'include' });
-                if (!res.ok) {
-                    res = await fetch('/api/downline/office-roster', { credentials: 'include' });
+                const isAdmin = currentLeader.role === 'admin' || currentLeader.role === 'global_admin' || currentLeader.role === 'sub_admin';
+                let res = null;
+
+                if (currentLeader.office_id) {
+                    res = await fetch(`/api/downlines/office-roster`, { credentials: 'include' });
+                    if (!res.ok) res = await fetch(`/api/downline/office-roster`, { credentials: 'include' });
+                } else if (isAdmin) {
+                    res = await fetch(`/api/auth/users/all`, { credentials: 'include' });
                 }
-                const data = await res.json();
 
-                if (data.success) {
-                    branchRoster = data.roster || [];
-                    document.getElementById('metric-total-branch-users').textContent = branchRoster.length;
-                    document.getElementById('badge-ids-count').textContent = branchRoster.length;
+                if (res && res.ok) {
+                    const data = await res.json();
+                    if (data.success) {
+                        branchRoster = data.roster || data.data || [];
+                        document.getElementById('metric-total-branch-users').textContent = branchRoster.length;
+                        document.getElementById('badge-ids-count').textContent = branchRoster.length;
 
-                    const issuedCount = branchRoster.filter(m => m.has_paid_softcopy).length;
-                    document.getElementById('metric-ids-issued').textContent = issuedCount;
+                        const issuedCount = branchRoster.filter(m => m.has_paid_softcopy).length;
+                        document.getElementById('metric-ids-issued').textContent = issuedCount;
 
-                    renderIDsTable(branchRoster);
+                        renderIDsTable(branchRoster);
+                    }
                 }
             } catch (err) {
                 console.error("Member roster query error:", err);
@@ -285,7 +330,7 @@
             tbody.innerHTML = '';
 
             if (!roster || roster.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400 font-medium">No personnel registered in this branch office roster.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400 font-medium">No personnel registered.</td></tr>`;
                 return;
             }
 

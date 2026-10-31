@@ -32,11 +32,11 @@
         <!-- Header Card -->
         <div class="glass-card p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-                <h2 class="text-xl font-extrabold text-pnt-dark tracking-tight" id="hub-title">Organization & Downline Network</h2>
+                <h2 class="text-xl font-extrabold text-pnt-dark tracking-tight" id="hub-title">Organization Network</h2>
                 <p class="text-xs text-slate-500 mt-1" id="hub-subtitle">Audit enterprise downline networks, physical branch assignments, and personnel registries.</p>
             </div>
 
-            <!-- Referral Link Generator (Visible to Members & Leaders) -->
+            <!-- Referral Link Generator -->
             <div id="referral-box" class="flex items-center gap-2 bg-slate-50 border border-slate-200 p-2 rounded-xl">
                 <div class="px-2">
                     <p class="text-[10px] font-bold text-slate-400 uppercase">Your Sponsor ID</p>
@@ -49,7 +49,7 @@
             </div>
         </div>
 
-        <!-- Metric Telemetry (Clickable Interactive Cards) -->
+        <!-- Metric Telemetry Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div id="card-stat-referrals" class="bg-white border border-slate-200 hover:border-pnt-purple/40 p-5 rounded-2xl shadow-sm cursor-pointer transition-all group">
                 <div class="flex items-center justify-between">
@@ -67,7 +67,7 @@
                 <h3 class="text-2xl font-bold text-slate-900 mt-1" id="stat-count-2">0</h3>
             </div>
 
-            <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
+            <div id="card-stat-membership-rate" class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
                 <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider" id="stat-label-3">Paid Membership Rate</p>
                 <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="stat-count-3">0%</h3>
             </div>
@@ -166,7 +166,7 @@
                     </div>
                 </div>
 
-                <!-- Transaction & Earnings Ledger Section -->
+                <!-- Transaction & Earnings Ledger Section (Clean 4-Column Layout) -->
                 <div class="space-y-2">
                     <h4 class="font-bold text-slate-900 uppercase tracking-wide text-[10px] text-pnt-purple">Full Transaction & Earnings Ledger</h4>
                     <div class="border border-slate-200 rounded-xl overflow-hidden max-h-40 overflow-y-auto">
@@ -174,7 +174,7 @@
                             <thead class="bg-slate-100 text-slate-500 font-bold uppercase text-[9px]">
                                 <tr>
                                     <th class="py-2 px-3">Date</th>
-                                    <th class="py-2 px-3">Purpose / Ref</th>
+                                    <th class="py-2 px-3">Type</th>
                                     <th class="py-2 px-3">Amount</th>
                                     <th class="py-2 px-3">Status</th>
                                 </tr>
@@ -213,6 +213,7 @@
         const tabBtnSecondary = document.getElementById('tab-btn-secondary');
         const cardStatReferrals = document.getElementById('card-stat-referrals');
         const cardStatRoster = document.getElementById('card-stat-roster');
+        const cardStatMembershipRate = document.getElementById('card-stat-membership-rate');
 
         function activatePrimaryTab() {
             activeTab = 'primary';
@@ -228,7 +229,7 @@
             activeTab = 'secondary';
             tabBtnSecondary.className = "pb-3 text-xs font-bold border-b-2 border-pnt-purple text-pnt-purple flex items-center gap-2 transition-all cursor-pointer";
             tabBtnPrimary.className = "pb-3 text-xs font-semibold text-slate-500 hover:text-slate-900 border-b-2 border-transparent flex items-center gap-2 transition-all cursor-pointer";
-            document.getElementById('table-heading').textContent = "Regional Branch Personnel Roster";
+            document.getElementById('table-heading').textContent = currentUser?.role === 'member' ? "Regional Colleagues" : "Regional Branch Personnel Roster";
             renderTable(secondaryRecords);
         }
 
@@ -249,7 +250,7 @@
 
                 currentUser = authData.user;
                 const isAdmin = currentUser.role === 'admin' || currentUser.role === 'global_admin';
-                const isLeader = currentUser.role === 'leader' || currentUser.role === 'team_leader';
+                const isLeaderOrAdmin = isAdmin || currentUser.role === 'leader' || currentUser.role === 'team_leader' || currentUser.role === 'sub_admin';
 
                 document.getElementById('user-sponsor-display').textContent = currentUser.customId || 'PNT-ADMIN';
 
@@ -259,6 +260,14 @@
                         alert(`📋 Referral invite link copied to clipboard:\n${refLink}`);
                     });
                 });
+
+                // Role-based visibility enforcement
+                if (!isLeaderOrAdmin) {
+                    cardStatRoster.classList.add('hidden');
+                    cardStatMembershipRate.classList.add('hidden');
+                    cardStatReferrals.parentElement.className = "grid grid-cols-1 gap-4";
+                    tabBtnSecondary.classList.add('hidden');
+                }
 
                 if (isAdmin) {
                     document.getElementById('hub-title').textContent = "Enterprise Organization & Downlines Tree";
@@ -270,12 +279,12 @@
                     await fetchAdminTree();
                 } else {
                     document.getElementById('tab-primary-title').textContent = "My Direct Downlines";
-                    document.getElementById('tab-secondary-title').textContent = isLeader ? "Branch Office Roster" : "Regional Colleagues";
+                    document.getElementById('tab-secondary-title').textContent = isLeaderOrAdmin ? "Branch Office Roster" : "Regional Colleagues";
 
                     await fetchMemberNetwork();
-                    if (isLeader) {
+                    if (isLeaderOrAdmin || currentUser.office_id) {
                         await fetchBranchRoster();
-                        if (masterRecords.length === 0 && secondaryRecords.length > 0) {
+                        if (masterRecords.length === 0 && secondaryRecords.length > 0 && isLeaderOrAdmin) {
                             activateSecondaryTab();
                         }
                     }
@@ -462,7 +471,7 @@
 
             const roleBadge = document.getElementById('inspect-role-badge');
             const isAdmin = user.role === 'admin' || user.role === 'global_admin';
-            const isLeader = user.role === 'leader' || user.role === 'team_leader';
+            const isLeader = user.role === 'leader' || user.role === 'team_leader' || user.role === 'sub_admin';
             roleBadge.textContent = isAdmin ? 'Admin' : (isLeader ? 'Team Leader' : 'Member');
 
             const avatarContainer = document.getElementById('inspect-avatar-container');
@@ -473,17 +482,14 @@
                 avatarContainer.innerHTML = `<span class="font-bold text-base">${initials}</span>`;
             }
 
-            // Format Sign-Up Date
             const signupDate = user.created_at ? new Date(user.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'Unknown';
             document.getElementById('inspect-signup-date').textContent = signupDate;
 
-            // Default temporary values while fetching telemetry
             document.getElementById('inspect-attendance-ratio').textContent = "Fetching telemetry...";
             document.getElementById('inspect-ledger-tbody').innerHTML = `<tr><td colspan="4" class="text-center py-3 text-slate-400">Loading ledger...</td></tr>`;
 
             openModal('user-profile-modal');
 
-            // Fetch extended telemetry (attendance counts & transaction ledger)
             try {
                 const res = await fetch(`/api/auth/profile/telemetry/${user.id}`, { credentials: 'include' });
                 const data = await res.json();
@@ -501,11 +507,16 @@
                     } else {
                         telemetry.transactions.forEach(tx => {
                             const txDate = new Date(tx.created_at || tx.date).toLocaleDateString();
+                            const isDeposit = tx.transaction_type === 'deposit';
                             const tr = document.createElement('tr');
                             tr.innerHTML = `
                                 <td class="py-2 px-3 font-mono text-slate-600">${txDate}</td>
-                                <td class="py-2 px-3 font-semibold text-slate-800">${tx.purpose || tx.reference || 'Workspace Fee'}</td>
-                                <td class="py-2 px-3 font-mono font-bold text-pnt-purple">₦${Number(tx.amount || 0).toLocaleString()}</td>
+                                <td class="py-2 px-3">
+                                    <span class="text-[9px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${isDeposit ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}">
+                                        ${isDeposit ? 'Deposit' : 'Withdrawal'}
+                                    </span>
+                                </td>
+                                <td class="py-2 px-3 font-mono font-bold ${isDeposit ? 'text-emerald-600' : 'text-rose-600'}">₦${Number(tx.amount || 0).toLocaleString()}</td>
                                 <td class="py-2 px-3"><span class="px-1.5 py-0.5 rounded text-[9px] uppercase font-bold bg-emerald-50 text-emerald-700">${tx.status || 'Success'}</span></td>
                             `;
                             ledgerTbody.appendChild(tr);
