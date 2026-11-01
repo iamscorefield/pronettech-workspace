@@ -230,7 +230,7 @@
                             <thead class="bg-slate-100 text-slate-500 font-bold uppercase text-[9px]">
                                 <tr>
                                     <th class="py-2 px-3">Date</th>
-                                    <th class="py-2 px-3">Purpose / Ref</th>
+                                    <th class="py-2 px-3">Type</th>
                                     <th class="py-2 px-3">Amount</th>
                                     <th class="py-2 px-3">Status</th>
                                 </tr>
@@ -463,11 +463,16 @@
                 } else {
                     telemetry.transactions.forEach(tx => {
                         const txDate = new Date(tx.created_at || tx.date).toLocaleDateString();
+                        const isDeposit = tx.transaction_type === 'deposit';
                         const tr = document.createElement('tr');
                         tr.innerHTML = `
                             <td class="py-2 px-3 font-mono text-slate-600">${txDate}</td>
-                            <td class="py-2 px-3 font-semibold text-slate-800">${tx.purpose || tx.reference || 'Workspace Fee'}</td>
-                            <td class="py-2 px-3 font-mono font-bold text-pnt-purple">₦${Number(tx.amount || 0).toLocaleString()}</td>
+                            <td class="py-2 px-3">
+                                <span class="text-[9px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${isDeposit ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'}">
+                                    ${isDeposit ? 'Deposit' : 'Withdrawal'}
+                                </span>
+                            </td>
+                            <td class="py-2 px-3 font-mono font-bold ${isDeposit ? 'text-emerald-600' : 'text-rose-600'}">₦${Number(tx.amount || 0).toLocaleString()}</td>
                             <td class="py-2 px-3"><span class="px-1.5 py-0.5 rounded text-[9px] uppercase font-bold bg-emerald-50 text-emerald-700">${tx.status || 'Success'}</span></td>
                         `;
                         ledgerTbody.appendChild(tr);
@@ -1005,9 +1010,7 @@
                 </div>
             `;
 
-            // Attach click handler to trigger chat selection
             item.querySelector('.flex-1').onclick = () => selectDrawerContact(contact);
-            // Attach click handler to avatar/name for dossier inspection modal
             item.querySelector('.contact-avatar-trigger').onclick = (e) => {
                 e.stopPropagation();
                 window.inspectUserProfile(contact);
@@ -1038,7 +1041,6 @@
         const initials = `${contact.first_name?.[0] || ''}${contact.last_name?.[0] || ''}`.toUpperCase() || 'U';
         avatarBox.innerHTML = contact.avatar_url ? `<img src="${contact.avatar_url}" class="w-full h-full object-cover rounded-full">` : initials;
 
-        // Hook up active chat header avatar and name to open executive dossier modal
         avatarBox.onclick = () => window.inspectUserProfile(contact);
         document.getElementById('drawer-active-name').onclick = () => window.inspectUserProfile(contact);
 

@@ -263,4 +263,34 @@ router.get('/metrics/office/:officeId', protect, authorize('leader', 'admin', 's
     }
 });
 
+// ===================================================
+// 7. FETCH PENDING ATTENDANCE LOGS FOR OFFICE
+// ===================================================
+router.get('/pending/office/:officeId', protect, authorize('leader', 'admin', 'sub_admin', 'global_admin', 'team_leader'), async (req, res) => {
+    const { officeId } = req.params;
+    const currentUserId = req.user.id;
+
+    try {
+        const { data, error } = await supabase
+            .from('attendance_logs')
+            .select('*, profiles:profile_id(first_name, last_name, email, custom_profile_id, avatar_url)')
+            .eq('office_id', officeId)
+            .eq('status', 'pending')
+            .neq('profile_id', currentUserId)
+            .order('marked_time', { ascending: false });
+
+        if (error) throw error;
+
+        const formattedLogs = (data || []).map(item => ({
+            ...item,
+            profiles: item.profiles || {}
+        }));
+
+        return res.status(200).json({ success: true, data: formattedLogs });
+    } catch (err) {
+        console.error('Error fetching pending attendance:', err.message);
+        return res.status(500).json({ success: false, message: `Failed to load pending queue: ${err.message}` });
+    }
+});
+
 module.exports = router;
