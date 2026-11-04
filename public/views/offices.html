@@ -40,13 +40,13 @@
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                     Refresh
                 </button>
-                <button onclick="openModal('branch-modal')" class="btn-brand-gradient text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition-all cursor-pointer">
+                <button onclick="openCreateModal()" class="btn-brand-gradient text-white font-bold px-4 py-2 rounded-xl text-xs shadow-md transition-all cursor-pointer">
                     + Add New Branch
                 </button>
             </div>
         </div>
 
-        <!-- Metric Cards: ONLY Total Active Branches and Lead Supervisors -->
+        <!-- Metric Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-xs">
                 <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Active Branches</span>
@@ -76,11 +76,12 @@
                             <th class="py-3 px-4">Branch Hub</th>
                             <th class="py-3 px-4">State</th>
                             <th class="py-3 px-4">Physical Address</th>
+                            <th class="py-3 px-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="offices-tbody" class="divide-y divide-slate-100">
                         <tr>
-                            <td colspan="3" class="text-center py-10 text-slate-400 font-medium">Loading regional office hubs...</td>
+                            <td colspan="4" class="text-center py-10 text-slate-400 font-medium">Loading regional office hubs...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -89,30 +90,33 @@
 
     </main>
 
-    <!-- Modal: Register Branch Office -->
+    <!-- Modal: Register / Edit Branch Office -->
     <div id="branch-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white border border-slate-200 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden p-6 space-y-4 relative">
             <button type="button" onclick="closeModal('branch-modal')" class="absolute right-4 top-4 text-slate-400 hover:text-slate-700 text-lg font-bold cursor-pointer">&times;</button>
             
             <div class="border-b border-slate-100 pb-2">
-                <h3 class="text-base font-bold text-slate-900">Add Regional Branch Hub</h3>
-                <p class="text-xs text-slate-500 mt-0.5">Register a new physical office center</p>
+                <h3 id="modal-title" class="text-base font-bold text-slate-900">Add Regional Branch Hub</h3>
+                <p id="modal-subtitle" class="text-xs text-slate-500 mt-0.5">Register a new physical office center</p>
             </div>
 
             <form id="branch-form" class="space-y-3">
+                <input type="hidden" id="branch-id">
                 <div>
                     <label class="block text-[11px] font-semibold text-slate-600 mb-1">Branch Name</label>
-                    <input type="text" id="branch-name" required placeholder="e.g., Abeokuta Hub" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                    <input type="text" id="branch-name" required placeholder="e.g., Abeokuta Hub" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-pnt-purple">
                 </div>
 
                 <div>
-                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">State</label>
-                    <input type="text" id="branch-state" required placeholder="e.g., Ogun" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none">
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">State of Residence (Nigeria)</label>
+                    <select id="branch-state" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-pnt-purple">
+                        <option value="">Select State</option>
+                    </select>
                 </div>
 
                 <div>
                     <label class="block text-[11px] font-semibold text-slate-600 mb-1">Physical Address</label>
-                    <textarea id="branch-address" rows="2" placeholder="Full street address and office unit..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none"></textarea>
+                    <textarea id="branch-address" rows="2" placeholder="Full street address and office unit..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-pnt-purple"></textarea>
                 </div>
 
                 <div class="flex gap-2 pt-2">
@@ -127,14 +131,30 @@
     <script src="/js/nav.js"></script>
 
     <script>
+        const nigerianStates = [
+            "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", 
+            "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "FCT - Abuja", "Gombe", 
+            "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", 
+            "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", 
+            "Taraba", "Yobe", "Zamfara"
+        ];
+
         let currentUser = null;
         let masterOffices = [];
 
         document.addEventListener('DOMContentLoaded', async () => {
+            const stateSelect = document.getElementById('branch-state');
+            nigerianStates.forEach(st => {
+                const opt = document.createElement('option');
+                opt.value = st;
+                opt.textContent = st;
+                stateSelect.appendChild(opt);
+            });
+
             try {
                 const res = await fetch('/api/auth/me', { credentials: 'include' });
                 const data = await res.json();
-                if (!data.success || (data.user.role !== 'admin' && data.user.role !== 'global_admin' && data.user.role !== 'sub_admin')) {
+                if (!data.success || !['admin', 'global_admin', 'sub_admin'].includes(data.user.role)) {
                     window.location.href = '/views/dashboard.html';
                     return;
                 }
@@ -149,43 +169,31 @@
 
         async function fetchOfficesData() {
             try {
-                // Try fetching offices from both common routes so it seamlessly matches your backend
-                let officesRes = await fetch('/api/offices', { credentials: 'include' });
-                if (!officesRes.ok) {
-                    officesRes = await fetch('/api/admin/offices', { credentials: 'include' });
-                }
+                const officesRes = await fetch('/api/offices', { credentials: 'include' });
                 const officesJson = await officesRes.json();
 
-                // Robust extraction: handles data, offices, or direct array
                 if (Array.isArray(officesJson)) {
                     masterOffices = officesJson;
                 } else if (officesJson.success && Array.isArray(officesJson.data)) {
                     masterOffices = officesJson.data;
-                } else if (Array.isArray(officesJson.offices)) {
-                    masterOffices = officesJson.offices;
                 } else {
                     masterOffices = officesJson.data || [];
                 }
 
-                // Fetch users to count lead supervisors
                 let totalLeads = 0;
                 try {
                     const usersRes = await fetch('/api/auth/users/all', { credentials: 'include' });
                     const usersData = await usersRes.json();
                     const users = usersData.data || usersData.users || [];
                     totalLeads = users.filter(u => ['leader', 'sub_admin'].includes(u.role)).length;
-                } catch(e) {
-                    console.log('Error fetching leads count:', e);
-                }
+                } catch(e) {}
 
-                // Update metric counters
                 document.getElementById('metric-total-offices').textContent = masterOffices.length;
                 document.getElementById('metric-total-leads').textContent = totalLeads;
 
                 renderOfficesTable(masterOffices);
             } catch (err) {
-                console.error("Offices sync error:", err);
-                document.getElementById('offices-tbody').innerHTML = `<tr><td colspan="3" class="text-center py-8 text-rose-500 font-medium">Failed to retrieve office branches.</td></tr>`;
+                document.getElementById('offices-tbody').innerHTML = `<tr><td colspan="4" class="text-center py-8 text-rose-500 font-medium">Failed to retrieve office branches.</td></tr>`;
             }
         }
 
@@ -203,11 +211,10 @@
         function renderOfficesTable(offices) {
             const tbody = document.getElementById('offices-tbody');
             tbody.innerHTML = '';
-
             document.getElementById('branch-count-label').textContent = `${offices.length} Hubs Found`;
 
             if (!offices || offices.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-slate-400 font-medium">No regional branch offices located.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-slate-400 font-medium">No regional branch offices located.</td></tr>`;
                 return;
             }
 
@@ -218,7 +225,6 @@
 
                 const row = document.createElement('tr');
                 row.className = "hover:bg-slate-50/70 transition-colors";
-
                 row.innerHTML = `
                     <td class="py-3 px-4 font-bold text-slate-900">${branchName}</td>
                     <td class="py-3 px-4">
@@ -227,54 +233,90 @@
                         </span>
                     </td>
                     <td class="py-3 px-4 text-slate-600">${address}</td>
+                    <td class="py-3 px-4 text-right space-x-2">
+                        <button onclick='openEditModal(${JSON.stringify(office)})' class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-semibold px-2.5 py-1 rounded-lg text-[11px] transition-all cursor-pointer">Edit</button>
+                        <button onclick="deleteOffice('${office.id}')" class="bg-red-50 hover:bg-red-100 text-red-600 font-semibold px-2.5 py-1 rounded-lg text-[11px] transition-all cursor-pointer">Delete</button>
+                    </td>
                 `;
-
                 tbody.appendChild(row);
             });
+        }
+
+        function openCreateModal() {
+            document.getElementById('branch-form').reset();
+            document.getElementById('branch-id').value = '';
+            document.getElementById('modal-title').textContent = 'Add Regional Branch Hub';
+            document.getElementById('modal-subtitle').textContent = 'Register a new physical office center';
+            document.getElementById('submit-branch-btn').textContent = 'Register Hub';
+            openModal('branch-modal');
+        }
+
+        function openEditModal(office) {
+            document.getElementById('branch-id').value = office.id || '';
+            document.getElementById('branch-name').value = office.branch_name || office.name || '';
+            document.getElementById('branch-state').value = office.state || '';
+            document.getElementById('branch-address').value = office.address || office.physical_address || '';
+            document.getElementById('modal-title').textContent = 'Edit Regional Branch Hub';
+            document.getElementById('modal-subtitle').textContent = 'Modify office details';
+            document.getElementById('submit-branch-btn').textContent = 'Update Hub';
+            openModal('branch-modal');
         }
 
         document.getElementById('branch-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submit-branch-btn');
+            const officeId = document.getElementById('branch-id').value;
             const branch_name = document.getElementById('branch-name').value.trim();
-            const state = document.getElementById('branch-state').value.trim();
+            const state = document.getElementById('branch-state').value;
             const address = document.getElementById('branch-address').value.trim();
 
             btn.disabled = true;
             btn.textContent = 'Saving...';
 
             try {
-                let res = await fetch('/api/offices', {
-                    method: 'POST',
+                const url = officeId ? `/api/offices/${officeId}` : '/api/offices';
+                const method = officeId ? 'PUT' : 'POST';
+
+                const res = await fetch(url, {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify({ branch_name, state, address })
                 });
-
-                if (!res.ok) {
-                    res = await fetch('/api/admin/offices', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                        body: JSON.stringify({ branch_name, state, address })
-                    });
-                }
-
                 const data = await res.json();
-                if (data.success || res.ok) {
+
+                if (res.ok || data.success) {
                     document.getElementById('branch-form').reset();
                     closeModal('branch-modal');
                     await fetchOfficesData();
                 } else {
-                    alert(`Failed: ${data.message || 'Error creating branch'}`);
+                    alert(`Failed: ${data?.message || 'Error processing request'}`);
                 }
             } catch (err) {
-                alert('Connection error registering branch.');
+                alert('Connection error saving office.');
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Register Hub';
+                btn.textContent = officeId ? 'Update Hub' : 'Register Hub';
             }
         });
+
+        async function deleteOffice(id) {
+            if (!confirm('Are you sure you want to delete this regional branch office?')) return;
+            try {
+                const res = await fetch(`/api/offices/${id}`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                if (res.ok || data.success) {
+                    await fetchOfficesData();
+                } else {
+                    alert(`Delete failed: ${data?.message || 'Unknown error'}`);
+                }
+            } catch (err) {
+                alert('Connection error deleting office.');
+            }
+        }
 
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }

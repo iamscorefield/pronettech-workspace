@@ -287,6 +287,8 @@
         const sponsorFeedback = document.getElementById('sponsor-feedback');
         const stateSelect = document.getElementById('state');
 
+        const forgotForm = document.getElementById('forgot-form');
+
         let isSponsorValid = false;
         let verifiedSponsorName = "";
         let selectedOfficeId = "";
@@ -305,6 +307,66 @@
 
         function openForgotPasswordModal() { document.getElementById('forgot-modal').classList.remove('hidden'); }
         function closeForgotPasswordModal() { document.getElementById('forgot-modal').classList.add('hidden'); }
+
+        // Custom branded card popup notification handler (replacing browser native alert)
+        function showCustomSuccessCard(title, message) {
+            let existingModal = document.getElementById('custom-card-modal');
+            if (existingModal) existingModal.remove();
+
+            const modalHtml = `
+                <div id="custom-card-modal" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+                    <div class="bg-white border border-slate-200 w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden p-6 space-y-4 relative text-center">
+                        <div class="mx-auto w-12 h-12 bg-purple-50 text-pnt-purple rounded-2xl flex items-center justify-center font-black text-xl mb-1 shadow-inner">
+                            ✓
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900">${title}</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">${message}</p>
+                        <div class="pt-2">
+                            <button type="button" onclick="document.getElementById('custom-card-modal').remove()" class="w-full py-2.5 btn-brand-gradient text-xs font-bold text-white rounded-xl shadow-md cursor-pointer">
+                                Understood
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        forgotForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value.trim();
+            const forgotBtn = document.getElementById('forgot-btn');
+
+            if (!email) return;
+
+            forgotBtn.disabled = true;
+            forgotBtn.textContent = 'Sending...';
+
+            try {
+                const res = await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+
+                if (res.ok || data.success) {
+                    closeForgotPasswordModal();
+                    showCustomSuccessCard(
+                        'ProNet-Tech Space', 
+                        'Password recovery link dispatched successfully. Check your email inbox.'
+                    );
+                    forgotForm.reset();
+                } else {
+                    alert(`❌ Failed: ${data.message || 'Could not send recovery link.'}`);
+                }
+            } catch (err) {
+                alert('Server connection failed while attempting password reset.');
+            } finally {
+                forgotBtn.disabled = false;
+                forgotBtn.textContent = 'Send Link';
+            }
+        });
 
         async function validateSponsorCode(code) {
             if (!code || code.trim() === '') {
@@ -542,7 +604,7 @@
                 alert('Could not connect to registration server.');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Complete Registration';
+                submitBtn.textContent = 'Finalize Profile Registration';
             }
         });
 
@@ -567,7 +629,6 @@
             progressBar.style.width = "50%";
         });
 
-        // LOGIN SUBMISSION (Fixed for sub_admin routing)
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const payload = {

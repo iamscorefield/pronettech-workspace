@@ -308,7 +308,7 @@ router.put('/profile/avatar', protect, upload.single('avatar'), async (req, res)
 });
 
 // ===================================================
-// 5. PASSWORD RESET PIPELINE
+// 5. PASSWORD RESET & RECOVERY PIPELINE
 // ===================================================
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
@@ -939,13 +939,12 @@ router.post('/announcements', protect, authorize('admin', 'sub_admin', 'global_a
 });
 
 // ===================================================
-// 13. USER PROFILE TELEMETRY ENDPOINT (CORRECTED COLUMN)
+// 13. USER PROFILE TELEMETRY ENDPOINT
 // ===================================================
 router.get('/profile/telemetry/:userId', protect, async (req, res) => {
     try {
         const { userId } = req.params;
 
-        // Count confirmed attendance logs using the correct profile_id column
         let attendanceCount = 0;
         const { count: attCount, error: attError } = await supabase
             .from('attendance_logs')
@@ -959,7 +958,6 @@ router.get('/profile/telemetry/:userId', protect, async (req, res) => {
 
         let transactions = [];
 
-        // Fetch financial transactions (Deposits) and tag them explicitly
         const { data: finData, error: finError } = await supabase
             .from('financial_transactions')
             .select('*')
@@ -975,7 +973,6 @@ router.get('/profile/telemetry/:userId', protect, async (req, res) => {
             transactions = transactions.concat(taggedDeposits);
         }
 
-        // Fetch withdrawal requests (Withdrawals) and tag them explicitly
         const { data: wdData, error: wdError } = await supabase
             .from('withdrawal_requests')
             .select('*')
@@ -1014,7 +1011,6 @@ router.get('/badges/summary', protect, async (req, res) => {
         let communityUnread = 0;
         let announcementsUnread = 0;
 
-        // 1. Check unapproved records in attendance_logs
         try {
             const { count, error } = await supabase
                 .from('attendance_logs')
@@ -1032,7 +1028,6 @@ router.get('/badges/summary', protect, async (req, res) => {
             }
         } catch (e) {}
 
-        // 2. Check pending wallet/finance requests
         try {
             const { count } = await supabase
                 .from('withdrawal_requests')
@@ -1049,7 +1044,6 @@ router.get('/badges/summary', protect, async (req, res) => {
             } catch (err) {}
         }
 
-        // 3. Check community unread items in channel_messages
         try {
             const { count } = await supabase
                 .from('channel_messages')
@@ -1057,7 +1051,6 @@ router.get('/badges/summary', protect, async (req, res) => {
             if (count) communityUnread = count;
         } catch (e) {}
 
-        // 4. Check announcements count
         try {
             const { count } = await supabase
                 .from('announcements')

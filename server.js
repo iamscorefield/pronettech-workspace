@@ -13,6 +13,7 @@ const downlineRoutes = require('./routes/downline');
 const financeRoutes = require('./routes/finance');
 const channelRoutes = require('./routes/channels'); // Newly added channels route
 const chatRoutes = require('./routes/chat');         // Newly added chat route
+const officesRouter = require('./routes/offices');   // Newly added offices route module
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -59,7 +60,7 @@ app.get('/api/offices', async (req, res) => {
         const { data, error } = await query;
         if (error) throw error;
         
-        res.status(200).json(data || []);
+        res.status(200).json({ success: true, data: data || [] });
     } catch (err) {
         console.error('Error fetching offices:', err.message);
         res.status(500).json({ success: false, message: 'Database query failed' });
@@ -130,7 +131,8 @@ app.use('/api/downline', downlineRoutes);
 app.use('/api/downlines', downlineRoutes);
 app.use('/api/finance', financeRoutes);
 app.use('/api/channels', channelRoutes); // Mounted channels router
-app.use('/api/chat', chatRoutes);         // Mounted chat router
+app.use('/api/chat', chatRoutes);        // Mounted chat router
+app.use('/api/admin/offices', officesRouter); // Mounted modular office router backup
 
 // Frontend Page Routing
 app.get('/', (req, res) => {
