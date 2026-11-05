@@ -18,9 +18,9 @@
   --border-subtle: rgba(13, 18, 43, 0.08);
 }
 
-/* Global Reset & Base Canvas */
+/* Global Reset & Base Canvas - Transparent to support background slideshows */
 html, body {
-  background-color: var(--pnt-bg) !important;
+  background-color: transparent !important;
   color: var(--text-main) !important;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   margin: 0;
