@@ -16,10 +16,11 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
-// Helper function for Official Launch Trial (November 1, 2026)
+// Helper function for Dynamic 30-Day User-Specific Trial Period
 function calculateTrialStatus(profile) {
-    const launchDate = new Date('2026-11-01T00:00:00Z'); // Official Launch Nov 1, 2026
-    const trialExpiresAt = new Date(launchDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // Dec 1, 2026
+    // Base trial duration: 30 days from user creation date
+    const registrationDate = profile.created_at ? new Date(profile.created_at) : new Date();
+    const trialExpiresAt = new Date(registrationDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // created_at + 30 days
     const now = new Date();
 
     const diffTime = trialExpiresAt - now;

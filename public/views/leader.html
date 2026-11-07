@@ -575,7 +575,7 @@
                 document.getElementById('card-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}&color=0D122B&bgcolor=FFFFFF`;
 
                 await syncEntitlementUI();
-                initCountdownEngine(currentUser.membership_expires_at, currentUser.created_at);
+                initCountdownEngine(currentUser.created_at);
                 checkDisciplinaryStatus(currentUser);
 
                 refreshLeaderData();
@@ -626,7 +626,7 @@
             } catch (err) { console.error("Could not sync entitlements:", err); }
         }
 
-        function initCountdownEngine(expiresAtString, createdAtString) {
+        function initCountdownEngine(createdAtString) {
             const warningStrip = document.getElementById('unpaid-warning-strip');
             const dateReadout = document.getElementById('timer-date-readout');
             const bannerTitle = document.getElementById('banner-title');
@@ -634,12 +634,13 @@
             const bannerIcon = document.getElementById('banner-icon');
             const timerLabel = document.getElementById('timer-status-label');
 
-            const launchDate = new Date('2026-11-01T00:00:00Z').getTime();
-            const targetDate = launchDate + (30 * 24 * 60 * 60 * 1000);
+            // Dynamic 30-day trial calculation from individual registration date (created_at)
+            const registrationTime = createdAtString ? new Date(createdAtString).getTime() : new Date().getTime();
+            const targetDate = registrationTime + (30 * 24 * 60 * 60 * 1000); // 30 days post-registration
 
             warningStrip.className = "bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 text-white px-6 py-3 shadow-md relative z-20";
             bannerTitle.textContent = "✨ 1-MONTH FREE TRIAL ACTIVE:";
-            bannerText.textContent = `You are enjoying your complimentary onboarding trial period. Full leader operations unlocked.`;
+            bannerText.textContent = `You are enjoying your complimentary 30-day trial period from registration. Full leader operations unlocked.`;
             bannerIcon.textContent = "🎁";
             timerLabel.textContent = "Trial Expires:";
 
@@ -650,7 +651,7 @@
                 if (currentDiff <= 0 && !userEntitlements.isMembershipActive) {
                     warningStrip.className = "bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 text-white px-6 py-3 shadow-md relative z-20";
                     bannerTitle.textContent = "ACCOUNT ACCESS LIMITED:";
-                    bannerText.textContent = "Your 1-month free trial validity has expired. Pay registration to unlock leadership actions.";
+                    bannerText.textContent = "Your 30-day post-registration free trial has expired. Pay registration to unlock leadership actions.";
                     bannerIcon.textContent = "⚠️";
                     timerLabel.textContent = "Expired On:";
                     dateReadout.textContent = new Date(targetDate).toLocaleDateString();

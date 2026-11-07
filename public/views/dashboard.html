@@ -465,7 +465,7 @@
                 document.getElementById('card-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verificationUrl)}&color=0D122B&bgcolor=FFFFFF`;
 
                 await syncEntitlementUI();
-                initCountdownEngine();
+                initCountdownEngine(currentUser.created_at);
                 checkDisciplinaryStatus(currentUser);
 
                 fetchTasks();
@@ -516,8 +516,8 @@
             } catch (err) { console.error("Could not sync entitlements:", err); }
         }
 
-        // Anchor trial strictly starting November 1, 2026 ending December 1, 2026
-        function initCountdownEngine() {
+        // Dynamic 30-day trial calculation from individual registration date (created_at)
+        function initCountdownEngine(createdAtString) {
             const warningStrip = document.getElementById('unpaid-warning-strip');
             const dateReadout = document.getElementById('timer-date-readout');
             const bannerTitle = document.getElementById('banner-title');
@@ -525,8 +525,8 @@
             const bannerIcon = document.getElementById('banner-icon');
             const timerLabel = document.getElementById('timer-status-label');
 
-            const launchDate = new Date('2026-11-01T00:00:00Z').getTime();
-            const targetDate = launchDate + (30 * 24 * 60 * 60 * 1000); // Dec 1, 2026
+            const registrationTime = createdAtString ? new Date(createdAtString).getTime() : new Date().getTime();
+            const targetDate = registrationTime + (30 * 24 * 60 * 60 * 1000); // 30 days post-registration
 
             const attBtn = document.getElementById('mark-attendance-btn');
             const attDesc = document.getElementById('attendance-desc-text');
@@ -538,7 +538,7 @@
                 if (currentDiff <= 0 && !userEntitlements.isMembershipActive) {
                     warningStrip.className = "bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 text-white px-6 py-3 shadow-md relative z-20";
                     bannerTitle.textContent = "ACCOUNT ACCESS LIMITED:";
-                    bannerText.textContent = "Your 1-month free trial validity has expired. Pay registration to unlock attendance and actions.";
+                    bannerText.textContent = "Your 30-day post-registration free trial has expired. Pay registration to unlock attendance and actions.";
                     bannerIcon.textContent = "⚠️";
                     timerLabel.textContent = "Expired On:";
                     dateReadout.textContent = new Date(targetDate).toLocaleDateString();
@@ -547,7 +547,7 @@
                     attBtn.disabled = true;
                     attBtn.className = "bg-slate-300 text-slate-500 font-bold px-8 py-4 rounded-2xl cursor-not-allowed";
                     attBtn.textContent = "Attendance Locked (Trial Expired)";
-                    attDesc.textContent = "Your 1-month free trial has expired. Please activate your annual membership to resume daily attendance logging.";
+                    attDesc.textContent = "Your 30-day free trial has expired. Please activate your annual membership to resume daily attendance logging.";
                     return;
                 }
 

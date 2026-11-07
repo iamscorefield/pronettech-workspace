@@ -11,9 +11,9 @@ const marketplaceRoutes = require('./routes/marketplace');
 const taskRoutes = require('./routes/tasks');
 const downlineRoutes = require('./routes/downline');
 const financeRoutes = require('./routes/finance');
-const channelRoutes = require('./routes/channels'); // Newly added channels route
-const chatRoutes = require('./routes/chat');         // Newly added chat route
-const officesRouter = require('./routes/offices');   // Newly added offices route module
+const channelRoutes = require('./routes/channels');
+const chatRoutes = require('./routes/chat');
+const officesRouter = require('./routes/offices');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -44,7 +44,10 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Dynamic Office Fetching Route (Supports real-time state filtering)
+// ===================================================
+// OFFICES MANAGEMENT ENDPOINTS (CRUD)
+// ===================================================
+
 app.get('/api/offices', async (req, res) => {
     try {
         const { state } = req.query;
@@ -67,11 +70,6 @@ app.get('/api/offices', async (req, res) => {
     }
 });
 
-// ===================================================
-// ADMIN ACTION ENDPOINTS (Offices & Push Broadcasts)
-// ===================================================
-
-// 1. Create New Office Route
 app.post('/api/offices', async (req, res) => {
     try {
         const { branch_name, state, address } = req.body;
@@ -93,33 +91,169 @@ app.post('/api/offices', async (req, res) => {
         return res.status(201).json({ success: true, message: 'New office branch created successfully!', data });
     } catch (err) {
         console.error('Office creation failed:', err.message);
-        return res.status(500).json({ success: false, message: 'Database failure creating office.' });
+        return res.status(500).json({ success: false, message: err.message || 'Database failure creating office.' });
     }
 });
 
-// 2. Send Push Notification / Broadcast Alert
-app.post('/api/broadcasts', async (req, res) => {
+app.put('/api/offices/:id', async (req, res) => {
     try {
-        const { title, message, priority } = req.body;
-        if (!title || !message) {
-            return res.status(400).json({ success: false, message: 'Title and message are required.' });
+        const { id } = req.params;
+        const { branch_name, state, address } = req.body;
+
+        const { data, error } = await supabase
+            .from('offices')
+            .update({ branch_name, state, address })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Office branch updated successfully!', data });
+    } catch (err) {
+        console.error('Error updating office:', err.message);
+        return res.status(500).json({ success: false, message: err.message || 'Database failure updating office.' });
+    }
+});
+
+app.delete('/api/offices/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const { error } = await supabase
+            .from('offices')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Office branch deleted successfully!' });
+    } catch (err) {
+        console.error('Error deleting office:', err.message);
+        return res.status(500).json({ success: false, message: err.message || 'Database failure deleting office.' });
+    }
+});
+
+// ===================================================
+// ANNOUNCEMENTS & BROADCAST ENDPOINTS (CRUD & Aliases)
+// ===================================================
+
+app.get(['/api/announcements', '/api/auth/announcements', '/api/admin/announcements'], async (req, res) => {
+    try {
+        const { data, error } = await supabase
+            .from('announcements')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        res.status(200).json({ success: true, data: data || [] });
+    } catch (err) {
+        console.error('Error fetching announcements:', err.message);
+        res.status(500).json({ success: false, message: 'Failed to fetch announcements' });
+    }
+});
+
+async function handleAnnouncementCreate(req, res) {
+    try {
+        const { title, content, message, is_global, target_office_id } = req.body;
+        const finalContent = content || message;
+        
+        if (!title || !finalContent) {
+            return res.status(400).json({ success: false, message: 'Title and content are required.' });
         }
 
-        // Insert into announcements table if available
-        await supabase
+        const { data, error } = await supabase
             .from('announcements')
             .insert([{ 
                 title, 
-                content: message, 
-                priority: priority || 'normal' 
-            }]);
+                content: finalContent, 
+                is_global: is_global !== undefined ? is_global : true,
+                target_office_id: target_office_id || null
+            }])
+            .select()
+            .single();
 
-        return res.status(201).json({ success: true, message: 'Broadcast transmission sent to all workspace terminals!' });
+        if (error) throw error;
+        return res.status(201).json({ success: true, message: 'Announcement created successfully!', data });
     } catch (err) {
-        console.error('Broadcast note:', err.message);
-        return res.status(200).json({ success: true, message: 'Broadcast transmission sent to all workspace terminals!' });
+        console.error('Announcement creation error:', err.message);
+        return res.status(500).json({ success: false, message: err.message || 'Database failure creating announcement.' });
     }
-});
+}
+
+app.post(['/api/announcements', '/api/auth/announcements', '/api/broadcasts', '/api/admin/announcements', '/api/admin/broadcasts'], handleAnnouncementCreate);
+
+async function handleAnnouncementUpdate(req, res) {
+    try {
+        const id = req.params.id || req.body.id;
+        const { title, content, message, is_global, target_office_id } = req.body;
+        const finalContent = content || message;
+        
+        if (!id) {
+            return res.status(400).json({ success: false, message: 'Announcement ID is required for update.' });
+        }
+
+        const updateData = {};
+        if (title !== undefined) updateData.title = title;
+        if (finalContent !== undefined) updateData.content = finalContent;
+        if (is_global !== undefined) updateData.is_global = is_global;
+        if (target_office_id !== undefined) updateData.target_office_id = target_office_id;
+
+        const { data, error } = await supabase
+            .from('announcements')
+            .update(updateData)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Announcement updated successfully!', data });
+    } catch (err) {
+        console.error('Error updating announcement:', err.message);
+        return res.status(500).json({ success: false, message: err.message || 'Database failure updating announcement.' });
+    }
+}
+
+app.put([
+    '/api/announcements/:id', 
+    '/api/auth/announcements/:id', 
+    '/api/broadcasts/:id', 
+    '/api/admin/announcements/:id', 
+    '/api/admin/broadcasts/:id',
+    '/api/announcements',
+    '/api/auth/announcements',
+    '/api/admin/announcements'
+], handleAnnouncementUpdate);
+
+async function handleAnnouncementDelete(req, res) {
+    try {
+        const id = req.params.id || req.query.id || req.body.id;
+        
+        if (!id) {
+            return res.status(400).json({ success: false, message: 'Announcement ID is required for deletion.' });
+        }
+
+        const { error } = await supabase
+            .from('announcements')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+        return res.status(200).json({ success: true, message: 'Announcement deleted successfully!' });
+    } catch (err) {
+        console.error('Error deleting announcement:', err.message);
+        return res.status(500).json({ success: false, message: err.message || 'Database failure deleting announcement.' });
+    }
+}
+
+app.delete([
+    '/api/announcements/:id', 
+    '/api/auth/announcements/:id', 
+    '/api/broadcasts/:id', 
+    '/api/admin/announcements/:id', 
+    '/api/admin/broadcasts/:id',
+    '/api/announcements',
+    '/api/auth/announcements',
+    '/api/admin/announcements'
+], handleAnnouncementDelete);
 
 // Mount Routing Modules
 app.use('/api/auth', authRoutes);
@@ -130,9 +264,9 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/downline', downlineRoutes);
 app.use('/api/downlines', downlineRoutes);
 app.use('/api/finance', financeRoutes);
-app.use('/api/channels', channelRoutes); // Mounted channels router
-app.use('/api/chat', chatRoutes);        // Mounted chat router
-app.use('/api/admin/offices', officesRouter); // Mounted modular office router backup
+app.use('/api/channels', channelRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/admin/offices', officesRouter);
 
 // Frontend Page Routing
 app.get('/', (req, res) => {
