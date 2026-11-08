@@ -475,8 +475,20 @@
             document.getElementById('selected-state-pill').textContent = `${state} State`;
 
             try {
-                const res = await fetch(`/api/offices?state=${encodeURIComponent(state)}`);
-                const branches = await res.json();
+                // FIXED: Target correct admin offices router path with fallback to query all and filter
+                let res = await fetch(`/api/admin/offices?state=${encodeURIComponent(state)}`, { credentials: 'include' });
+                if (!res.ok) {
+                    res = await fetch(`/api/offices?state=${encodeURIComponent(state)}`, { credentials: 'include' });
+                }
+                
+                let jsonRes = await res.json().catch(() => null);
+                let branches = [];
+                
+                if (jsonRes) {
+                    const rawList = Array.isArray(jsonRes) ? jsonRes : (jsonRes.data || []);
+                    // Filter case-insensitively by state name if backend didn't filter
+                    branches = rawList.filter(b => b.state && b.state.toLowerCase().includes(state.toLowerCase()));
+                }
 
                 officeGrid.innerHTML = '';
 
