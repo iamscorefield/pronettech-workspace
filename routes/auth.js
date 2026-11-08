@@ -587,7 +587,8 @@ router.get('/pending/office/:officeId', protect, authorize('leader', 'team_leade
     }
 });
 
-router.post('/consent', protect, async (req, res) => {
+// FIXED: Added array route matching to safely support both /consent and /api/auth/consent
+router.post(['/consent', '/api/auth/consent'], protect, async (req, res) => {
     const { age_bracket, slide_acknowledgments, signed_name, signature_data } = req.body;
 
     if (!age_bracket || !signed_name || !signature_data) {
