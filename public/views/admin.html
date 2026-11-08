@@ -652,9 +652,14 @@
 
         async function fetchOfficesList() {
             try {
-                const res = await fetch('/api/offices');
+                // FIXED: Support both /api/admin/offices and /api/offices routes
+                let res = await fetch('/api/admin/offices', { credentials: 'include' });
+                if (!res.ok) {
+                    res = await fetch('/api/offices', { credentials: 'include' });
+                }
                 if (res.ok) {
-                    verifiedOffices = await res.json();
+                    const jsonRes = await res.json();
+                    verifiedOffices = Array.isArray(jsonRes) ? jsonRes : (jsonRes.data || []);
                     renderOfficesInspector(verifiedOffices);
                     populateOfficeSelectDropdown();
                     populatePreapproveOfficeDropdown();
@@ -1055,8 +1060,7 @@
                 const userStatus = (user.status || 'active').toLowerCase();
                 const isAlreadyActive = userStatus === 'active';
 
-                // DISTINCT COLOR-CODED STATUS BADGES
-                let statusBadge = "bg-emerald-50 text-emerald-700 border-emerald-200"; // default active
+                let statusBadge = "bg-emerald-50 text-emerald-700 border-emerald-200";
                 if (userStatus === 'warning') {
                     statusBadge = "bg-amber-50 text-amber-700 border-amber-300 font-bold";
                 } else if (userStatus === 'inactive') {
@@ -1284,7 +1288,7 @@
             const state = document.getElementById('modal-branch-state').value;
             const address = document.getElementById('modal-branch-address').value;
             try {
-                const res = await fetch('/api/offices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ branch_name, state, address }) });
+                const res = await fetch('/api/admin/offices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ branch_name, state, address }) });
                 const data = await res.json();
                 if (data.success) { alert(`🏢 ${branch_name} added!`); document.getElementById('create-office-form').reset(); showBranchListView(); refreshAdminConsole(); }
                 else { alert(`Error: ${data.message}`); }
