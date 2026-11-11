@@ -374,7 +374,7 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // ===================================================
-// 6. SIGNUP ROUTE
+// 6. SIGNUP ROUTE (PRODUCTION IDEMPOTENT & SAFE)
 // ===================================================
 router.post('/signup', async (req, res) => {
     const { email, password, first_name, last_name, phone_number, state, office_id, sponsor_id } = req.body;
@@ -391,8 +391,10 @@ router.post('/signup', async (req, res) => {
     }
 
     const cleanSponsorId = sponsor_id.trim().toUpperCase();
+    const cleanEmail = email.trim().toLowerCase();
 
     try {
+        // 1. Validate Sponsor Upline
         const { data: sponsorRecord, error: sponsorErr } = await supabase
             .from('profiles')
             .select('id, first_name, last_name, custom_profile_id, status')
@@ -413,33 +415,78 @@ router.post('/signup', async (req, res) => {
             });
         }
 
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-            email,
-            password
-        });
+        // 2. Check if Auth User already exists
+        let userId = null;
+        const { data: existingUsersData } = await supabase.auth.admin.listUsers();
+        const existingAuthUser = existingUsersData?.users?.find(u => u.email.toLowerCase() === cleanEmail);
 
-        if (authError || !authData.user) {
-            return res.status(400).json({ success: false, message: authError?.message || 'Authentication sign-up failed.' });
+        if (existingAuthUser) {
+            userId = existingAuthUser.id;
+        } else {
+            const { data: authData, error: authError } = await supabase.auth.signUp({
+                email: cleanEmail,
+                password
+            });
+
+            if (authError || !authData.user) {
+                return res.status(400).json({ success: false, message: authError?.message || 'Authentication sign-up failed.' });
+            }
+            userId = authData.user.id;
         }
 
-        const userId = authData.user.id;
+        // 3. Check if a profile already exists for this user to preserve their custom_profile_id
+        const { data: existingProfile } = await supabase
+            .from('profiles')
+            .select('custom_profile_id')
+            .eq('id', userId)
+            .maybeSingle();
 
+        let uniqueCustomId = existingProfile?.custom_profile_id;
+
+        // If no profile exists yet, generate a guaranteed unique custom ID
+        if (!uniqueCustomId) {
+            let attempts = 0;
+            while (attempts < 5) {
+                attempts++;
+                const timestampPart = Date.now().toString().slice(-6);
+                const randomPart = Math.floor(1000 + Math.random() * 9000);
+                const candidateId = `PNT-2026-${timestampPart}-${randomPart}`;
+
+                // Check if candidate ID is taken
+                const { data: checkTaken } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('custom_profile_id', candidateId)
+                    .maybeSingle();
+
+                if (!checkTaken) {
+                    uniqueCustomId = candidateId;
+                    break;
+                }
+            }
+            if (!uniqueCustomId) {
+                uniqueCustomId = `PNT-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+            }
+        }
+
+        // 4. Safe Upsert into profiles table
         const { data: profileData, error: profileError } = await supabase
             .from('profiles')
-            .insert([{
+            .upsert([{
                 id: userId,
                 first_name: first_name.trim(),
                 last_name: last_name.trim(),
-                email: email.trim().toLowerCase(),
+                email: cleanEmail,
                 phone_number: phone_number.trim(),
                 state: state.trim(),
                 sponsor_id: cleanSponsorId,
                 office_id,
+                custom_profile_id: uniqueCustomId,
                 role: 'member',
                 status: 'pending',
                 membership_expires_at: null,
                 has_paid_softcopy: false
-            }])
+            }], { onConflict: 'id' })
             .select();
 
         if (profileError) {
@@ -448,23 +495,25 @@ router.post('/signup', async (req, res) => {
 
         const userProfile = profileData && profileData[0];
 
+        // 5. Record Upline Relationship in Sponsors Table
         await supabase
             .from('sponsors')
-            .insert([{
+            .upsert([{
                 profile_id: userId,
                 sponsor_name: `${sponsorRecord.first_name} ${sponsorRecord.last_name}`,
                 sponsor_number: cleanSponsorId
-            }]);
+            }], { onConflict: 'profile_id' });
 
         return res.status(201).json({
             success: true,
             message: 'Registration successful! Account pending confirmation from your Team Leader.',
             user: {
-                custom_profile_id: userProfile?.custom_profile_id || 'PNT-2026-PENDING'
+                custom_profile_id: userProfile?.custom_profile_id || uniqueCustomId
             }
         });
 
     } catch (err) {
+        console.error('Critical signup pipeline error:', err);
         return res.status(500).json({ success: false, message: `Internal server failure: ${err.message}` });
     }
 });
@@ -587,7 +636,6 @@ router.get('/pending/office/:officeId', protect, authorize('leader', 'team_leade
     }
 });
 
-// FIXED: Added array route matching to safely support both /consent and /api/auth/consent
 router.post(['/consent', '/api/auth/consent'], protect, async (req, res) => {
     const { age_bracket, slide_acknowledgments, signed_name, signature_data } = req.body;
 
